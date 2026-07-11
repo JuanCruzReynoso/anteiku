@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Search, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { CartButton } from "@/features/cart/ui/cart-button";
@@ -24,9 +24,9 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-6 md:px-8">
+      <div className="container mx-auto flex h-18 items-center justify-between px-6 md:px-8">
         {/* Logo */}
-        <Logo variant="color" size={36} priority />
+        <Logo variant="color" size={40} priority />
 
         {/* Navigation - Desktop */}
         <nav aria-label="Navegación principal" className="hidden md:flex items-center gap-10">
@@ -53,14 +53,6 @@ export function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon-lg"
-            aria-label="Buscar"
-            className="focus-accent"
-          >
-            <Search className="h-6 w-6" />
-          </Button>
           <ThemeToggle />
           <CartButton />
 
@@ -76,7 +68,7 @@ export function Navbar() {
                 />
               }
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5" />
             </SheetTrigger>
             <SheetContent side="left" showCloseButton={false}>
               <SheetHeader>
