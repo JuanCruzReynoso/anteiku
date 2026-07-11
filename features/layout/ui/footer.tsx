@@ -6,18 +6,18 @@ export function Footer() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
-          <div className="space-y-4">
+          <section className="space-y-4">
             <Link href="/" className="text-lg font-bold tracking-tight">
               ANTEIKU
             </Link>
             <p className="text-sm text-muted-foreground">
               Merchandise geek premium y café de especialidad.
             </p>
-          </div>
+          </section>
 
           {/* Tienda */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Tienda</h3>
+          <nav aria-label="Tienda" className="space-y-4">
+            <h2 className="text-sm font-semibold">Tienda</h2>
             <ul className="space-y-2">
               <li>
                 <Link
@@ -60,69 +60,49 @@ export function Footer() {
                 </Link>
               </li>
             </ul>
-          </div>
+          </nav>
 
-          {/* Ayuda */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Ayuda</h3>
+          {/* Contacto */}
+          <section className="space-y-4">
+            <h2 className="text-sm font-semibold">Contacto</h2>
             <ul className="space-y-2">
               <li>
-                <Link
-                  href="/faq"
+                <a
+                  href="mailto:hola@anteiku.com"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Preguntas frecuentes
-                </Link>
+                  hola@anteiku.com
+                </a>
               </li>
               <li>
-                <Link
-                  href="/shipping"
+                <a
+                  href="https://instagram.com/anteiku"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  Envíos
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/returns"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Devoluciones
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Contacto
-                </Link>
+                  Instagram
+                </a>
               </li>
             </ul>
-          </div>
+          </section>
 
           {/* Legal */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Legal</h3>
+          <section className="space-y-4">
+            <h2 className="text-sm font-semibold">Legal</h2>
             <ul className="space-y-2">
               <li>
-                <Link
-                  href="/privacy"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
+                <span className="text-sm text-muted-foreground/50">
                   Política de privacidad
-                </Link>
+                </span>
               </li>
               <li>
-                <Link
-                  href="/terms"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
+                <span className="text-sm text-muted-foreground/50">
                   Términos y condiciones
-                </Link>
+                </span>
               </li>
             </ul>
-          </div>
+          </section>
         </div>
 
         {/* Bottom */}

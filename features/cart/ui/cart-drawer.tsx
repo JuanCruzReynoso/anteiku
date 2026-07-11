@@ -1,8 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
-import { X, Minus, Plus, ShoppingBag } from "lucide-react";
+import Link from "next/link";
+import { Minus, Plus, ShoppingBag } from "lucide-react";
 import { useCartStore } from "../lib/cart-store";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 
 function formatPrice(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
@@ -20,151 +28,118 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
   const updateQuantity = useCartStore((s) => s.updateQuantity);
   const removeItem = useCartStore((s) => s.removeItem);
 
-  // Close on Escape + lock scroll
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    if (open) {
-      document.addEventListener("keydown", handleKey);
-      document.body.style.overflow = "hidden";
-    }
-    return () => {
-      document.removeEventListener("keydown", handleKey);
-      document.body.style.overflow = "";
-    };
-  }, [open, onClose]);
-
   return (
-    <>
-      {/* Backdrop */}
-      {open && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 transition-opacity"
-          onClick={onClose}
-          aria-hidden="true"
-        />
-      )}
+    <Sheet open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <SheetContent side="right" showCloseButton={false}>
+        <SheetHeader>
+          <SheetTitle>Carrito ({itemCount})</SheetTitle>
+          <SheetDescription>Revisá tus productos antes de finalizar la compra</SheetDescription>
+        </SheetHeader>
 
-      {/* Drawer */}
-      <div
-        className={`fixed inset-y-0 right-0 z-50 w-full max-w-md bg-background shadow-xl transition-transform duration-300 ease-in-out ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
-        role="dialog"
-        aria-label="Carrito de compras"
-      >
-        <div className="flex h-full flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b px-6 py-4">
-            <h2 className="text-lg font-semibold">
-              Carrito ({itemCount})
-            </h2>
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex size-8 items-center justify-center rounded-lg hover:bg-muted transition-colors"
-              aria-label="Cerrar carrito"
+        {items.length === 0 ? (
+          <aside className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-12 text-muted-foreground">
+            <ShoppingBag className="h-12 w-12" aria-hidden="true" />
+            <p>Tu carrito está vacío</p>
+            <Button
+              variant="outline"
+              render={<Link href="/shop" onClick={onClose} />}
             >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          {/* Empty state */}
-          {items.length === 0 ? (
-            <div className="flex flex-1 flex-col items-center justify-center gap-4 text-muted-foreground">
-              <ShoppingBag className="h-12 w-12" />
-              <p>Tu carrito está vacío</p>
-            </div>
-          ) : (
-            <>
-              {/* Items */}
-              <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-                {items.map((item) => (
+              Ver productos
+            </Button>
+          </aside>
+        ) : (
+          <>
+            {/* Items */}
+            <section aria-label="Productos en el carrito" className="flex-1 overflow-y-auto px-6 space-y-4">
+              {items.map((item) => (
+                <article
+                  key={item.variantId}
+                  className="flex gap-4 py-4 border-b last:border-b-0"
+                >
+                  {/* Image placeholder */}
                   <div
-                    key={item.variantId}
-                    className="flex gap-4 py-4 border-b last:border-b-0"
+                    className="h-20 w-20 shrink-0 rounded-lg bg-muted flex items-center justify-center text-xs text-muted-foreground"
+                    aria-hidden="true"
                   >
-                    {/* Image placeholder */}
-                    <div className="h-20 w-20 shrink-0 rounded-lg bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                      img
+                    img
+                  </div>
+
+                  {/* Info */}
+                  <div className="flex flex-1 flex-col justify-between">
+                    <div>
+                      <h3 className="text-sm font-medium">{item.name}</h3>
+                      <p className="text-xs text-muted-foreground">
+                        {item.variantName}
+                      </p>
                     </div>
 
-                    {/* Info */}
-                    <div className="flex flex-1 flex-col justify-between">
-                      <div>
-                        <h3 className="text-sm font-medium">{item.name}</h3>
-                        <p className="text-xs text-muted-foreground">
-                          {item.variantName}
-                        </p>
+                    <div className="flex items-center justify-between">
+                      {/* Quantity */}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon-sm"
+                          onClick={() =>
+                            updateQuantity(item.variantId, item.quantity - 1)
+                          }
+                          aria-label={`Disminuir cantidad de ${item.name}`}
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <output className="w-8 text-center text-sm" aria-live="polite">
+                          {item.quantity}
+                        </output>
+                        <Button
+                          variant="outline"
+                          size="icon-sm"
+                          onClick={() =>
+                            updateQuantity(item.variantId, item.quantity + 1)
+                          }
+                          aria-label={`Aumentar cantidad de ${item.name}`}
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        {/* Quantity */}
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateQuantity(item.variantId, item.quantity - 1)
-                            }
-                            className="inline-flex size-7 items-center justify-center rounded border hover:bg-muted transition-colors"
-                            aria-label="Disminuir cantidad"
-                          >
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="w-8 text-center text-sm">
-                            {item.quantity}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              updateQuantity(item.variantId, item.quantity + 1)
-                            }
-                            className="inline-flex size-7 items-center justify-center rounded border hover:bg-muted transition-colors"
-                            aria-label="Aumentar cantidad"
-                          >
-                            <Plus className="h-3 w-3" />
-                          </button>
-                        </div>
-
-                        {/* Price + remove */}
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm font-medium">
-                            {formatPrice(item.price * item.quantity)}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => removeItem(item.variantId)}
-                            className="text-xs text-muted-foreground hover:text-foreground underline"
-                          >
-                            Quitar
-                          </button>
-                        </div>
+                      {/* Price + remove */}
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium">
+                          {formatPrice(item.price * item.quantity)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeItem(item.variantId)}
+                          className="text-xs text-muted-foreground hover:text-foreground underline"
+                          aria-label={`Quitar ${item.name} del carrito`}
+                        >
+                          Quitar
+                        </button>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                </article>
+              ))}
+            </section>
 
-              {/* Footer */}
-              <div className="border-t px-6 py-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Total</span>
-                  <span className="text-lg font-semibold">
-                    {formatPrice(total)}
-                  </span>
-                </div>
-                <a
-                  href="/checkout"
-                  className="flex w-full h-12 items-center justify-center rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
-                >
-                  Finalizar compra
-                </a>
+            {/* Footer */}
+            <footer className="border-t px-6 py-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Total</span>
+                <output className="text-lg font-semibold" aria-live="polite">
+                  {formatPrice(total)}
+                </output>
               </div>
-            </>
-          )}
-        </div>
-      </div>
-    </>
+              <Button
+                size="lg"
+                className="w-full"
+                render={<Link href="/checkout" onClick={onClose} />}
+              >
+                Finalizar compra
+              </Button>
+            </footer>
+          </>
+        )}
+      </SheetContent>
+    </Sheet>
   );
 }
