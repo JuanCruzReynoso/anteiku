@@ -115,6 +115,11 @@ a, button {
   animation: slide-in-right 0.4s ease-out both;
 }
 
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
 /* Stagger delays for lists */
 .stagger-1 { animation-delay: 0.05s; }
 .stagger-2 { animation-delay: 0.1s; }

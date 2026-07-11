@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, type Variants } from "framer-motion";
 import { mockProducts } from "@/features/product/lib/mock-data";
 import { ProductCard } from "@/features/product/ui/product-card";
+import { GlitchTitle } from "@/components/glitch-title";
 
 const fadeIn: Variants = {
   hidden: { opacity: 0 },
@@ -89,7 +90,7 @@ export default function Home() {
 
             <div className="space-y-6">
               <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-[-0.04em] uppercase">
-                ANTEIKU
+                <GlitchTitle />
               </h1>
               <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto leading-relaxed tracking-wide">
                 Merchandise geek premium y café de especialidad.
