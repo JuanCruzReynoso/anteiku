@@ -16,6 +16,14 @@ const MYSTERY_WORDS = [
   "血",      // blood
   "夜",      // night
   "静寂",    // silence
+  "uwu",
+  "coffee!",
+  "miau",
+  "tatakae",
+  "sugoi!",
+  "touka koukan",
+  "FLCL",
+  "EVA 01",
 ];
 
 const GLITCH_CHARS = "!@#$%^&*()_+-=[]{}|;:,.<>?/~`ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
