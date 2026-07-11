@@ -6,7 +6,9 @@ Last updated: 2026-07-11
 
 ## Sources scanned
 
+- .claude\skills
 - .openclaw\skills
+- .agents\skills
 - C:\Users\ChillOutKet\.config\opencode\skills
 - C:\Users\ChillOutKet\.claude\skills
 - C:\Users\ChillOutKet\.gemini\skills
@@ -25,15 +27,30 @@ Last updated: 2026-07-11
 
 | Skill | Trigger / description | Scope | Path |
 | --- | --- | --- | --- |
+| `accessibility` | Audit and improve web accessibility following WCAG 2.2 guidelines. Use when asked to "improve accessibility", "a11y audit", "WCAG compliance", "screen reader support", "keyboard navigation", or "make accessible". | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\accessibility\SKILL.md` |
 | `branch-pr` | Create Gentle AI pull requests with issue-first checks. Trigger: creating, opening, or preparing PRs for review. | project | `C:\Users\ChillOutKet\Dev\anteiku\.openclaw\skills\branch-pr\SKILL.md` |
 | `chained-pr` | Trigger: PRs over 400 lines, stacked PRs, review slices. Split oversized changes into chained PRs that protect review focus. | project | `C:\Users\ChillOutKet\Dev\anteiku\.openclaw\skills\chained-pr\SKILL.md` |
 | `cognitive-doc-design` | Design docs that reduce cognitive load. Trigger: writing guides, READMEs, RFCs, onboarding, architecture, or review-facing docs. | project | `C:\Users\ChillOutKet\Dev\anteiku\.openclaw\skills\cognitive-doc-design\SKILL.md` |
 | `comment-writer` | Write warm, direct collaboration comments. Trigger: PR feedback, issue replies, reviews, Slack messages, or GitHub comments. | project | `C:\Users\ChillOutKet\Dev\anteiku\.openclaw\skills\comment-writer\SKILL.md` |
+| `drizzle-orm` | Type-safe SQL ORM for TypeScript with zero runtime overhead | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\drizzle\SKILL.md` |
+| `frontend-design` | Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics. | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\frontend-design\SKILL.md` |
 | `go-testing` | Trigger: Go tests, go test coverage, Bubbletea teatest, golden files. Apply focused Go testing patterns. | project | `C:\Users\ChillOutKet\Dev\anteiku\.openclaw\skills\go-testing\SKILL.md` |
 | `issue-creation` | Create Gentle AI issues with issue-first checks. Trigger: creating GitHub issues, bug reports, or feature requests. | project | `C:\Users\ChillOutKet\Dev\anteiku\.openclaw\skills\issue-creation\SKILL.md` |
 | `judgment-day` | Trigger: judgment day, dual review, adversarial review, juzgar. Run blind dual review, fix confirmed issues, then re-judge. | project | `C:\Users\ChillOutKet\Dev\anteiku\.openclaw\skills\judgment-day\SKILL.md` |
+| `next-best-practices` | Next.js best practices - file conventions, RSC boundaries, data patterns, async APIs, metadata, error handling, route handlers, image/font optimization, bundling | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\next-best-practices\SKILL.md` |
+| `next-cache-components` | Next.js 16 Cache Components - PPR, use cache directive, cacheLife, cacheTag, updateTag | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\next-cache-components\SKILL.md` |
+| `next-upgrade` | Upgrade Next.js to the latest version following official migration guides and codemods | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\next-upgrade\SKILL.md` |
+| `nodejs-backend-patterns` | Build production-ready Node.js backend services with Express/Fastify, implementing middleware patterns, error handling, authentication, database integration, and API design best practices. Use when creating Node.js servers, REST APIs, GraphQL backends, or microservices architectures. | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\nodejs-backend-patterns\SKILL.md` |
+| `nodejs-best-practices` | Node.js development principles and decision-making. Framework selection, async patterns, security, and architecture. Teaches thinking, not copying. | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\nodejs-best-practices\SKILL.md` |
+| `seo` | Optimize for search engine visibility and ranking. Use when asked to "improve SEO", "optimize for search", "fix meta tags", "add structured data", "sitemap optimization", or "search engine optimization". | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\seo\SKILL.md` |
+| `shadcn` | Manages shadcn components and projects — adding, searching, fixing, debugging, styling, and composing UI. Provides project context, component docs, and usage examples. Applies when working with shadcn/ui, component registries, presets, --preset codes, or any project with a components.json file. Also triggers for "shadcn init", "create an app with --preset", or "switch to --preset". | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\shadcn\SKILL.md` |
 | `skill-creator` | Trigger: new skills, agent instructions, documenting AI usage patterns. Create LLM-first skills with valid frontmatter. | project | `C:\Users\ChillOutKet\Dev\anteiku\.openclaw\skills\skill-creator\SKILL.md` |
 | `skill-improver` | Trigger: improve skills, audit skills, refactor skills, skill quality. Audit and upgrade existing LLM-first skills. | project | `C:\Users\ChillOutKet\Dev\anteiku\.openclaw\skills\skill-improver\SKILL.md` |
+| `tailwind-css-patterns` | Provides comprehensive Tailwind CSS utility-first styling patterns including responsive design, layout utilities, flexbox, grid, spacing, typography, colors, and modern CSS best practices. Use when styling React/Vue/Svelte components, building responsive layouts, implementing design systems, or optimizing CSS workflow. | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\tailwind-css-patterns\SKILL.md` |
+| `tailwind-v4-shadcn` | \| Production-tested setup for Tailwind CSS v4 with shadcn/ui, Vite, and React. Use when: initializing React projects with Tailwind v4, setting up shadcn/ui, implementing dark mode, debugging CSS variable issues, fixing theme switching, migrating from Tailwind v3, or encountering color/theming problems. Covers: @theme inline pattern, CSS variable architecture, dark mode with ThemeProvider, component composition, vite.config setup, common v4 gotchas, and production-tested patterns. | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\tailwind-v4-shadcn\SKILL.md` |
+| `typescript-advanced-types` | Master TypeScript's advanced type system including generics, conditional types, mapped types, template literals, and utility types for building type-safe applications. Use when implementing complex type logic, creating reusable type utilities, or ensuring compile-time type safety in TypeScript projects. | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\typescript-advanced-types\SKILL.md` |
+| `vercel-composition-patterns` | — | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\composition-patterns\SKILL.md` |
+| `vercel-react-best-practices` | React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements. | project | `C:\Users\ChillOutKet\Dev\anteiku\.agents\skills\react-best-practices\SKILL.md` |
 | `work-unit-commits` | Plan commits as reviewable work units. Trigger: implementation, commit splitting, chained PRs, or keeping tests and docs with code. | project | `C:\Users\ChillOutKet\Dev\anteiku\.openclaw\skills\work-unit-commits\SKILL.md` |
 
 ## Loading protocol

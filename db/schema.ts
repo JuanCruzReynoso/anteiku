@@ -9,6 +9,7 @@ import {
   jsonb,
   pgEnum,
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
 // ─── Enums ──────────────────────────────────────────────
 
@@ -103,3 +104,31 @@ export const orderItems = pgTable("order_items", {
   quantity: integer("quantity").notNull(),
   unitPrice: integer("unit_price").notNull(), // price at time of purchase in cents
 });
+
+// ─── Relations ──────────────────────────────────────────
+
+export const productsRelations = relations(products, ({ many }) => ({
+  variantsList: many(variants),
+}));
+
+export const variantsRelations = relations(variants, ({ one }) => ({
+  product: one(products, {
+    fields: [variants.productId],
+    references: [products.id],
+  }),
+}));
+
+export const ordersRelations = relations(orders, ({ many }) => ({
+  items: many(orderItems),
+}));
+
+export const orderItemsRelations = relations(orderItems, ({ one }) => ({
+  order: one(orders, {
+    fields: [orderItems.orderId],
+    references: [orders.id],
+  }),
+  variant: one(variants, {
+    fields: [orderItems.variantId],
+    references: [variants.id],
+  }),
+}));
