@@ -26,7 +26,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-18 items-center justify-between px-6 md:px-8">
         {/* Logo */}
-        <Logo variant="color" size={44} priority />
+        <Logo variant="color" size={48} priority />
 
         {/* Navigation - Desktop */}
         <nav aria-label="Navegación principal" className="hidden md:flex items-center gap-10">
