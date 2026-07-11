@@ -82,8 +82,8 @@ export default function Home() {
               <Image
                 src="/logo-color.png"
                 alt="Anteiku Coffee"
-                width={120}
-                height={120}
+                width={140}
+                height={140}
                 priority
               />
             </div>

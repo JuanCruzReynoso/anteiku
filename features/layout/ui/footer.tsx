@@ -13,8 +13,8 @@ export function Footer() {
               <Image
                 src="/logo-mono.png"
                 alt="Anteiku"
-                width={40}
-                height={40}
+                width={44}
+                height={44}
               />
               <span className="text-sm uppercase tracking-[0.3em] font-bold">
                 ANTEIKU
