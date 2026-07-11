@@ -13,8 +13,8 @@ export function Footer() {
               <Image
                 src="/logo-mono.png"
                 alt="Anteiku"
-                width={28}
-                height={28}
+                width={36}
+                height={36}
               />
               <span className="text-sm uppercase tracking-[0.3em] font-bold">
                 ANTEIKU
@@ -53,7 +53,7 @@ export function Footer() {
                   href="mailto:antieku.store@gmail.com"
                   className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <Mail className="h-5 w-5" />
+                  <Mail className="h-6 w-6" />
                   antieku.store@gmail.com
                 </a>
               </li>
@@ -64,7 +64,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <Instagram className="h-5 w-5" />
+                  <Instagram className="h-6 w-6" />
                   Instagram
                 </a>
               </li>

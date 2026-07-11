@@ -14,12 +14,12 @@ export function CartButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="relative inline-flex size-12 items-center justify-center rounded-full hover:bg-muted transition-colors"
+        className="relative inline-flex size-14 items-center justify-center rounded-full hover:bg-muted transition-colors"
         aria-label={`Cart (${itemCount} items)`}
       >
-        <ShoppingBag className="h-5 w-5" />
+        <ShoppingBag className="h-6 w-6" />
         {itemCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-foreground text-[9px] font-medium text-background tabular-nums">
+          <span className="absolute top-0 right-0 flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground tabular-nums">
             {itemCount > 99 ? "99+" : itemCount}
           </span>
         )}

@@ -52,14 +52,14 @@ export function Navbar() {
         </nav>
 
         {/* Actions */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon-lg"
             aria-label="Buscar"
             className="focus-accent"
           >
-            <Search className="h-5 w-5" />
+            <Search className="h-6 w-6" />
           </Button>
           <ThemeToggle />
           <CartButton />
@@ -76,7 +76,7 @@ export function Navbar() {
                 />
               }
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-6 w-6" />
             </SheetTrigger>
             <SheetContent side="left" showCloseButton={false}>
               <SheetHeader>
