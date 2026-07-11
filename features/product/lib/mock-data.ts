@@ -35,14 +35,14 @@ export const mockProducts: Product[] = [
     description:
       "Dark roast with notes of dark chocolate and smoke. Dangerously smooth.",
     category: "coffee",
-    images: ["/placeholder-coffee-1.png"],
-    basePrice: 1800,
+    images: ["/products/cafe-anteiku-black.png"],
+    basePrice: 3800,
     variants: [
       {
         id: "v1",
         name: "250g",
         sku: "TGB-250",
-        price: 1800,
+        price: 3800,
         stock: 50,
         options: { weight: "250g" },
       },
@@ -50,7 +50,7 @@ export const mockProducts: Product[] = [
         id: "v2",
         name: "500g",
         sku: "TGB-500",
-        price: 3200,
+        price: 6800,
         stock: 30,
         options: { weight: "500g" },
       },
