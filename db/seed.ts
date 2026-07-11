@@ -5,18 +5,18 @@ import { products, variants } from "./schema";
 
 const seedProducts = [
   {
-    name: "Tokyo Ghoul Blend",
-    slug: "tokyo-ghoul-blend",
+    name: "Tokyo Noir",
+    slug: "tokyo-noir",
     description:
       "Dark roast with notes of dark chocolate and smoke. Dangerously smooth.",
     category: "coffee" as const,
-    images: ["/placeholder-coffee-1.png"],
-    basePrice: 1800,
+    images: ["/products/cafe-anteiku-black.png"],
+    basePrice: 13500,
     variants: [
       {
         name: "250g",
-        sku: "TGB-250",
-        price: 1800,
+        sku: "TN-250",
+        price: 13500,
         stock: 50,
         options: { weight: "250g" },
       },

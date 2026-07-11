@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 import { shippingSchema, type ShippingFormData } from "../lib/schema";
 
 interface ShippingFormProps {
@@ -22,8 +23,19 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
     },
   });
 
+  function handleFormError() {
+    const errorMessages = Object.values(errors)
+      .map((e) => e?.message)
+      .filter(Boolean);
+    if (errorMessages.length > 0) {
+      toast.error("Revisá los campos", {
+        description: errorMessages[0]?.toString() || "Completá todos los campos obligatorios.",
+      });
+    }
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form onSubmit={handleSubmit(onSubmit, handleFormError)} className="space-y-8">
       <h2 className="text-xl font-semibold">Datos de envío</h2>
 
       {/* Email */}
@@ -35,7 +47,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           id="email"
           type="email"
           {...register("email")}
-          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
+          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
           placeholder="tu@email.com"
         />
         {errors.email && (
@@ -52,7 +64,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           id="name"
           type="text"
           {...register("name")}
-          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
+          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
           placeholder="Juan Pérez"
         />
         {errors.name && (
@@ -69,7 +81,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           id="phone"
           type="tel"
           {...register("phone")}
-          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
+          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
           placeholder="+54 11 1234-5678"
         />
         {errors.phone && (
@@ -86,7 +98,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           id="line1"
           type="text"
           {...register("line1")}
-          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
+          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
           placeholder="Av. Corrientes 1234"
         />
         {errors.line1 && (
@@ -103,7 +115,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           id="line2"
           type="text"
           {...register("line2")}
-          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
+          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
           placeholder="Piso 4, Depto B"
         />
       </div>
@@ -118,7 +130,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
             id="city"
             type="text"
             {...register("city")}
-            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
+            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
             placeholder="Buenos Aires"
           />
           {errors.city && (
@@ -133,7 +145,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
             id="state"
             type="text"
             {...register("state")}
-            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
+            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
             placeholder="CABA"
           />
           {errors.state && (
@@ -152,7 +164,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
             id="postalCode"
             type="text"
             {...register("postalCode")}
-            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
+            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
             placeholder="C1000"
           />
           {errors.postalCode && (
@@ -169,7 +181,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
             id="country"
             type="text"
             {...register("country")}
-            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
+            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
           />
           {errors.country && (
             <p className="text-xs text-destructive">
@@ -182,7 +194,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
       {/* Submit — pill button */}
       <button
         type="submit"
-        className="w-full h-12 rounded-full bg-foreground text-background font-medium hover:bg-foreground/80 transition-colors"
+        className="w-full h-12 rounded-full bg-foreground text-background font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
       >
         Continuar al pago
       </button>

@@ -1,10 +1,7 @@
 "use client";
 
 import { useCartStore } from "@/features/cart/lib/cart-store";
-
-function formatPrice(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
-}
+import { formatPrice } from "@/lib/utils";
 
 export function OrderSummary() {
   const items = useCartStore((s) => s.items);

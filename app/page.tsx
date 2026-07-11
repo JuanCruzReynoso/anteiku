@@ -3,24 +3,6 @@ import Image from "next/image";
 import { mockProducts } from "@/features/product/lib/mock-data";
 import { ProductCard } from "@/features/product/ui/product-card";
 
-const categories = [
-  {
-    label: "Café",
-    value: "coffee",
-    description: "Tostados de especialidad para el culto al buen café",
-  },
-  {
-    label: "Figuras",
-    value: "figures",
-    description: "Coleccionables premium, selección curada",
-  },
-  {
-    label: "Indumentaria",
-    value: "apparel",
-    description: "Streetwear que mezcla cultura anime y moda",
-  },
-] as const;
-
 export default function Home() {
   const featured = mockProducts.slice(0, 4);
 
@@ -88,7 +70,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
               <Link
                 href="/shop"
-                className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-10 text-sm font-medium text-background hover:bg-foreground/80 transition-colors"
+                className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-10 text-sm font-medium text-background hover:bg-primary hover:text-primary-foreground transition-colors"
               >
                 Ver todo
               </Link>
@@ -99,42 +81,6 @@ export default function Home() {
                 Explorar café
               </Link>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Categories ───────────────────────────────── */}
-      <section className="py-32">
-        <div className="container mx-auto px-6 md:px-8">
-          <div className="mb-16">
-            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-4">
-              Explorá
-            </p>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-[-0.03em]">
-              Por categoría
-            </h2>
-          </div>
-
-          <div className="flex flex-col">
-            {categories.map((cat, i) => (
-              <Link
-                key={cat.value}
-                href={`/shop?category=${cat.value}`}
-                className="group flex items-baseline justify-between py-8 border-b border-muted/80 last:border-b-0"
-              >
-                <div className="flex items-baseline gap-6">
-                  <span className="text-xs text-muted-foreground font-mono tabular-nums">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <h3 className="text-3xl md:text-4xl font-bold tracking-[-0.02em] group-hover:pl-2 transition-all duration-300">
-                    {cat.label}
-                  </h3>
-                </div>
-                <span className="text-sm text-muted-foreground hidden md:block max-w-xs text-right">
-                  {cat.description}
-                </span>
-              </Link>
-            ))}
           </div>
         </div>
       </section>
@@ -227,7 +173,7 @@ export default function Home() {
           <div className="mt-12">
             <Link
               href="/product/mrpopo-igor-remera"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-10 text-sm font-medium text-background hover:bg-foreground/80 transition-colors"
+              className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-10 text-sm font-medium text-background hover:bg-primary hover:text-primary-foreground transition-colors"
             >
               Ver producto
             </Link>

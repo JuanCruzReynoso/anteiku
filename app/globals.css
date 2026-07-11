@@ -80,3 +80,9 @@ body {
 a, button {
   transition: all 150ms ease;
 }
+
+/* Accent utilities — red accent for interactive emphasis */
+.focus-accent:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--primary);
+}

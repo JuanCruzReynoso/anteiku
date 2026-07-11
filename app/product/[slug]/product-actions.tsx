@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { useCartStore } from "@/features/cart/lib/cart-store";
+import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/features/product/lib/mock-data";
-
-function formatPrice(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
-}
 
 interface ProductActionsProps {
   product: Product;
@@ -29,6 +27,9 @@ export function ProductActions({ product }: ProductActionsProps) {
       image: product.images[0],
     });
     setAdded(true);
+    toast.success("Agregado al carrito", {
+      description: `${product.name} — ${selectedVariant.name}`,
+    });
     setTimeout(() => setAdded(false), 1500);
   }
 
@@ -69,7 +70,7 @@ export function ProductActions({ product }: ProductActionsProps) {
         type="button"
         onClick={handleAdd}
         disabled={selectedVariant.stock === 0}
-        className="w-full h-12 rounded-full bg-foreground text-background font-medium hover:bg-foreground/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full h-12 rounded-full bg-foreground text-background font-medium hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {selectedVariant.stock === 0
           ? "Sin stock"

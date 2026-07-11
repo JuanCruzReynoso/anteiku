@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Search, Menu } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
@@ -15,16 +16,11 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-const navLinks = [
-  { href: "/shop", label: "Tienda" },
-  { href: "/shop?category=coffee", label: "Café" },
-  { href: "/shop?category=figures", label: "Figuras" },
-  { href: "/shop?category=apparel", label: "Indumentaria" },
-  { href: "/shop?category=notebooks", label: "Cuadernos" },
-] as const;
+const navLinks = [{ href: "/shop", label: "Tienda" }];
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -34,15 +30,25 @@ export function Navbar() {
 
         {/* Navigation - Desktop */}
         <nav aria-label="Navegación principal" className="hidden md:flex items-center gap-10">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href || pathname.startsWith(link.href + "?");
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`text-xs uppercase tracking-[0.2em] font-medium transition-colors relative ${
+                  isActive
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {link.label}
+                {isActive && (
+                  <span className="absolute -bottom-1 left-0 right-0 h-px bg-primary" />
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Actions */}
@@ -51,6 +57,7 @@ export function Navbar() {
             variant="ghost"
             size="icon"
             aria-label="Buscar"
+            className="focus-accent"
           >
             <Search className="h-4 w-4" />
           </Button>
@@ -76,16 +83,23 @@ export function Navbar() {
                 <SheetTitle>Menú</SheetTitle>
               </SheetHeader>
               <nav aria-label="Navegación móvil" className="flex flex-col gap-0 px-6">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className="block py-4 text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                {navLinks.map((link) => {
+                  const isActive = pathname === link.href || pathname.startsWith(link.href + "?");
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setOpen(false)}
+                      className={`block py-4 text-xs uppercase tracking-[0.2em] font-medium transition-colors ${
+                        isActive
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
               </nav>
             </SheetContent>
           </Sheet>

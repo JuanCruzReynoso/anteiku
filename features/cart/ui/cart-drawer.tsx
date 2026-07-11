@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Minus, Plus, ShoppingBag } from "lucide-react";
 import { useCartStore } from "../lib/cart-store";
 import { Button } from "@/components/ui/button";
+import { formatPrice } from "@/lib/utils";
 import {
   Sheet,
   SheetContent,
@@ -11,10 +12,6 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-
-function formatPrice(cents: number): string {
-  return `$${(cents / 100).toFixed(2)}`;
-}
 
 interface CartDrawerProps {
   open: boolean;
@@ -37,9 +34,16 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
         </SheetHeader>
 
         {items.length === 0 ? (
-          <aside className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-12 text-muted-foreground">
-            <ShoppingBag className="h-10 w-10" aria-hidden="true" />
-            <p>Tu carrito está vacío</p>
+          <aside className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-12 text-center">
+            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+              <ShoppingBag className="h-7 w-7 text-muted-foreground" aria-hidden="true" />
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Tu carrito está vacío</p>
+              <p className="text-xs text-muted-foreground">
+                Explorá nuestra colección y encontrá algo que te guste.
+              </p>
+            </div>
             <Button
               variant="outline"
               render={<Link href="/shop" onClick={onClose} />}
@@ -131,6 +135,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
               </div>
               <Button
                 size="lg"
+                variant="accent"
                 className="w-full"
                 render={<Link href="/checkout" onClick={onClose} />}
               >

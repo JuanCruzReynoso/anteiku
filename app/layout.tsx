@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Navbar } from "@/features/layout/ui/navbar";
 import { Footer } from "@/features/layout/ui/footer";
@@ -96,6 +97,16 @@ export default function RootLayout({
           <Navbar />
           <main id="main-content" className="flex-1">{children}</main>
           <Footer />
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              style: {
+                background: "var(--background)",
+                border: "1px solid var(--muted)",
+                color: "var(--foreground)",
+              },
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>

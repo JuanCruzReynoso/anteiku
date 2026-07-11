@@ -1,14 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { formatPrice } from "@/lib/utils";
 import type { Product } from "../lib/mock-data";
-
-function formatPrice(cents: number): string {
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    minimumFractionDigits: 0,
-  }).format(cents / 100);
-}
 
 interface ProductCardProps {
   product: Product;
@@ -20,10 +13,10 @@ export function ProductCard({ product }: ProductCardProps) {
   const hasRealImage = product.images[0] && !product.images[0].startsWith("/placeholder");
 
   return (
-    <article>
-      <Link href={`/product/${product.slug}`} className="group block space-y-4">
-        {/* Image — borderless, full bleed */}
-        <div className="aspect-square bg-muted overflow-hidden relative">
+    <article className="group">
+      <Link href={`/product/${product.slug}`} className="block space-y-4">
+        {/* Image — borderless, full bleed with hover lift */}
+        <div className="aspect-square bg-muted overflow-hidden relative transition-shadow duration-300 group-hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
           {hasRealImage ? (
             <Image
               src={product.images[0]}
@@ -44,7 +37,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {/* Info — editorial style */}
         <div className="space-y-1.5">
-          <h3 className="font-medium text-sm group-hover:opacity-70 transition-opacity">
+          <h3 className="font-medium text-sm group-hover:text-primary transition-colors">
             {product.name}
           </h3>
           <p className="text-xs text-muted-foreground uppercase tracking-wider">

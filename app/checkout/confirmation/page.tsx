@@ -46,7 +46,7 @@ export default function ConfirmationPage() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
           <Link
             href="/shop"
-            className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-10 text-sm font-medium text-background hover:bg-foreground/80 transition-colors"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-10 text-sm font-medium text-background hover:bg-primary hover:text-primary-foreground transition-colors"
           >
             Seguir comprando
           </Link>

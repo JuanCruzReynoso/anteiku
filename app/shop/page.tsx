@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  mockProducts,
-  type ProductCategory,
-} from "@/features/product/lib/mock-data";
+import { mockProducts } from "@/features/product/lib/mock-data";
+import { allCategories } from "@/features/product/lib/categories";
 import { ProductCard } from "@/features/product/ui/product-card";
 
 export const metadata: Metadata = {
@@ -14,15 +12,9 @@ export const metadata: Metadata = {
   },
 };
 
-const categories: { label: string; value: ProductCategory | "all" }[] = [
+const filterTabs = [
   { label: "Todos", value: "all" },
-  { label: "Café", value: "coffee" },
-  { label: "Figuras", value: "figures" },
-  { label: "Indumentaria", value: "apparel" },
-  { label: "Stickers", value: "stickers" },
-  { label: "Tamagotchis", value: "tamagotchis" },
-  { label: "Accesorios", value: "accessories" },
-  { label: "Cuadernos", value: "notebooks" },
+  ...allCategories.map((c) => ({ label: c.label, value: c.value })),
 ];
 
 interface ShopPageProps {
@@ -55,7 +47,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
 
       {/* Category Filter */}
       <div className="flex flex-wrap gap-2 mb-16">
-        {categories.map((cat) => {
+        {filterTabs.map((cat) => {
           const isActive = activeCategory === cat.value;
           return (
             <Link

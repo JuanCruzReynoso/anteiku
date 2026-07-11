@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check } from "lucide-react";
+import { toast } from "sonner";
 import { useCartStore } from "@/features/cart/lib/cart-store";
 import type { ProductVariant } from "@/features/product/lib/mock-data";
 
@@ -28,6 +28,9 @@ export function AddToCartButton({ product, variant }: AddToCartButtonProps) {
       image: product.images[0],
     });
     setAdded(true);
+    toast.success("Agregado al carrito", {
+      description: `${product.name} — ${variant.name}`,
+    });
     setTimeout(() => setAdded(false), 1500);
   }
 
@@ -36,13 +39,13 @@ export function AddToCartButton({ product, variant }: AddToCartButtonProps) {
       type="button"
       onClick={handleAdd}
       disabled={variant.stock === 0}
-      className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full h-12 rounded-full bg-foreground text-background font-medium hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {variant.stock === 0
-        ? "Out of Stock"
+        ? "Sin stock"
         : added
-          ? "Added!"
-          : "Add to Cart"}
+          ? "¡Agregado!"
+          : "Agregar al carrito"}
     </button>
   );
 }

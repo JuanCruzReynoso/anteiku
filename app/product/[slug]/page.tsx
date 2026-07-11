@@ -2,17 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { mockProducts } from "@/features/product/lib/mock-data";
+import { formatPrice } from "@/lib/utils";
 import { ProductActions } from "./product-actions";
 
 const siteUrl = "https://anteiku.com";
-
-function formatPrice(cents: number): string {
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    minimumFractionDigits: 0,
-  }).format(cents / 100);
-}
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;

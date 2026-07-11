@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+import { Mail, Instagram } from "lucide-react";
 
 export function Footer() {
   return (
@@ -7,8 +9,16 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
           {/* Brand */}
           <section className="space-y-6">
-            <Link href="/" className="text-sm uppercase tracking-[0.3em] font-bold">
-              ANTEIKU
+            <Link href="/" className="inline-flex items-center gap-3">
+              <Image
+                src="/logo-mono.png"
+                alt="Anteiku"
+                width={28}
+                height={28}
+              />
+              <span className="text-sm uppercase tracking-[0.3em] font-bold">
+                ANTEIKU
+              </span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Merchandise geek premium y café de especialidad.
@@ -29,38 +39,6 @@ export function Footer() {
                   Todos los productos
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/shop?category=coffee"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Café
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/shop?category=figures"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Figuras
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/shop?category=apparel"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Indumentaria
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/shop?category=notebooks"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  Cuadernos
-                </Link>
-              </li>
             </ul>
           </nav>
 
@@ -72,19 +50,21 @@ export function Footer() {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="mailto:hola@anteiku.com"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  href="mailto:antieku.store@gmail.com"
+                  className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  hola@anteiku.com
+                  <Mail className="h-4 w-4" />
+                  antieku.store@gmail.com
                 </a>
               </li>
               <li>
                 <a
-                  href="https://instagram.com/anteiku"
+                  href="https://www.instagram.com/anteiku.c0ffee/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
+                  <Instagram className="h-4 w-4" />
                   Instagram
                 </a>
               </li>
