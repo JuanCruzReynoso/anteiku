@@ -293,7 +293,7 @@ export const mockProducts: Product[] = [
     name: "Hisoka Almendra Remera",
     slug: "hisoka-almendra-remera",
     description:
-      "Remera blanca con ilustración de Hisoka y texto アーモンド (Almond). Algodón premium.",
+      "Crossover entre Almendra de Spinetta y Hisoka de Hunter x Hunter. Ilustración original, algodón premium.",
     category: "apparel",
     images: ["/products/hisoka-almendra-remera.png"],
     basePrice: 22000,
@@ -337,7 +337,7 @@ export const mockProducts: Product[] = [
     name: "Mr. Popo Igor Remera",
     slug: "mrpopo-igor-remera",
     description:
-      "Remera rosa con Mr. Popo de Dragon Ball. Diseño exclusivo, edición limitada.",
+      "Crossover entre el álbum IGOR de Tyler the Creator y Mr. Popo de Dragon Ball. Algodón premium, edición limitada.",
     category: "apparel",
     images: ["/products/mrpopo-igor-remera.png"],
     basePrice: 25000,
