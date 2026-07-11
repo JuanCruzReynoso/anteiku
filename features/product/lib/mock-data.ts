@@ -249,7 +249,7 @@ export const mockProducts: Product[] = [
     name: "White Pony Chomba",
     slug: "whitepony-chomba",
     description:
-      "Chomba negra con logo bordado. Crossover White Pony de Deftones x Anteiku. Premium.",
+      "Chomba negra con logo bordado. Crossover White Pony de Deftones x Polo. Premium.",
     category: "apparel",
     images: ["/products/whitepony-chomba.png"],
     basePrice: 35000,
