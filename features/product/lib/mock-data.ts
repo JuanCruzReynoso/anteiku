@@ -249,7 +249,7 @@ export const mockProducts: Product[] = [
     name: "White Pony Chomba",
     slug: "whitepony-chomba",
     description:
-      "Chomba premium negra con caballo blanco bordado. Estilo clásico, corte moderno.",
+      "Crossover entre el álbum White Pony de Deftones y estilo polo. Logo bordado, premium.",
     category: "apparel",
     images: ["/products/whitepony-chomba.png"],
     basePrice: 35000,
