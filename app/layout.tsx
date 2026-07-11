@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { ErrorBoundary } from "@/components/error-boundary";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { Navbar } from "@/features/layout/ui/navbar";
 import { Footer } from "@/features/layout/ui/footer";
@@ -95,7 +96,9 @@ export default function RootLayout({
             Saltar al contenido
           </a>
           <Navbar />
-          <main id="main-content" className="flex-1">{children}</main>
+          <main id="main-content" className="flex-1">
+            <ErrorBoundary>{children}</ErrorBoundary>
+          </main>
           <Footer />
           <Toaster
             position="bottom-right"

@@ -1,7 +1,33 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { motion, type Variants } from "framer-motion";
 import { mockProducts } from "@/features/product/lib/mock-data";
 import { ProductCard } from "@/features/product/ui/product-card";
+
+const fadeIn: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.6, ease: "easeOut" } },
+};
+
+const slideUp: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+};
+
+const staggerContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.12, delayChildren: 0.2 },
+  },
+};
+
+const staggerItem: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
 
 export default function Home() {
   const featured = mockProducts.slice(0, 4);
@@ -44,7 +70,12 @@ export default function Home() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--muted)_1px,transparent_1px),linear-gradient(to_bottom,var(--muted)_1px,transparent_1px)] bg-[size:6rem_6rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
 
         <div className="container relative mx-auto px-6 md:px-8 text-center">
-          <div className="space-y-10">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+            className="space-y-10"
+          >
             {/* Logo */}
             <div className="flex justify-center">
               <Image
@@ -81,14 +112,20 @@ export default function Home() {
                 Explorar café
               </Link>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* ── Featured Products ────────────────────────── */}
       <section className="py-32 bg-muted/30">
         <div className="container mx-auto px-6 md:px-8">
-          <div className="flex items-end justify-between mb-16">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={slideUp}
+            className="flex items-end justify-between mb-16"
+          >
             <div>
               <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-4">
                 Destacados
@@ -103,11 +140,11 @@ export default function Home() {
             >
               Ver todos →
             </Link>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
-            {featured.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {featured.map((product, index) => (
+              <ProductCard key={product.id} product={product} index={index} />
             ))}
           </div>
 
@@ -125,7 +162,13 @@ export default function Home() {
       {/* ── Lookbook ─────────────────────────────────── */}
       <section className="py-32">
         <div className="container mx-auto px-6 md:px-8">
-          <div className="mb-16">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={slideUp}
+            className="mb-16"
+          >
             <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-4">
               Lookbook
             </p>
@@ -135,10 +178,19 @@ export default function Home() {
             <p className="text-sm text-muted-foreground mt-3">
               Crossover限量 — Edición limitada
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <figure className="relative aspect-[3/4] md:aspect-[4/5] overflow-hidden group">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={staggerContainer}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
+            <motion.figure
+              variants={staggerItem}
+              className="relative aspect-[3/4] md:aspect-[4/5] overflow-hidden group rounded-lg"
+            >
               <Image
                 src="/products/mrpopo-igor-rosa-lookbook.jpg"
                 alt="Modelo usando remera Mr. Popo Igor color rosa en skatepark"
@@ -147,14 +199,19 @@ export default function Home() {
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                 priority
               />
-              <figcaption className="absolute bottom-0 inset-x-0 p-6">
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <figcaption className="absolute bottom-0 inset-x-0 p-8">
                 <span className="text-white text-xs uppercase tracking-[0.2em] font-medium">
                   Variante Rosa
                 </span>
               </figcaption>
-            </figure>
+            </motion.figure>
 
-            <figure className="relative aspect-[3/4] md:aspect-[4/5] overflow-hidden group">
+            <motion.figure
+              variants={staggerItem}
+              className="relative aspect-[3/4] md:aspect-[4/5] overflow-hidden group rounded-lg"
+            >
               <Image
                 src="/products/mrpopo-igor-negra-lookbook.jpg"
                 alt="Modelo usando remera Mr. Popo Igor color negro"
@@ -162,13 +219,15 @@ export default function Home() {
                 sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
-              <figcaption className="absolute bottom-0 inset-x-0 p-6">
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <figcaption className="absolute bottom-0 inset-x-0 p-8">
                 <span className="text-white text-xs uppercase tracking-[0.2em] font-medium">
                   Variante Negra
                 </span>
               </figcaption>
-            </figure>
-          </div>
+            </motion.figure>
+          </motion.div>
 
           <div className="mt-12">
             <Link
@@ -184,14 +243,21 @@ export default function Home() {
       {/* ── Brand Statement ──────────────────────────── */}
       <section className="py-40">
         <div className="container mx-auto px-6 md:px-8 text-center max-w-3xl">
-          <h2 className="text-4xl md:text-6xl font-bold tracking-[-0.03em] mb-10">
-            No somos una tienda más de merch.
-          </h2>
-          <p className="text-muted-foreground leading-relaxed text-lg">
-            No hacemos genérico. Cada pieza está curada con intención — desde
-            granos de café de origen único hasta coleccionables seleccionados a
-            mano. Si no cumple el estándar, no entra al catálogo.
-          </p>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={slideUp}
+          >
+            <h2 className="text-4xl md:text-6xl font-bold tracking-[-0.03em] mb-10">
+              No somos una tienda más de merch.
+            </h2>
+            <p className="text-muted-foreground leading-relaxed text-lg">
+              No hacemos genérico. Cada pieza está curada con intención — desde
+              granos de café de origen único hasta coleccionables seleccionados a
+              mano. Si no cumple el estándar, no entra al catálogo.
+            </p>
+          </motion.div>
         </div>
       </section>
     </div>

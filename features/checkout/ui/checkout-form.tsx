@@ -19,17 +19,26 @@ export function CheckoutForm() {
   // Redirect if cart is empty
   if (items.length === 0 && !shippingData) {
     return (
-      <div className="text-center py-32">
-        <h1 className="text-4xl font-bold tracking-[-0.03em] mb-4">Tu carrito está vacío</h1>
-        <p className="text-muted-foreground mb-10">
-          Agregá productos antes de finalizar la compra.
-        </p>
-        <a
-          href="/shop"
-          className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-10 text-sm font-medium text-background hover:bg-primary hover:text-primary-foreground transition-colors"
-        >
-          Ver productos
-        </a>
+      <div className="text-center py-32 animate-fade-in">
+        <div className="max-w-md mx-auto space-y-6">
+          <div className="w-12 h-12 mx-auto rounded-full bg-muted flex items-center justify-center">
+            <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+            </svg>
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold">Sin productos</h1>
+            <p className="text-muted-foreground">
+              Agregá algo al carrito antes de continuar.
+            </p>
+          </div>
+          <a
+            href="/shop"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-10 text-sm font-medium text-background hover:bg-primary hover:text-primary-foreground transition-colors"
+          >
+            Ver productos
+          </a>
+        </div>
       </div>
     );
   }
