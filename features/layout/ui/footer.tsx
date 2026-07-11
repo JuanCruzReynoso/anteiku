@@ -51,6 +51,14 @@ export function Footer() {
                   Indumentaria
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/shop?category=notebooks"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Cuadernos
+                </Link>
+              </li>
             </ul>
           </div>
 

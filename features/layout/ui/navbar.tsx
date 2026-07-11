@@ -37,6 +37,12 @@ export function Navbar() {
           >
             Indumentaria
           </Link>
+          <Link
+            href="/shop?category=notebooks"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Cuadernos
+          </Link>
         </nav>
 
         {/* Actions */}

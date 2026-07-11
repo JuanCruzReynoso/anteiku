@@ -19,6 +19,7 @@ const categories: { label: string; value: ProductCategory | "all" }[] = [
   { label: "Stickers", value: "stickers" },
   { label: "Tamagotchis", value: "tamagotchis" },
   { label: "Accesorios", value: "accessories" },
+  { label: "Cuadernos", value: "notebooks" },
 ];
 
 interface ShopPageProps {
