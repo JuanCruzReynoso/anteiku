@@ -27,8 +27,37 @@ const categories = [
 export default function Home() {
   const featured = mockProducts.slice(0, 4);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Anteiku",
+    url: "https://anteiku.com",
+    logo: "https://anteiku.com/logo-color.png",
+    description: "Merchandise geek premium y café de especialidad.",
+  };
+
+  const websiteLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "Anteiku",
+    url: "https://anteiku.com",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: "https://anteiku.com/shop?search={search_term_string}",
+      "query-input": "required name=search_term_string",
+    },
+  };
+
   return (
     <div className="flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }}
+      />
       {/* ── Hero ─────────────────────────────────────── */}
       <section className="relative flex items-center justify-center py-32 md:py-40 overflow-hidden">
         {/* Subtle grid background */}

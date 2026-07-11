@@ -9,6 +9,9 @@ import { ProductCard } from "@/features/product/ui/product-card";
 export const metadata: Metadata = {
   title: "Tienda",
   description: "Explorá nuestra colección de merchandise geek y café de especialidad.",
+  alternates: {
+    canonical: "https://anteiku.com/shop",
+  },
 };
 
 const categories: { label: string; value: ProductCategory | "all" }[] = [

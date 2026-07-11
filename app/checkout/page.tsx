@@ -3,7 +3,11 @@ import { CheckoutForm } from "@/features/checkout/ui/checkout-form";
 
 export const metadata: Metadata = {
   title: "Checkout",
-  description: "Complete your order.",
+  description: "Finalizá tu compra en Anteiku.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function CheckoutPage() {
