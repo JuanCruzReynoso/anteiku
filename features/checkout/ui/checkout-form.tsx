@@ -18,14 +18,14 @@ export function CheckoutForm() {
   // Redirect if cart is empty
   if (items.length === 0 && !shippingData) {
     return (
-      <div className="text-center py-24">
-        <h1 className="text-2xl font-bold mb-4">Tu carrito está vacío</h1>
-        <p className="text-muted-foreground mb-8">
+      <div className="text-center py-32">
+        <h1 className="text-4xl font-bold tracking-[-0.03em] mb-4">Tu carrito está vacío</h1>
+        <p className="text-muted-foreground mb-10">
           Agregá productos antes de finalizar la compra.
         </p>
         <a
           href="/shop"
-          className="inline-flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-10 text-sm font-medium text-background hover:bg-foreground/80 transition-colors"
         >
           Ver productos
         </a>
@@ -44,31 +44,33 @@ export function CheckoutForm() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold tracking-tight mb-8">Checkout</h1>
+    <div className="container mx-auto px-6 md:px-8 py-12 md:py-20">
+      <h1 className="text-4xl md:text-5xl font-bold tracking-[-0.03em] mb-12">Checkout</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 md:gap-16">
         {/* Form */}
         <div className="lg:col-span-2">
           {step === "shipping" ? (
             <ShippingForm onSubmit={handleShippingSubmit} />
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Pago</h2>
                 <button
                   type="button"
                   onClick={() => setStep("shipping")}
-                  className="text-sm text-primary hover:underline"
+                  className="text-xs uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Editar envío
                 </button>
               </div>
 
-              {/* Shipping summary */}
-              <div className="rounded-lg border p-4 space-y-2">
-                <p className="text-sm font-medium">Enviar a:</p>
-                <p className="text-sm text-muted-foreground">
+              {/* Shipping summary — borderless */}
+              <div className="bg-muted p-6 space-y-2">
+                <p className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+                  Enviar a:
+                </p>
+                <p className="text-sm">
                   {shippingData?.name}
                   <br />
                   {shippingData?.line1}
@@ -81,8 +83,8 @@ export function CheckoutForm() {
                 </p>
               </div>
 
-              {/* MercadoPago placeholder */}
-              <div className="rounded-lg border-2 border-dashed p-8 text-center space-y-4">
+              {/* MercadoPago placeholder — borderless */}
+              <div className="bg-muted p-10 text-center space-y-4">
                 <div className="text-4xl">💳</div>
                 <p className="text-muted-foreground">
                   Acá va a aparecer la integración con MercadoPago.
@@ -95,7 +97,7 @@ export function CheckoutForm() {
               <button
                 type="button"
                 onClick={handlePayment}
-                className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+                className="w-full h-12 rounded-full bg-foreground text-background font-medium hover:bg-foreground/80 transition-colors"
               >
                 Completar pedido (Demo)
               </button>
@@ -105,7 +107,7 @@ export function CheckoutForm() {
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="sticky top-24 rounded-lg border p-6">
+          <div className="sticky top-24 bg-muted p-6">
             <OrderSummary />
           </div>
         </div>

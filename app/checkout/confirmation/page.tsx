@@ -14,20 +14,27 @@ export default function ConfirmationPage() {
   }, [clearCart]);
 
   return (
-    <div className="container mx-auto px-4 py-24 text-center">
-      <div className="max-w-md mx-auto space-y-6">
+    <div className="container mx-auto px-6 md:px-8 py-32 text-center">
+      <div className="max-w-md mx-auto space-y-8">
         <div className="flex justify-center">
-          <CheckCircle className="h-16 w-16 text-primary" />
+          <CheckCircle className="h-14 w-14 text-primary" />
         </div>
 
-        <h1 className="text-3xl font-bold tracking-tight">Pedido confirmado</h1>
+        <div className="space-y-4">
+          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+            Pedido
+          </p>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-[-0.03em]">
+            Confirmado
+          </h1>
+        </div>
 
         <p className="text-muted-foreground leading-relaxed">
           ¡Gracias por tu compra! Te vamos a enviar un email de confirmación
           con los detalles del envío.
         </p>
 
-        <div className="rounded-lg border p-4 text-sm text-muted-foreground">
+        <div className="bg-muted p-4 text-sm">
           <p>
             Número de pedido:{" "}
             <span className="font-mono font-medium text-foreground">
@@ -39,13 +46,13 @@ export default function ConfirmationPage() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
           <Link
             href="/shop"
-            className="inline-flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-10 text-sm font-medium text-background hover:bg-foreground/80 transition-colors"
           >
             Seguir comprando
           </Link>
           <Link
             href="/"
-            className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-8 text-sm font-medium hover:bg-muted transition-colors"
+            className="inline-flex h-12 items-center justify-center rounded-full px-10 text-sm font-medium hover:bg-muted transition-colors"
           >
             Volver al inicio
           </Link>

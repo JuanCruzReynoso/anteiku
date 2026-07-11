@@ -33,7 +33,6 @@ export function Logo({
         width={size}
         height={size}
         priority={priority}
-        className="rounded-full"
       />
     </Link>
   );

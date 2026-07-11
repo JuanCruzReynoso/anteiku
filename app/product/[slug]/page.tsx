@@ -100,10 +100,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="container mx-auto px-4 py-12">
-        {/* Breadcrumbs */}
-        <nav aria-label="Breadcrumb" className="mb-6 text-sm text-muted-foreground">
-          <ol className="flex items-center gap-2">
+      <div className="container mx-auto px-6 md:px-8 py-12 md:py-20">
+        {/* Breadcrumbs — editorial micro text */}
+        <nav aria-label="Breadcrumb" className="mb-10 text-xs text-muted-foreground">
+          <ol className="flex items-center gap-2 uppercase tracking-[0.15em]">
             <li><a href="/" className="hover:text-foreground transition-colors">Inicio</a></li>
             <li aria-hidden="true">/</li>
             <li><a href="/shop" className="hover:text-foreground transition-colors">Tienda</a></li>
@@ -112,9 +112,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </ol>
         </nav>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-          {/* Image */}
-          <div className="aspect-square bg-muted rounded-lg overflow-hidden relative">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
+          {/* Image — borderless, full bleed */}
+          <div className="aspect-square bg-muted overflow-hidden relative">
             {hasRealImage ? (
               <Image
                 src={product.images[0]}
@@ -132,21 +132,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           {/* Details */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             <div>
-              <p className="text-sm text-muted-foreground uppercase tracking-wider mb-2">
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4">
                 {product.category}
               </p>
-              <h1 className="text-3xl font-bold tracking-tight">
+              <h1 className="text-4xl md:text-5xl font-bold tracking-[-0.03em]">
                 {product.name}
               </h1>
-              <p className="text-2xl font-semibold mt-2">
+              <p className="text-2xl font-semibold mt-4">
                 {hasVariants ? "Desde " : ""}
                 {formatPrice(minPrice)}
               </p>
             </div>
 
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="text-muted-foreground leading-relaxed text-lg">
               {product.description}
             </p>
 

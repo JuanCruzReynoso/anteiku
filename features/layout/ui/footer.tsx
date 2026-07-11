@@ -2,23 +2,25 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="border-t bg-muted/50">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-muted/40">
+      <div className="container mx-auto px-6 md:px-8 py-20">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
           {/* Brand */}
-          <section className="space-y-4">
-            <Link href="/" className="text-lg font-bold tracking-tight">
+          <section className="space-y-6">
+            <Link href="/" className="text-sm uppercase tracking-[0.3em] font-bold">
               ANTEIKU
             </Link>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Merchandise geek premium y café de especialidad.
             </p>
           </section>
 
           {/* Tienda */}
-          <nav aria-label="Tienda" className="space-y-4">
-            <h2 className="text-sm font-semibold">Tienda</h2>
-            <ul className="space-y-2">
+          <nav aria-label="Tienda" className="space-y-6">
+            <h2 className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+              Tienda
+            </h2>
+            <ul className="space-y-3">
               <li>
                 <Link
                   href="/shop"
@@ -63,9 +65,11 @@ export function Footer() {
           </nav>
 
           {/* Contacto */}
-          <section className="space-y-4">
-            <h2 className="text-sm font-semibold">Contacto</h2>
-            <ul className="space-y-2">
+          <section className="space-y-6">
+            <h2 className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+              Contacto
+            </h2>
+            <ul className="space-y-3">
               <li>
                 <a
                   href="mailto:hola@anteiku.com"
@@ -88,9 +92,11 @@ export function Footer() {
           </section>
 
           {/* Legal */}
-          <section className="space-y-4">
-            <h2 className="text-sm font-semibold">Legal</h2>
-            <ul className="space-y-2">
+          <section className="space-y-6">
+            <h2 className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+              Legal
+            </h2>
+            <ul className="space-y-3">
               <li>
                 <span className="text-sm text-muted-foreground/50">
                   Política de privacidad
@@ -106,8 +112,8 @@ export function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="mt-8 pt-8 border-t">
-          <p className="text-sm text-muted-foreground text-center">
+        <div className="mt-20 pt-8">
+          <p className="text-xs text-muted-foreground text-center tracking-wider">
             © {new Date().getFullYear()} Anteiku. Todos los derechos reservados.
           </p>
         </div>

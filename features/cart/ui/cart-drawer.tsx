@@ -38,7 +38,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
 
         {items.length === 0 ? (
           <aside className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-12 text-muted-foreground">
-            <ShoppingBag className="h-12 w-12" aria-hidden="true" />
+            <ShoppingBag className="h-10 w-10" aria-hidden="true" />
             <p>Tu carrito está vacío</p>
             <Button
               variant="outline"
@@ -49,16 +49,16 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
           </aside>
         ) : (
           <>
-            {/* Items */}
-            <section aria-label="Productos en el carrito" className="flex-1 overflow-y-auto px-6 space-y-4">
+            {/* Items — no borders, clean separation */}
+            <section aria-label="Productos en el carrito" className="flex-1 overflow-y-auto px-6">
               {items.map((item) => (
                 <article
                   key={item.variantId}
-                  className="flex gap-4 py-4 border-b last:border-b-0"
+                  className="flex gap-4 py-6"
                 >
                   {/* Image placeholder */}
                   <div
-                    className="h-20 w-20 shrink-0 rounded-lg bg-muted flex items-center justify-center text-xs text-muted-foreground"
+                    className="h-16 w-16 shrink-0 bg-muted flex items-center justify-center text-xs text-muted-foreground"
                     aria-hidden="true"
                   >
                     img
@@ -74,8 +74,8 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                     </div>
 
                     <div className="flex items-center justify-between">
-                      {/* Quantity */}
-                      <div className="flex items-center gap-2">
+                      {/* Quantity — pill controls */}
+                      <div className="flex items-center gap-1">
                         <Button
                           variant="outline"
                           size="icon-sm"
@@ -86,7 +86,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
-                        <output className="w-8 text-center text-sm" aria-live="polite">
+                        <output className="w-8 text-center text-sm tabular-nums" aria-live="polite">
                           {item.quantity}
                         </output>
                         <Button
@@ -103,13 +103,13 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
 
                       {/* Price + remove */}
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-medium">
+                        <span className="text-sm font-medium tabular-nums">
                           {formatPrice(item.price * item.quantity)}
                         </span>
                         <button
                           type="button"
                           onClick={() => removeItem(item.variantId)}
-                          className="text-xs text-muted-foreground hover:text-foreground underline"
+                          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                           aria-label={`Quitar ${item.name} del carrito`}
                         >
                           Quitar
@@ -121,11 +121,11 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
               ))}
             </section>
 
-            {/* Footer */}
-            <footer className="border-t px-6 py-4 space-y-4">
+            {/* Footer — no border-t */}
+            <footer className="px-6 py-6 space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Total</span>
-                <output className="text-lg font-semibold" aria-live="polite">
+                <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Total</span>
+                <output className="text-lg font-semibold tabular-nums" aria-live="polite">
                   {formatPrice(total)}
                 </output>
               </div>

@@ -7,19 +7,16 @@ const categories = [
   {
     label: "Café",
     value: "coffee",
-    emoji: "☕",
     description: "Tostados de especialidad para el culto al buen café",
   },
   {
     label: "Figuras",
     value: "figures",
-    emoji: "🎯",
     description: "Coleccionables premium, selección curada",
   },
   {
     label: "Indumentaria",
     value: "apparel",
-    emoji: "👕",
     description: "Streetwear que mezcla cultura anime y moda",
   },
 ] as const;
@@ -58,80 +55,84 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }}
       />
+
       {/* ── Hero ─────────────────────────────────────── */}
-      <section className="relative flex items-center justify-center py-32 md:py-40 overflow-hidden">
+      <section className="relative flex items-center justify-center py-40 md:py-56 overflow-hidden">
         {/* Subtle grid background */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--muted)_1px,transparent_1px),linear-gradient(to_bottom,var(--muted)_1px,transparent_1px)] bg-[size:6rem_6rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
 
-        <div className="container relative mx-auto px-4 text-center space-y-8">
-          {/* Logo */}
-          <div className="flex justify-center">
-            <Image
-              src="/logo-color.png"
-              alt="Anteiku Coffee"
-              width={120}
-              height={120}
-              priority
-              className="rounded-full"
-            />
-          </div>
+        <div className="container relative mx-auto px-6 md:px-8 text-center">
+          <div className="space-y-10">
+            {/* Logo */}
+            <div className="flex justify-center">
+              <Image
+                src="/logo-color.png"
+                alt="Anteiku Coffee"
+                width={100}
+                height={100}
+                priority
+              />
+            </div>
 
-          <div className="space-y-4">
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-              ANTEIKU
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-lg mx-auto leading-relaxed">
-              Merchandise geek premium y café de especialidad.
-              <br className="hidden md:block" />
-              Curado para los exigentes.
-            </p>
-          </div>
+            <div className="space-y-6">
+              <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold tracking-[-0.04em] uppercase">
+                ANTEIKU
+              </h1>
+              <p className="text-sm md:text-base text-muted-foreground max-w-md mx-auto leading-relaxed tracking-wide">
+                Merchandise geek premium y café de especialidad.
+                <br className="hidden md:block" />
+                Curado para los exigentes.
+              </p>
+            </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Link
-              href="/shop"
-              className="inline-flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              Ver todo
-            </Link>
-            <Link
-              href="/shop?category=coffee"
-              className="inline-flex h-12 items-center justify-center rounded-lg border border-border px-8 text-sm font-medium hover:bg-muted transition-colors"
-            >
-              Explorar café
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
+              <Link
+                href="/shop"
+                className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-10 text-sm font-medium text-background hover:bg-foreground/80 transition-colors"
+              >
+                Ver todo
+              </Link>
+              <Link
+                href="/shop?category=coffee"
+                className="inline-flex h-12 items-center justify-center rounded-full px-10 text-sm font-medium hover:bg-muted transition-colors"
+              >
+                Explorar café
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ── Categories ───────────────────────────────── */}
-      <section className="py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight">
-              Explorá por categoría
-            </h2>
-            <p className="text-muted-foreground mt-2">
-              ¿Qué estás buscando?
+      <section className="py-32">
+        <div className="container mx-auto px-6 md:px-8">
+          <div className="mb-16">
+            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-4">
+              Explorá
             </p>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-[-0.03em]">
+              Por categoría
+            </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {categories.map((cat) => (
+          <div className="flex flex-col">
+            {categories.map((cat, i) => (
               <Link
                 key={cat.value}
                 href={`/shop?category=${cat.value}`}
-                className="group relative aspect-[4/3] bg-muted rounded-xl overflow-hidden flex flex-col items-center justify-center gap-4 transition-all hover:shadow-lg hover:scale-[1.02]"
+                className="group flex items-baseline justify-between py-8 border-b border-muted/80 last:border-b-0"
               >
-                <span className="text-6xl group-hover:scale-110 transition-transform">
-                  {cat.emoji}
-                </span>
-                <div className="text-center">
-                  <h3 className="font-semibold text-lg">{cat.label}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {cat.description}
-                  </p>
+                <div className="flex items-baseline gap-6">
+                  <span className="text-xs text-muted-foreground font-mono tabular-nums">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="text-3xl md:text-4xl font-bold tracking-[-0.02em] group-hover:pl-2 transition-all duration-300">
+                    {cat.label}
+                  </h3>
                 </div>
+                <span className="text-sm text-muted-foreground hidden md:block max-w-xs text-right">
+                  {cat.description}
+                </span>
               </Link>
             ))}
           </div>
@@ -139,35 +140,35 @@ export default function Home() {
       </section>
 
       {/* ── Featured Products ────────────────────────── */}
-      <section className="py-24 bg-muted/30">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-12">
+      <section className="py-32 bg-muted/30">
+        <div className="container mx-auto px-6 md:px-8">
+          <div className="flex items-end justify-between mb-16">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight">
-                Productos destacados
-              </h2>
-              <p className="text-muted-foreground mt-1">
-                Elegidos a mano
+              <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-4">
+                Destacados
               </p>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-[-0.03em]">
+                Elegidos a mano
+              </h2>
             </div>
             <Link
               href="/shop"
-              className="text-sm font-medium text-primary hover:underline hidden sm:block"
+              className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground hover:text-foreground transition-colors hidden sm:block"
             >
               Ver todos →
             </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10">
             {featured.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
 
-          <div className="mt-8 text-center sm:hidden">
+          <div className="mt-12 text-center sm:hidden">
             <Link
               href="/shop"
-              className="text-sm font-medium text-primary hover:underline"
+              className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               Ver todos los productos →
             </Link>
@@ -176,50 +177,57 @@ export default function Home() {
       </section>
 
       {/* ── Lookbook ─────────────────────────────────── */}
-      <section className="py-24">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight">
+      <section className="py-32">
+        <div className="container mx-auto px-6 md:px-8">
+          <div className="mb-16">
+            <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-4">
               Lookbook
+            </p>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-[-0.03em]">
+              Mr. Popo Igor
             </h2>
-            <p className="text-muted-foreground mt-2">
-              Mr. Popo Igor — Crossover限量
+            <p className="text-sm text-muted-foreground mt-3">
+              Crossover限量 — Edición limitada
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <figure className="relative aspect-[3/4] md:aspect-[4/5] rounded-xl overflow-hidden group">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <figure className="relative aspect-[3/4] md:aspect-[4/5] overflow-hidden group">
               <Image
                 src="/products/mrpopo-igor-rosa-lookbook.jpg"
                 alt="Modelo usando remera Mr. Popo Igor color rosa en skatepark"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
                 priority
               />
-              <figcaption className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-6">
-                <span className="text-white text-sm font-medium">Variante Rosa</span>
+              <figcaption className="absolute bottom-0 inset-x-0 p-6">
+                <span className="text-white text-xs uppercase tracking-[0.2em] font-medium">
+                  Variante Rosa
+                </span>
               </figcaption>
             </figure>
 
-            <figure className="relative aspect-[3/4] md:aspect-[4/5] rounded-xl overflow-hidden group">
+            <figure className="relative aspect-[3/4] md:aspect-[4/5] overflow-hidden group">
               <Image
                 src="/products/mrpopo-igor-negra-lookbook.jpg"
                 alt="Modelo usando remera Mr. Popo Igor color negro"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
               />
-              <figcaption className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-6">
-                <span className="text-white text-sm font-medium">Variante Negra</span>
+              <figcaption className="absolute bottom-0 inset-x-0 p-6">
+                <span className="text-white text-xs uppercase tracking-[0.2em] font-medium">
+                  Variante Negra
+                </span>
               </figcaption>
             </figure>
           </div>
 
-          <div className="mt-8 text-center">
+          <div className="mt-12">
             <Link
               href="/product/mrpopo-igor-remera"
-              className="inline-flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="inline-flex h-12 items-center justify-center rounded-full bg-foreground px-10 text-sm font-medium text-background hover:bg-foreground/80 transition-colors"
             >
               Ver producto
             </Link>
@@ -228,12 +236,12 @@ export default function Home() {
       </section>
 
       {/* ── Brand Statement ──────────────────────────── */}
-      <section className="py-24">
-        <div className="container mx-auto px-4 text-center max-w-2xl">
-          <h2 className="text-3xl font-bold tracking-tight mb-6">
+      <section className="py-40">
+        <div className="container mx-auto px-6 md:px-8 text-center max-w-3xl">
+          <h2 className="text-4xl md:text-6xl font-bold tracking-[-0.03em] mb-10">
             No somos una tienda más de merch.
           </h2>
-          <p className="text-muted-foreground leading-relaxed">
+          <p className="text-muted-foreground leading-relaxed text-lg">
             No hacemos genérico. Cada pieza está curada con intención — desde
             granos de café de origen único hasta coleccionables seleccionados a
             mano. Si no cumple el estándar, no entra al catálogo.

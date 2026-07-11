@@ -23,19 +23,19 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
   });
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       <h2 className="text-xl font-semibold">Datos de envío</h2>
 
       {/* Email */}
       <div className="space-y-2">
-        <label htmlFor="email" className="text-sm font-medium">
+        <label htmlFor="email" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Email
         </label>
         <input
           id="email"
           type="email"
           {...register("email")}
-          className="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
           placeholder="tu@email.com"
         />
         {errors.email && (
@@ -45,14 +45,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
 
       {/* Name */}
       <div className="space-y-2">
-        <label htmlFor="name" className="text-sm font-medium">
+        <label htmlFor="name" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Nombre completo
         </label>
         <input
           id="name"
           type="text"
           {...register("name")}
-          className="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
           placeholder="Juan Pérez"
         />
         {errors.name && (
@@ -62,14 +62,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
 
       {/* Phone */}
       <div className="space-y-2">
-        <label htmlFor="phone" className="text-sm font-medium">
+        <label htmlFor="phone" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Teléfono
         </label>
         <input
           id="phone"
           type="tel"
           {...register("phone")}
-          className="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
           placeholder="+54 11 1234-5678"
         />
         {errors.phone && (
@@ -79,14 +79,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
 
       {/* Address */}
       <div className="space-y-2">
-        <label htmlFor="line1" className="text-sm font-medium">
+        <label htmlFor="line1" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Dirección
         </label>
         <input
           id="line1"
           type="text"
           {...register("line1")}
-          className="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
           placeholder="Av. Corrientes 1234"
         />
         {errors.line1 && (
@@ -96,14 +96,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
 
       {/* Address line 2 */}
       <div className="space-y-2">
-        <label htmlFor="line2" className="text-sm font-medium">
-          Piso, departamento, etc. <span className="text-muted-foreground">(opcional)</span>
+        <label htmlFor="line2" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+          Piso, departamento, etc. <span className="normal-case tracking-normal">(opcional)</span>
         </label>
         <input
           id="line2"
           type="text"
           {...register("line2")}
-          className="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
           placeholder="Piso 4, Depto B"
         />
       </div>
@@ -111,14 +111,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
       {/* City + State */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="city" className="text-sm font-medium">
+          <label htmlFor="city" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             Ciudad
           </label>
           <input
             id="city"
             type="text"
             {...register("city")}
-            className="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
             placeholder="Buenos Aires"
           />
           {errors.city && (
@@ -126,14 +126,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           )}
         </div>
         <div className="space-y-2">
-          <label htmlFor="state" className="text-sm font-medium">
+          <label htmlFor="state" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             Provincia
           </label>
           <input
             id="state"
             type="text"
             {...register("state")}
-            className="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
             placeholder="CABA"
           />
           {errors.state && (
@@ -145,14 +145,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
       {/* Postal Code + Country */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="postalCode" className="text-sm font-medium">
+          <label htmlFor="postalCode" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             Código postal
           </label>
           <input
             id="postalCode"
             type="text"
             {...register("postalCode")}
-            className="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
             placeholder="C1000"
           />
           {errors.postalCode && (
@@ -162,14 +162,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           )}
         </div>
         <div className="space-y-2">
-          <label htmlFor="country" className="text-sm font-medium">
+          <label htmlFor="country" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             País
           </label>
           <input
             id="country"
             type="text"
             {...register("country")}
-            className="w-full h-10 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-foreground transition-shadow"
           />
           {errors.country && (
             <p className="text-xs text-destructive">
@@ -179,10 +179,10 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
         </div>
       </div>
 
-      {/* Submit */}
+      {/* Submit — pill button */}
       <button
         type="submit"
-        className="w-full h-12 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+        className="w-full h-12 rounded-full bg-foreground text-background font-medium hover:bg-foreground/80 transition-colors"
       >
         Continuar al pago
       </button>

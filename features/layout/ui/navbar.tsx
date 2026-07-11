@@ -27,18 +27,18 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+    <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto flex h-16 items-center justify-between px-6 md:px-8">
         {/* Logo */}
-        <Logo variant="color" size={44} priority />
+        <Logo variant="color" size={36} priority />
 
         {/* Navigation - Desktop */}
-        <nav aria-label="Navegación principal" className="hidden md:flex items-center gap-8">
+        <nav aria-label="Navegación principal" className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               {link.label}
             </Link>
@@ -52,7 +52,7 @@ export function Navbar() {
             size="icon"
             aria-label="Buscar"
           >
-            <Search className="h-5 w-5" />
+            <Search className="h-4 w-4" />
           </Button>
           <ThemeToggle />
           <CartButton />
@@ -69,19 +69,19 @@ export function Navbar() {
                 />
               }
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4" />
             </SheetTrigger>
             <SheetContent side="left" showCloseButton={false}>
               <SheetHeader>
                 <SheetTitle>Menú</SheetTitle>
               </SheetHeader>
-              <nav aria-label="Navegación móvil" className="flex flex-col gap-1 px-4">
+              <nav aria-label="Navegación móvil" className="flex flex-col gap-0 px-6">
                 {navLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className="block py-3 text-base font-medium text-muted-foreground hover:text-foreground transition-colors border-b border-border/50 last:border-0"
+                    className="block py-4 text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {link.label}
                   </Link>
