@@ -175,6 +175,58 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Lookbook ─────────────────────────────────── */}
+      <section className="py-24">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold tracking-tight">
+              Lookbook
+            </h2>
+            <p className="text-muted-foreground mt-2">
+              Mr. Popo Igor — Crossover限量
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <figure className="relative aspect-[3/4] md:aspect-[4/5] rounded-xl overflow-hidden group">
+              <Image
+                src="/products/mrpopo-igor-rosa-lookbook.jpg"
+                alt="Modelo usando remera Mr. Popo Igor color rosa en skatepark"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                priority
+              />
+              <figcaption className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+                <span className="text-white text-sm font-medium">Variante Rosa</span>
+              </figcaption>
+            </figure>
+
+            <figure className="relative aspect-[3/4] md:aspect-[4/5] rounded-xl overflow-hidden group">
+              <Image
+                src="/products/mrpopo-igor-negra-lookbook.jpg"
+                alt="Modelo usando remera Mr. Popo Igor color negro"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <figcaption className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-6">
+                <span className="text-white text-sm font-medium">Variante Negra</span>
+              </figcaption>
+            </figure>
+          </div>
+
+          <div className="mt-8 text-center">
+            <Link
+              href="/product/mrpopo-igor-remera"
+              className="inline-flex h-12 items-center justify-center rounded-lg bg-primary px-8 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              Ver producto
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ── Brand Statement ──────────────────────────── */}
       <section className="py-24">
         <div className="container mx-auto px-4 text-center max-w-2xl">
