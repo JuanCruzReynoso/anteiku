@@ -249,4 +249,48 @@ export const mockProducts: Product[] = [
       },
     ],
   },
+  {
+    id: "15",
+    name: "Gashbell Perversito Remera",
+    slug: "gashbell-perversito-remera",
+    description:
+      "Remera celeste con Gashbell riendo. Crossover Gashbell x The Simpsons. Frase icónica de Gabo. Algodón premium.",
+    category: "apparel",
+    images: ["/products/gashbell-perversito-remera.png"],
+    basePrice: 22000,
+    variants: [
+      {
+        id: "v32",
+        name: "Celeste / S",
+        sku: "GPR-BLU-S",
+        price: 22000,
+        stock: 10,
+        options: { color: "Celeste", size: "S" },
+      },
+      {
+        id: "v33",
+        name: "Celeste / M",
+        sku: "GPR-BLU-M",
+        price: 22000,
+        stock: 15,
+        options: { color: "Celeste", size: "M" },
+      },
+      {
+        id: "v34",
+        name: "Celeste / L",
+        sku: "GPR-BLU-L",
+        price: 22000,
+        stock: 12,
+        options: { color: "Celeste", size: "L" },
+      },
+      {
+        id: "v35",
+        name: "Celeste / XL",
+        sku: "GPR-BLU-XL",
+        price: 22000,
+        stock: 8,
+        options: { color: "Celeste", size: "XL" },
+      },
+    ],
+  },
 ];
