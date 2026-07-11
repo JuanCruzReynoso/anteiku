@@ -81,7 +81,7 @@ export const mockProducts: Product[] = [
     name: "Kaneki Mask Tee",
     slug: "kaneki-mask-tee",
     description:
-      "Premium cotton tee featuring the iconic mask design. Minimal, bold, unmistakable.",
+      "Remera negra con máscara de Kaneki. Tokyo Ghoul x Anteiku. Algodón premium.",
     category: "apparel",
     images: ["/placeholder-apparel-1.png"],
     basePrice: 24000,
@@ -125,7 +125,7 @@ export const mockProducts: Product[] = [
     name: "Anteiku Logo Hoodie",
     slug: "anteiku-logo-hoodie",
     description:
-      "Heavyweight fleece hoodie with embroidered logo. Premium streetwear essentials.",
+      "Buzo con logo bordado de Anteiku. Fleece pesado, corte relajado. Streetwear premium.",
     category: "apparel",
     images: ["/placeholder-apparel-2.png"],
     basePrice: 42000,
@@ -249,7 +249,7 @@ export const mockProducts: Product[] = [
     name: "White Pony Chomba",
     slug: "whitepony-chomba",
     description:
-      "Crossover entre el álbum White Pony de Deftones y estilo polo. Logo bordado, premium.",
+      "Chomba negra con logo bordado. Crossover White Pony de Deftones x Anteiku. Premium.",
     category: "apparel",
     images: ["/products/whitepony-chomba.png"],
     basePrice: 35000,
@@ -293,7 +293,7 @@ export const mockProducts: Product[] = [
     name: "Hisoka Almendra Remera",
     slug: "hisoka-almendra-remera",
     description:
-      "Crossover entre Almendra de Spinetta y Hisoka de Hunter x Hunter. Ilustración original, algodón premium.",
+      "Remera blanca con ilustración de Hisoka. Crossover Almendra de Spinetta x Hunter x Hunter. Algodón premium.",
     category: "apparel",
     images: ["/products/hisoka-almendra-remera.png"],
     basePrice: 22000,
@@ -337,7 +337,7 @@ export const mockProducts: Product[] = [
     name: "Mr. Popo Igor Remera",
     slug: "mrpopo-igor-remera",
     description:
-      "Crossover entre el álbum IGOR de Tyler the Creator y Mr. Popo de Dragon Ball. Algodón premium, edición limitada.",
+      "Remera rosa con Mr. Popo. Crossover IGOR de Tyler the Creator x Dragon Ball. Algodón premium, edición limitada.",
     category: "apparel",
     images: ["/products/mrpopo-igor-remera.png"],
     basePrice: 25000,
