@@ -53,7 +53,7 @@ export function Footer() {
                   href="mailto:antieku.store@gmail.com"
                   className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <Mail className="h-4 w-4" />
+                  <Mail className="h-5 w-5" />
                   antieku.store@gmail.com
                 </a>
               </li>
@@ -64,7 +64,7 @@ export function Footer() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <Instagram className="h-4 w-4" />
+                  <Instagram className="h-5 w-5" />
                   Instagram
                 </a>
               </li>
