@@ -42,7 +42,7 @@ export const mockProducts: Product[] = [
         id: "v1",
         name: "250g",
         sku: "TGB-250",
-        price: 3800,
+        price: 13500,
         stock: 50,
         options: { weight: "250g" },
       },
