@@ -106,7 +106,7 @@ export async function createVariant(data: {
     return { error: validated.error.issues[0].message };
   }
   await requireAdmin();
-  const [variant] = await db.insert(variants).values(validated.data).returning();
+  const [variant] = await db.insert(variants).values({ ...validated.data, productId: data.productId }).returning();
   revalidatePath("/admin/products");
   return variant;
 }

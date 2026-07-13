@@ -41,14 +41,18 @@ export function VariantManager({
   const handleAdd = async () => {
     setIsAdding(true);
     try {
-      const variant = await createVariant({
+      const result = await createVariant({
         productId,
         name: form.name,
         sku: form.sku,
         price: form.price,
         stock: form.stock,
       });
-      setVariants([...variants, { ...variant, options: {} }]);
+      if ("error" in result) {
+        toast.error(result.error);
+        return;
+      }
+      setVariants([...variants, { ...result, options: {} }]);
       setForm({ name: "", sku: "", price: 0, stock: 0 });
       toast.success("Variante creada");
     } catch {
@@ -60,15 +64,19 @@ export function VariantManager({
 
   const handleUpdate = async (id: string) => {
     try {
-      const variant = await updateVariant(id, {
+      const result = await updateVariant(id, {
         name: form.name,
         sku: form.sku,
         price: form.price,
         stock: form.stock,
       });
+      if ("error" in result) {
+        toast.error(result.error);
+        return;
+      }
       setVariants(
         variants.map((v) =>
-          v.id === id ? { ...variant, options: v.options } : v
+          v.id === id ? { ...result, options: v.options } : v
         )
       );
       setEditingId(null);
