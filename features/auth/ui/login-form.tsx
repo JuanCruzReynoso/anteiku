@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signInWithGoogle } from "@/features/auth/lib/actions";
 
-export function LoginForm() {
+function LoginFormInner() {
   const searchParams = useSearchParams();
   const redirectedFrom = searchParams.get("redirectedFrom");
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -87,5 +87,13 @@ export function LoginForm() {
         </Link>
       </p>
     </div>
+  );
+}
+
+export function LoginForm() {
+  return (
+    <Suspense fallback={null}>
+      <LoginFormInner />
+    </Suspense>
   );
 }
