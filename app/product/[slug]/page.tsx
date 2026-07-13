@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProductBySlug, getAllProducts } from "@/features/product/lib/queries";
+import { getProductDisplayData } from "@/features/product/lib/display";
 import { formatPrice } from "@/lib/utils";
 import { ProductActions } from "./product-actions";
 
@@ -24,8 +25,7 @@ export async function generateMetadata({
   const product = await getProductBySlug(slug);
   if (!product) return { title: "Producto no encontrado" };
 
-  const minPrice = Math.min(...product.variants.map((v) => v.price));
-  const hasRealImage = product.images[0] && !product.images[0].startsWith("/placeholder");
+  const { minPrice, hasRealImage } = getProductDisplayData(product);
 
   return {
     title: product.name,
@@ -57,9 +57,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   if (!product) notFound();
 
-  const minPrice = Math.min(...product.variants.map((v) => v.price));
-  const hasVariants = product.variants.length > 1;
-  const hasRealImage = product.images[0] && !product.images[0].startsWith("/placeholder");
+  const { minPrice, hasVariants, hasRealImage } = getProductDisplayData(product);
 
   const jsonLd = {
     "@context": "https://schema.org",

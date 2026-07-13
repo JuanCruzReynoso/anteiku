@@ -5,6 +5,7 @@ import { coupons } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "./actions";
+import { couponSchema } from "./schemas";
 
 export async function getCoupons() {
   await requireAdmin();
@@ -51,10 +52,14 @@ export async function createCoupon(data: {
   startsAt?: Date;
   endsAt?: Date;
 }) {
+  const validated = couponSchema.safeParse(data);
+  if (!validated.success) {
+    return { error: validated.error.issues[0].message };
+  }
   await requireAdmin();
   const [coupon] = await db
     .insert(coupons)
-    .values({ ...data, code: data.code.toUpperCase() })
+    .values({ ...validated.data, code: validated.data.code.toUpperCase() })
     .returning();
   revalidatePath("/admin/coupons");
   return coupon;
@@ -74,11 +79,16 @@ export async function updateCoupon(
     active?: boolean;
   }
 ) {
+  const validated = couponSchema.partial().safeParse(data);
+  if (!validated.success) {
+    return { error: validated.error.issues[0].message };
+  }
   await requireAdmin();
-  if (data.code) data.code = data.code.toUpperCase();
+  const updateData = { ...validated.data, updatedAt: new Date() };
+  if (validated.data.code) updateData.code = validated.data.code.toUpperCase();
   const [coupon] = await db
     .update(coupons)
-    .set({ ...data, updatedAt: new Date() })
+    .set(updateData)
     .where(eq(coupons.id, id))
     .returning();
   revalidatePath("/admin/coupons");

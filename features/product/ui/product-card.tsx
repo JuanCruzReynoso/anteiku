@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { formatPrice } from "@/lib/utils";
+import { getProductDisplayData } from "@/features/product/lib/display";
 
 /** Compatible with both DB products (category as object) and legacy mock products (category as string) */
 export interface ProductCardProduct {
@@ -28,10 +29,7 @@ function resolveCategoryName(category: ProductCardProduct["category"]): string {
 }
 
 export function ProductCard({ product, index = 0, priority = false }: ProductCardProps) {
-  const minPrice = Math.min(...product.variants.map((v) => v.price));
-  const hasVariants = product.variants.length > 1;
-  const hasRealImage =
-    product.images[0] && !product.images[0].startsWith("/placeholder");
+  const { minPrice, hasVariants, hasRealImage } = getProductDisplayData(product);
   const categoryName = resolveCategoryName(product.category);
 
   return (

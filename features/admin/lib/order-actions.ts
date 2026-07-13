@@ -5,6 +5,7 @@ import { orders, orderItems, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "./actions";
+import { orderStatusSchema } from "./schemas";
 
 export async function getOrders() {
   await requireAdmin();
@@ -35,13 +36,17 @@ export async function updateOrderStatus(
   status: "pending" | "paid" | "shipped" | "delivered" | "cancelled",
   notes?: string
 ) {
+  const validated = orderStatusSchema.safeParse({ status, notes });
+  if (!validated.success) {
+    return { error: validated.error.issues[0].message };
+  }
   await requireAdmin();
   const updateData: { status: typeof status; notes?: string; updatedAt: Date } = {
-    status,
+    status: validated.data.status,
     updatedAt: new Date(),
   };
-  if (notes !== undefined) {
-    updateData.notes = notes;
+  if (validated.data.notes !== undefined) {
+    updateData.notes = validated.data.notes;
   }
   const [order] = await db
     .update(orders)

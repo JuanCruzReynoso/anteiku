@@ -8,21 +8,25 @@ export default auth(async (req) => {
 
   // 2. Auth.js route protection
   const isLoggedIn = !!req.auth;
+  const pathname = req.nextUrl.pathname;
   const isAuthRoute =
-    req.nextUrl.pathname.startsWith("/login") ||
-    req.nextUrl.pathname.startsWith("/register") ||
-    req.nextUrl.pathname.startsWith("/forgot-password");
-  const isProtectedRoute = req.nextUrl.pathname.startsWith("/checkout");
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/register") ||
+    pathname.startsWith("/forgot-password");
+  const isProtectedRoute = pathname.startsWith("/checkout");
+  const isAdminRoute = pathname.startsWith("/admin");
 
-  if (isProtectedRoute && !isLoggedIn) {
+  // Redirect unauthenticated users from protected routes
+  if ((isProtectedRoute || isAdminRoute) && !isLoggedIn) {
     return Response.redirect(
       new URL(
-        `/login?redirectedFrom=${req.nextUrl.pathname}`,
+        `/login?redirectedFrom=${pathname}`,
         req.url,
       ),
     );
   }
 
+  // Redirect logged-in users away from auth routes
   if (isAuthRoute && isLoggedIn) {
     return Response.redirect(new URL("/shop", req.url));
   }

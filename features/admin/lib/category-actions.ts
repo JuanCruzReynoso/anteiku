@@ -5,6 +5,7 @@ import { categories } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "./actions";
+import { categorySchema } from "./schemas";
 
 export async function getCategories() {
   await requireAdmin();
@@ -34,8 +35,12 @@ export async function createCategory(data: {
   description?: string;
   image?: string;
 }) {
+  const validated = categorySchema.safeParse(data);
+  if (!validated.success) {
+    return { error: validated.error.issues[0].message };
+  }
   await requireAdmin();
-  const [category] = await db.insert(categories).values(data).returning();
+  const [category] = await db.insert(categories).values(validated.data).returning();
   revalidatePath("/admin/categories");
   return category;
 }
@@ -51,10 +56,14 @@ export async function updateCategory(
     sortOrder?: number;
   }
 ) {
+  const validated = categorySchema.partial().safeParse(data);
+  if (!validated.success) {
+    return { error: validated.error.issues[0].message };
+  }
   await requireAdmin();
   const [category] = await db
     .update(categories)
-    .set({ ...data, updatedAt: new Date() })
+    .set({ ...validated.data, updatedAt: new Date() })
     .where(eq(categories.id, id))
     .returning();
   revalidatePath("/admin/categories");

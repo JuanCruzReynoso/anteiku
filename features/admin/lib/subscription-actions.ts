@@ -5,6 +5,7 @@ import { subscriptionPlans, userSubscriptions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "./actions";
+import { subscriptionPlanSchema } from "./schemas";
 
 export async function getSubscriptionPlans() {
   await requireAdmin();
@@ -21,8 +22,12 @@ export async function createSubscriptionPlan(data: {
   interval?: string;
   features?: string[];
 }) {
+  const validated = subscriptionPlanSchema.safeParse(data);
+  if (!validated.success) {
+    return { error: validated.error.issues[0].message };
+  }
   await requireAdmin();
-  const [plan] = await db.insert(subscriptionPlans).values(data).returning();
+  const [plan] = await db.insert(subscriptionPlans).values(validated.data).returning();
   revalidatePath("/admin/subscriptions");
   return plan;
 }
@@ -38,10 +43,14 @@ export async function updateSubscriptionPlan(
     active?: boolean;
   }
 ) {
+  const validated = subscriptionPlanSchema.partial().safeParse(data);
+  if (!validated.success) {
+    return { error: validated.error.issues[0].message };
+  }
   await requireAdmin();
   const [plan] = await db
     .update(subscriptionPlans)
-    .set({ ...data, updatedAt: new Date() })
+    .set({ ...validated.data, updatedAt: new Date() })
     .where(eq(subscriptionPlans.id, id))
     .returning();
   revalidatePath("/admin/subscriptions");

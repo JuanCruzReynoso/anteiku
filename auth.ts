@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { env } from "@/lib/env";
 import { db } from "./db";
 import { users } from "./db/schema";
 import { eq } from "drizzle-orm";
@@ -13,7 +14,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 // Emails with owner access — configurable via env var (comma-separated)
-const OWNER_EMAILS = process.env.OWNER_EMAILS?.split(",").map(e => e.trim()) ?? [];
+const OWNER_EMAILS = env.OWNER_EMAILS?.split(",").map(e => e.trim()) ?? [];
 
 declare module "next-auth" {
   interface Session {
@@ -25,9 +26,7 @@ declare module "next-auth" {
       image?: string | null;
     };
   }
-}
 
-declare module "next-auth" {
   interface JWT {
     role?: string;
   }
@@ -107,8 +106,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
     }),
   ],
   callbacks: {

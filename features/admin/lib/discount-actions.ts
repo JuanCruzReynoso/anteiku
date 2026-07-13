@@ -5,6 +5,7 @@ import { discounts } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "./actions";
+import { discountSchema } from "./schemas";
 
 export async function getDiscounts() {
   await requireAdmin();
@@ -24,8 +25,12 @@ export async function createDiscount(data: {
   startsAt?: Date;
   endsAt?: Date;
 }) {
+  const validated = discountSchema.safeParse(data);
+  if (!validated.success) {
+    return { error: validated.error.issues[0].message };
+  }
   await requireAdmin();
-  const [discount] = await db.insert(discounts).values(data).returning();
+  const [discount] = await db.insert(discounts).values(validated.data).returning();
   revalidatePath("/admin/discounts");
   return discount;
 }
@@ -44,10 +49,14 @@ export async function updateDiscount(
     active?: boolean;
   }
 ) {
+  const validated = discountSchema.partial().safeParse(data);
+  if (!validated.success) {
+    return { error: validated.error.issues[0].message };
+  }
   await requireAdmin();
   const [discount] = await db
     .update(discounts)
-    .set({ ...data, updatedAt: new Date() })
+    .set({ ...validated.data, updatedAt: new Date() })
     .where(eq(discounts.id, id))
     .returning();
   revalidatePath("/admin/discounts");

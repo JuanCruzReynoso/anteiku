@@ -5,6 +5,7 @@ import { products, variants } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "./actions";
+import { productSchema, variantSchema } from "./schemas";
 
 export async function getProducts() {
   await requireAdmin();
@@ -31,12 +32,16 @@ export async function createProduct(data: {
   featured: boolean;
   images: string[];
 }) {
+  const validated = productSchema.safeParse(data);
+  if (!validated.success) {
+    return { error: validated.error.issues[0].message };
+  }
   await requireAdmin();
   const [product] = await db
     .insert(products)
     .values({
-      ...data,
-      featured: data.featured ? "true" : "false",
+      ...validated.data,
+      featured: validated.data.featured ? "true" : "false",
     })
     .returning();
   revalidatePath("/admin/products");
@@ -56,12 +61,16 @@ export async function updateProduct(
     images?: string[];
   }
 ) {
+  const validated = productSchema.partial().safeParse(data);
+  if (!validated.success) {
+    return { error: validated.error.issues[0].message };
+  }
   await requireAdmin();
   const [product] = await db
     .update(products)
     .set({
-      ...data,
-      featured: data.featured !== undefined ? (data.featured ? "true" : "false") : undefined,
+      ...validated.data,
+      featured: validated.data.featured !== undefined ? (validated.data.featured ? "true" : "false") : undefined,
       updatedAt: new Date(),
     })
     .where(eq(products.id, id))
@@ -92,8 +101,12 @@ export async function createVariant(data: {
   stock: number;
   options?: Record<string, string>;
 }) {
+  const validated = variantSchema.safeParse(data);
+  if (!validated.success) {
+    return { error: validated.error.issues[0].message };
+  }
   await requireAdmin();
-  const [variant] = await db.insert(variants).values(data).returning();
+  const [variant] = await db.insert(variants).values(validated.data).returning();
   revalidatePath("/admin/products");
   return variant;
 }
@@ -108,10 +121,14 @@ export async function updateVariant(
     options?: Record<string, string>;
   }
 ) {
+  const validated = variantSchema.partial().safeParse(data);
+  if (!validated.success) {
+    return { error: validated.error.issues[0].message };
+  }
   await requireAdmin();
   const [variant] = await db
     .update(variants)
-    .set(data)
+    .set(validated.data)
     .where(eq(variants.id, id))
     .returning();
   revalidatePath("/admin/products");

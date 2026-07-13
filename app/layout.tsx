@@ -35,21 +35,12 @@ export const metadata: Metadata = {
     title: "Anteiku — Merchandise Geek & Café de Especialidad",
     description:
       "Colección curada de tamagotchis, figuras, stickers, indumentaria y café de especialidad. Estética minimalista premium con cultura callejera japonesa.",
-    images: [
-      {
-        url: "/og.png",
-        width: 1200,
-        height: 630,
-        alt: "Anteiku — Merchandise Geek & Café de Especialidad",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Anteiku — Merchandise Geek & Café de Especialidad",
     description:
       "Colección curada de tamagotchis, figuras, stickers, indumentaria y café de especialidad.",
-    images: ["/og.png"],
   },
   alternates: {
     canonical: siteUrl,
