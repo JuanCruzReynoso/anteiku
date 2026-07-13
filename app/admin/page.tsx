@@ -147,7 +147,7 @@ export default async function AdminDashboard() {
       {/* Welcome banner */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-[-0.03em]">
-          Hola, {session.user.name?.split(" ")[0] || "Admin"} 👋
+          Hola, {session.user.name?.split(" ")[0] || "Admin"}
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
           Resumen de tu tienda hoy
