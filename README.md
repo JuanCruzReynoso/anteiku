@@ -1,36 +1,140 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Anteiku
+
+E-commerce premium de merchandise geek y café de especialidad. Next.js 16, Drizzle ORM, Supabase, Tailwind CSS.
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | Next.js 16 (App Router) |
+| Language | TypeScript 5 |
+| Database | PostgreSQL (Supabase) |
+| ORM | Drizzle ORM |
+| Auth | NextAuth v5 (beta) |
+| Styling | Tailwind CSS v4 |
+| State | Zustand |
+| Animations | Framer Motion 12 |
+| Testing | Vitest + Testing Library |
+| CI/CD | GitHub Actions |
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- pnpm
+- Supabase project (or local PostgreSQL)
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copy `.env.example` to `.env.local` and configure:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+# Database
+DATABASE_URL=postgresql://...
 
-## Learn More
+# Auth
+NEXTAUTH_SECRET=your-secret
+NEXTAUTH_URL=http://localhost:3000
 
-To learn more about Next.js, take a look at the following resources:
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Optional — admin dashboard low stock threshold (default: 5)
+LOW_STOCK_THRESHOLD=5
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Development
 
-## Deploy on Vercel
+```bash
+pnpm dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open [http://localhost:3000](http://localhost:3000).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Database
+
+```bash
+# Generate migration
+pnpm db:generate
+
+# Run migration
+pnpm db:migrate
+
+# Push schema directly
+pnpm db:push
+
+# Seed database
+pnpm db:seed
+
+# Open Drizzle Studio
+pnpm db:studio
+```
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Production build |
+| `pnpm start` | Start production server |
+| `pnpm lint` | Run ESLint |
+| `pnpm test` | Run tests (vitest) |
+| `pnpm test:watch` | Run tests in watch mode |
+| `pnpm db:generate` | Generate Drizzle migration |
+| `pnpm db:migrate` | Run migrations |
+| `pnpm db:push` | Push schema to database |
+| `pnpm db:seed` | Seed database with sample data |
+| `pnpm db:studio` | Open Drizzle Studio |
+
+## Project Structure
+
+```
+anteiku/
+├── app/                    # Next.js App Router pages
+│   ├── admin/              # Admin dashboard
+│   ├── checkout/           # Checkout flow
+│   ├── product/[slug]/     # Product detail pages
+│   ├── shop/               # Product listing
+│   ├── sitemap.ts          # Dynamic sitemap
+│   └── robots.ts           # Robots.txt rules
+├── components/             # Shared UI components
+│   ├── motion.tsx          # Framer Motion variants & hooks
+│   └── ui/                 # shadcn/ui components
+├── db/                     # Drizzle schema, migrations, queries
+├── features/               # Domain modules
+│   ├── admin/              # Admin actions & forms
+│   ├── auth/               # Authentication
+│   ├── cart/               # Cart store & UI
+│   ├── checkout/           # Checkout flow & actions
+│   ├── home/               # Homepage
+│   ├── layout/             # Navbar, footer
+│   ├── product/            # Product card, queries
+│   └── shop/               # Shop search
+├── hooks/                  # Shared React hooks
+├── lib/                    # Utilities, config
+├── services/               # External service integrations
+├── tests/                  # Test setup
+└── types/                  # Shared TypeScript types
+```
+
+## Deployment
+
+Deploy to Vercel:
+
+1. Push to GitHub
+2. Import project in [Vercel](https://vercel.com)
+3. Configure environment variables
+4. Deploy
+
+The CI pipeline runs lint, type-check, test, and build on every push and PR to `main`.
+
+## License
+
+Private — Anteiku 2026
