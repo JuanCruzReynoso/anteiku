@@ -1,10 +1,11 @@
 import { db } from "@/db";
 import { products, categories, variants } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export async function getAllProducts() {
   return db.query.products.findMany({
     orderBy: [desc(products.createdAt)],
+    where: eq(products.status, "active"),
     with: { category: true, variants: true },
   });
 }
@@ -29,14 +30,14 @@ export async function getProductsByCategory(categorySlug: string) {
   });
   if (!category) return [];
   return db.query.products.findMany({
-    where: eq(products.categoryId, category.id),
+    where: and(eq(products.categoryId, category.id), eq(products.status, "active")),
     with: { category: true, variants: true },
   });
 }
 
 export async function getFeaturedProducts() {
   return db.query.products.findMany({
-    where: eq(products.featured, "true"),
+    where: and(eq(products.featured, "true"), eq(products.status, "active")),
     with: { category: true, variants: true },
     limit: 4,
   });

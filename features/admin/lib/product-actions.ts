@@ -80,6 +80,26 @@ export async function updateProduct(
   return product;
 }
 
+export async function toggleProductVisibility(id: string) {
+  await requireAdmin();
+  const [product] = await db
+    .select({ status: products.status })
+    .from(products)
+    .where(eq(products.id, id))
+    .limit(1);
+
+  if (!product) return { error: "Producto no encontrado" };
+
+  const newStatus = product.status === "active" ? "inactive" : "active";
+  await db
+    .update(products)
+    .set({ status: newStatus, updatedAt: new Date() })
+    .where(eq(products.id, id));
+
+  revalidatePath("/admin/products");
+  return { status: newStatus };
+}
+
 export async function deleteProduct(id: string) {
   await requireAdmin();
   await db.delete(products).where(eq(products.id, id));

@@ -56,7 +56,7 @@ export default async function AdminProducts() {
             </thead>
             <tbody className="divide-y">
               {allProducts.map((product) => (
-                <tr key={product.id} className="hover:bg-muted/30">
+                <tr key={product.id} className={`hover:bg-muted/30 ${product.status === "inactive" ? "opacity-60" : ""}`}>
                   <td className="px-4 py-3">
                     {product.images && product.images.length > 0 ? (
                       <div className="w-10 h-10 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground overflow-hidden">
@@ -91,7 +91,7 @@ export default async function AdminProducts() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <ProductActions productId={product.id} />
+                    <ProductActions productId={product.id} status={product.status} />
                   </td>
                 </tr>
               ))}

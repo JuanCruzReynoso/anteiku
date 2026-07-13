@@ -1,4 +1,4 @@
-import { eq, sql, type InferSelectModel } from "drizzle-orm";
+import { eq, sql, and, type InferSelectModel } from "drizzle-orm";
 import { db } from "@/db";
 import { products, variants } from "@/db/schema";
 
@@ -24,8 +24,12 @@ export async function getProducts(
 ): Promise<ProductWithVariants[]> {
   const { categoryId, limit = 50, offset = 0 } = filters;
 
+  const whereClause = categoryId
+    ? and(eq(products.categoryId, categoryId), eq(products.status, "active"))
+    : eq(products.status, "active");
+
   const rows = await db.query.products.findMany({
-    where: categoryId ? eq(products.categoryId, categoryId) : undefined,
+    where: whereClause,
     limit,
     offset,
     with: {
@@ -80,6 +84,7 @@ export async function getFeaturedProducts(
   limit = 4
 ): Promise<ProductWithVariants[]> {
   const rows = await db.query.products.findMany({
+    where: eq(products.status, "active"),
     limit,
     with: {
       variants: true,
@@ -104,7 +109,10 @@ export async function searchProducts(
   query: string
 ): Promise<ProductWithVariants[]> {
   const rows = await db.query.products.findMany({
-    where: sql`${products.name} ILIKE ${`%${query}%`} OR ${products.description} ILIKE ${`%${query}%`}`,
+    where: and(
+      sql`${products.name} ILIKE ${`%${query}%`} OR ${products.description} ILIKE ${`%${query}%`}`,
+      eq(products.status, "active")
+    ),
     limit: 20,
     with: {
       variants: true,
