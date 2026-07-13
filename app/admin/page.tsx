@@ -1,11 +1,13 @@
 import { requireAdmin } from "@/features/admin/lib/actions";
 import { db } from "@/db";
-import { products, orders, users } from "@/db/schema";
-import { count, sql } from "drizzle-orm";
+import { products, orders, users, variants } from "@/db/schema";
+import { count, sql, eq, gte } from "drizzle-orm";
 import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+
+const LOW_STOCK_THRESHOLD = Number(process.env.LOW_STOCK_THRESHOLD ?? 5);
 
 export default async function AdminDashboard() {
   const session = await requireAdmin();
@@ -28,6 +30,26 @@ export default async function AdminDashboard() {
     WHERE ${orders.status} != 'cancelled'
   `);
   const totalRevenue = (revenueResult[0] as { total: number }).total;
+
+  // Pending orders
+  const [pendingOrderCount] = await db
+    .select({ value: count() })
+    .from(orders)
+    .where(eq(orders.status, "pending"));
+
+  // Recent orders (last 7 days)
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const [recentOrderCount] = await db
+    .select({ value: count() })
+    .from(orders)
+    .where(gte(orders.createdAt, sevenDaysAgo));
+
+  // Low stock alerts (stock < threshold, includes 0)
+  const [lowStockCount] = await db
+    .select({ value: count() })
+    .from(variants)
+    .where(sql`${variants.stock} < ${LOW_STOCK_THRESHOLD}`);
 
   return (
     <div>
@@ -67,6 +89,33 @@ export default async function AdminDashboard() {
           </h3>
           <p className="text-2xl font-bold">{formatPrice(totalRevenue)}</p>
         </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <Link
+          href="/admin/orders?status=pending"
+          className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+        >
+          <h3 className="text-sm font-medium text-muted-foreground">
+            Ordenes pendientes
+          </h3>
+          <p className="text-2xl font-bold">{pendingOrderCount.value}</p>
+        </Link>
+        <div className="p-4 border rounded-lg">
+          <h3 className="text-sm font-medium text-muted-foreground">
+            Ordenes (7 días)
+          </h3>
+          <p className="text-2xl font-bold">{recentOrderCount.value}</p>
+        </div>
+        <Link
+          href="/admin/products"
+          className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+        >
+          <h3 className="text-sm font-medium text-muted-foreground">
+            Stock bajo (&lt;{LOW_STOCK_THRESHOLD})
+          </h3>
+          <p className="text-2xl font-bold">{lowStockCount.value}</p>
+        </Link>
       </div>
 
       <div className="border rounded-lg p-6">
