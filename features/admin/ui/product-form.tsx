@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2, Plus, X } from "lucide-react";
+import { ImageUpload } from "./image-upload";
 
 interface ProductFormProps {
   categories: { id: string; name: string }[];
@@ -226,12 +227,18 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
       {/* Images */}
       <div>
         <label className="block text-sm font-medium mb-1">Imágenes</label>
-        <div className="flex gap-2 mb-2">
+        <ImageUpload
+          onUpload={(url) => {
+            setValue("images", [...images, url]);
+          }}
+          disabled={isSubmitting}
+        />
+        <div className="flex gap-2 mb-2 mt-2">
           <input
             type="text"
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
-            placeholder="URL de la imagen"
+            placeholder="O pegá una URL de imagen"
             className="flex-1 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
