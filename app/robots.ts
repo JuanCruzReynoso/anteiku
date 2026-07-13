@@ -6,7 +6,7 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/checkout", "/checkout/confirmation"],
+        disallow: ["/admin/", "/api/", "/checkout", "/checkout/confirmation"],
       },
     ],
     sitemap: "https://anteiku.com/sitemap.xml",

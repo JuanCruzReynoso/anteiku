@@ -5,11 +5,13 @@ import { searchProducts } from "@/db/queries";
 import { ProductCard } from "@/features/product/ui/product-card";
 import { SearchInput } from "@/features/shop/ui/search-input";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
 export const metadata: Metadata = {
   title: "Tienda",
   description: "Explorá nuestra colección de merchandise geek y café de especialidad.",
   alternates: {
-    canonical: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/shop`,
+    canonical: `${APP_URL}/shop`,
   },
 };
 
@@ -45,8 +47,31 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     ...allCategories.map((c) => ({ label: c.name, value: c.slug })),
   ];
 
+  const limitedProducts = filtered.slice(0, 20);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Tienda — Anteiku",
+    url: `${APP_URL}/shop`,
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: limitedProducts.length,
+      itemListElement: limitedProducts.map((product, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: `${APP_URL}/product/${product.slug}`,
+        name: product.name,
+      })),
+    },
+  };
+
   return (
     <div className="container mx-auto px-6 md:px-8 py-16 md:py-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Header */}
       <div className="mb-12">
         <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-4">
