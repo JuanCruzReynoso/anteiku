@@ -142,11 +142,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session;
     },
     async jwt({ token, user }) {
-      // Set user data on initial sign-in (user is only available here during OAuth flow)
+      // On initial sign-in, set user data from OAuth
       if (user) {
         token.sub = user.id;
         token.role = (user as any).role;
       }
+
+      // Always refresh role from DB to catch admin changes without re-login
+      if (token.sub) {
+        try {
+          const dbUser = await db.query.users.findFirst({
+            where: eq(users.id, token.sub),
+            columns: { role: true },
+          });
+          if (dbUser) {
+            token.role = dbUser.role;
+          }
+        } catch {
+          // DB unreachable — keep cached role from token
+        }
+      }
+
       return token;
     },
   },
