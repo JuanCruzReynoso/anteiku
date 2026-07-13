@@ -12,6 +12,18 @@ import {
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
+// ─── Enums ──────────────────────────────────────────────
+
+export const roleEnum = pgEnum("user_role", ["owner", "admin", "customer"]);
+
+export const orderStatusEnum = pgEnum("order_status", [
+  "pending",
+  "paid",
+  "shipped",
+  "delivered",
+  "cancelled",
+]);
+
 // ─── Auth.js Tables ──────────────────────────────────────
 
 export const users = pgTable("users", {
@@ -22,7 +34,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   emailVerified: timestamp("email_verified", { mode: "date" }),
   image: text("image"),
-  role: text("role").notNull().default("customer"), // "owner" | "admin" | "customer"
+  role: roleEnum("role").notNull().default("customer"),
   phone: text("phone"),
   address: jsonb("address").$type<{
     street: string;
@@ -68,16 +80,6 @@ export const verificationTokens = pgTable("verification_tokens", {
   token: text("token").notNull().unique(),
   expires: timestamp("expires", { mode: "date" }).notNull(),
 });
-
-// ─── Enums ──────────────────────────────────────────────
-
-export const orderStatusEnum = pgEnum("order_status", [
-  "pending",
-  "paid",
-  "shipped",
-  "delivered",
-  "cancelled",
-]);
 
 // ─── Categories ─────────────────────────────────────────
 
