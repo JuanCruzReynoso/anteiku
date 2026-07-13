@@ -10,6 +10,7 @@ export interface CartItem {
   variantName: string;
   price: number; // ARS integer
   quantity: number;
+  stock: number; // available stock at add time
   image?: string;
 }
 
@@ -48,15 +49,20 @@ export const useCartStore = create<CartState & CartActions>()(
         const { items } = get();
         const existing = items.find((i) => i.variantId === item.variantId);
 
+        // Use stock from item data if available, fallback to 999 for legacy items
+        const maxStock = "stock" in item ? (item as any).stock : 999;
+
         let next: CartItem[];
         if (existing) {
+          const newQty = Math.min(existing.quantity + quantity, maxStock);
           next = items.map((i) =>
             i.variantId === item.variantId
-              ? { ...i, quantity: i.quantity + quantity }
+              ? { ...i, quantity: newQty }
               : i
           );
         } else {
-          next = [...items, { ...item, quantity }];
+          const cappedQty = Math.min(quantity, maxStock);
+          next = [...items, { ...item, quantity: cappedQty, stock: maxStock }];
         }
 
         set({ items: next, ...computeTotals(next) });
@@ -98,6 +104,12 @@ export const useCartStore = create<CartState & CartActions>()(
               typeof item.quantity === "number" &&
               item.quantity > 0
           );
+
+          // Ensure stock field exists on all items (migrate legacy items)
+          state.items = state.items.map((item) => ({
+            ...item,
+            stock: typeof item.stock === "number" ? item.stock : 999,
+          }));
 
           if (state.items.length < before) {
             console.warn(

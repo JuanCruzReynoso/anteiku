@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 import { useCartStore } from "@/features/cart/lib/cart-store";
 
-export default function ConfirmationPage() {
+function ConfirmationContent() {
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get("orderId");
   const clearCart = useCartStore((s) => s.clearCart);
 
   // Clear cart on mount (order placed)
@@ -34,14 +37,16 @@ export default function ConfirmationPage() {
           con los detalles del envío.
         </p>
 
-        <div className="bg-muted p-4 text-sm">
-          <p>
-            Número de pedido:{" "}
-            <span className="font-mono font-medium text-foreground">
-              #ANT-{Date.now().toString(36).toUpperCase()}-{Math.random().toString(36).substring(2, 5).toUpperCase()}
-            </span>
-          </p>
-        </div>
+        {orderId && (
+          <div className="bg-muted p-4 text-sm">
+            <p>
+              Número de pedido:{" "}
+              <span className="font-mono font-medium text-foreground">
+                #{orderId.slice(0, 8).toUpperCase()}
+              </span>
+            </p>
+          </div>
+        )}
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
           <Link
@@ -59,5 +64,13 @@ export default function ConfirmationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ConfirmationPage() {
+  return (
+    <Suspense>
+      <ConfirmationContent />
+    </Suspense>
   );
 }

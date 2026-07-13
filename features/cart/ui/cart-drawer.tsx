@@ -88,6 +88,11 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                       <p className="text-xs text-muted-foreground">
                         {item.variantName}
                       </p>
+                      {"stock" in item && item.stock === 0 && (
+                        <p className="text-xs text-destructive font-medium mt-1">
+                          Sin stock
+                        </p>
+                      )}
                     </div>
 
                     <div className="flex items-center justify-between">

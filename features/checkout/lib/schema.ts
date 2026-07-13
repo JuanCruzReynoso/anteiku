@@ -13,3 +13,20 @@ export const shippingSchema = z.object({
 });
 
 export type ShippingFormData = z.infer<typeof shippingSchema>;
+
+// ─── Order Schema ────────────────────────────────────────
+
+export const orderSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        variantId: z.string().uuid(),
+        quantity: z.number().int().positive(),
+      })
+    )
+    .min(1, "El carrito está vacío"),
+  shippingAddress: shippingSchema,
+  email: z.string().email("Ingresá un email válido"),
+});
+
+export type OrderInput = z.infer<typeof orderSchema>;

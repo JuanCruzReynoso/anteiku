@@ -37,6 +37,7 @@ export function ProductActions({ product }: ProductActionsProps) {
       name: product.name,
       variantName: selectedVariant.name,
       price: selectedVariant.price,
+      stock: selectedVariant.stock,
       image: product.images[0],
     });
     setAdded(true);

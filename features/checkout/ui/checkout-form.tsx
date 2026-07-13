@@ -6,11 +6,13 @@ import { toast } from "sonner";
 import { useCartStore } from "@/features/cart/lib/cart-store";
 import { ShippingForm } from "@/features/checkout/ui/shipping-form";
 import { OrderSummary } from "@/features/checkout/ui/order-summary";
+import { createOrder } from "@/features/checkout/lib/actions";
 import type { ShippingFormData } from "@/features/checkout/lib/schema";
 
 export function CheckoutForm() {
   const router = useRouter();
   const items = useCartStore((s) => s.items);
+  const clearCart = useCartStore((s) => s.clearCart);
   const [step, setStep] = useState<"shipping" | "payment">("shipping");
   const [shippingData, setShippingData] = useState<ShippingFormData | null>(
     null
@@ -55,12 +57,39 @@ export function CheckoutForm() {
   // 3. Redirect to MercadoPago checkout
   // 4. Handle webhook callback for payment confirmation
   // 5. Create order in DB after payment approval
-  function handlePayment() {
+  async function handlePayment() {
+    if (!shippingData) return;
     setIsProcessing(true);
-    toast.success("Pedido confirmado", {
-      description: "Redirigiendo a la confirmación...",
-    });
-    setTimeout(() => router.push("/checkout/confirmation"), 1200);
+
+    try {
+      const result = await createOrder({
+        items: items.map((item) => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
+        })),
+        shippingAddress: shippingData,
+        email: shippingData.email,
+      });
+
+      if (result.error) {
+        toast.error("Error al procesar el pedido", {
+          description: result.error,
+        });
+        return;
+      }
+
+      toast.success("Pedido confirmado", {
+        description: "Redirigiendo a la confirmación...",
+      });
+      clearCart();
+      router.push(`/checkout/confirmation?orderId=${result.orderId}`);
+    } catch {
+      toast.error("Error inesperado", {
+        description: "Intentá nuevamente.",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   }
 
   return (
