@@ -12,7 +12,7 @@ export interface ProductWithVariants extends Product {
 }
 
 export interface ProductFilters {
-  category?: string;
+  categoryId?: string;
   limit?: number;
   offset?: number;
 }
@@ -22,21 +22,21 @@ export interface ProductFilters {
 export async function getProducts(
   filters: ProductFilters = {}
 ): Promise<ProductWithVariants[]> {
-  const { category, limit = 50, offset = 0 } = filters;
+  const { categoryId, limit = 50, offset = 0 } = filters;
 
   const rows = await db.query.products.findMany({
-    where: category ? eq(products.category, category as any) : undefined,
+    where: categoryId ? eq(products.categoryId, categoryId) : undefined,
     limit,
     offset,
     with: {
-      variantsList: true,
+      variants: true,
     },
     orderBy: (products, { desc }) => [desc(products.createdAt)],
   });
 
   return rows.map((row) => ({
     ...row,
-    variants: row.variantsList,
+    variants: row.variants,
   }));
 }
 
@@ -46,7 +46,7 @@ export async function getProductBySlug(
   const row = await db.query.products.findFirst({
     where: eq(products.slug, slug),
     with: {
-      variantsList: true,
+      variants: true,
     },
   });
 
@@ -54,7 +54,7 @@ export async function getProductBySlug(
 
   return {
     ...row,
-    variants: row.variantsList,
+    variants: row.variants,
   };
 }
 
@@ -64,7 +64,7 @@ export async function getProductById(
   const row = await db.query.products.findFirst({
     where: eq(products.id, id),
     with: {
-      variantsList: true,
+      variants: true,
     },
   });
 
@@ -72,7 +72,7 @@ export async function getProductById(
 
   return {
     ...row,
-    variants: row.variantsList,
+    variants: row.variants,
   };
 }
 
@@ -82,22 +82,22 @@ export async function getFeaturedProducts(
   const rows = await db.query.products.findMany({
     limit,
     with: {
-      variantsList: true,
+      variants: true,
     },
     orderBy: (products, { desc }) => [desc(products.createdAt)],
   });
 
   return rows.map((row) => ({
     ...row,
-    variants: row.variantsList,
+    variants: row.variants,
   }));
 }
 
-export async function getProductsByCategory(
-  category: string,
+export async function getProductsByCategoryId(
+  categoryId: string,
   limit = 50
 ): Promise<ProductWithVariants[]> {
-  return getProducts({ category, limit });
+  return getProducts({ categoryId, limit });
 }
 
 export async function searchProducts(
@@ -107,12 +107,12 @@ export async function searchProducts(
     where: sql`${products.name} ILIKE ${`%${query}%`} OR ${products.description} ILIKE ${`%${query}%`}`,
     limit: 20,
     with: {
-      variantsList: true,
+      variants: true,
     },
   });
 
   return rows.map((row) => ({
     ...row,
-    variants: row.variantsList,
+    variants: row.variants,
   }));
 }

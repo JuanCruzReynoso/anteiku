@@ -4,10 +4,23 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useCartStore } from "@/features/cart/lib/cart-store";
 import { formatPrice } from "@/lib/utils";
-import type { Product } from "@/features/product/lib/mock-data";
+
+/** Compatible with DB products (category as object) */
+interface ProductActionsProduct {
+  id: string;
+  name: string;
+  images: string[];
+  variants: {
+    id: string;
+    name: string;
+    price: number;
+    stock: number;
+    options: Record<string, string>;
+  }[];
+}
 
 interface ProductActionsProps {
-  product: Product;
+  product: ProductActionsProduct;
 }
 
 export function ProductActions({ product }: ProductActionsProps) {

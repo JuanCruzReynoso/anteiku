@@ -11,6 +11,7 @@ const priceFormatter = new Intl.NumberFormat("es-AR", {
   minimumFractionDigits: 0,
 });
 
-export function formatPrice(cents: number): string {
-  return priceFormatter.format(cents / 100);
+export function formatPrice(amount: number): string {
+  // Prices are stored as ARS integers (no cents)
+  return priceFormatter.format(amount);
 }

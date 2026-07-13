@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu } from "lucide-react";
+import { Menu, User } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 import { Logo } from "@/components/ui/logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { CartButton } from "@/features/cart/ui/cart-button";
@@ -18,9 +19,14 @@ import {
 
 const navLinks = [{ href: "/shop", label: "Tienda" }];
 
+const adminRoles = ["owner", "admin"];
+
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const { data: session, status } = useSession();
+  const user = session?.user;
+  const loading = status === "loading";
 
   return (
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -49,12 +55,60 @@ export function Navbar() {
               </Link>
             );
           })}
+          {user && adminRoles.includes(user.role as string) && (
+            <Link
+              href="/admin"
+              className={`text-xs uppercase tracking-[0.2em] font-medium transition-colors relative ${
+                pathname.startsWith("/admin")
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Admin
+              {pathname.startsWith("/admin") && (
+                <span className="absolute -bottom-1 left-0 right-0 h-px bg-primary" />
+              )}
+            </Link>
+          )}
         </nav>
 
         {/* Actions */}
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <CartButton />
+
+          {/* Desktop auth */}
+          <div className="hidden md:flex items-center gap-2">
+            {loading ? (
+              <div className="h-8 w-20 animate-pulse bg-muted" />
+            ) : user ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground max-w-[120px] truncate">
+                  {user.name || user.email?.split("@")[0]}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                >
+                  Cerrar sesión
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" size="sm">
+                    Iniciar sesión
+                  </Button>
+                </Link>
+                <Link href="/register">
+                  <Button variant="accent" size="sm">
+                    Crear cuenta
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
 
           {/* Mobile menu trigger */}
           <Sheet open={open} onOpenChange={setOpen}>
@@ -92,7 +146,57 @@ export function Navbar() {
                     </Link>
                   );
                 })}
+                {user && adminRoles.includes(user.role as string) && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setOpen(false)}
+                    className={`block py-4 text-xs uppercase tracking-[0.2em] font-medium transition-colors ${
+                      pathname.startsWith("/admin")
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Admin
+                  </Link>
+                )}
               </nav>
+
+              {/* Mobile auth section */}
+              <div className="mt-auto px-6 pb-6 space-y-3">
+                {user ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 px-4 py-3 bg-muted">
+                      <User className="size-4 text-muted-foreground" />
+                      <span className="text-sm truncate">
+                        {user.name || user.email?.split("@")[0]}
+                      </span>
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        setOpen(false);
+                        signOut({ callbackUrl: "/" });
+                      }}
+                    >
+                      Cerrar sesión
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <Link href="/login" className="block" onClick={() => setOpen(false)}>
+                      <Button variant="outline" className="w-full">
+                        Iniciar sesión
+                      </Button>
+                    </Link>
+                    <Link href="/register" className="block" onClick={() => setOpen(false)}>
+                      <Button variant="accent" className="w-full">
+                        Crear cuenta
+                      </Button>
+                    </Link>
+                  </>
+                )}
+              </div>
             </SheetContent>
           </Sheet>
         </div>

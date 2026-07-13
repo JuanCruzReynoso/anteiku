@@ -15,6 +15,7 @@ export function CheckoutForm() {
   const [shippingData, setShippingData] = useState<ShippingFormData | null>(
     null
   );
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Redirect if cart is empty
   if (items.length === 0 && !shippingData) {
@@ -48,12 +49,18 @@ export function CheckoutForm() {
     setStep("payment");
   }
 
+  // TODO: MercadoPago Integration
+  // 1. Initialize MercadoPago SDK with public key
+  // 2. Create payment preference via API route
+  // 3. Redirect to MercadoPago checkout
+  // 4. Handle webhook callback for payment confirmation
+  // 5. Create order in DB after payment approval
   function handlePayment() {
-    // Placeholder — integración con MercadoPago
+    setIsProcessing(true);
     toast.success("Pedido confirmado", {
       description: "Redirigiendo a la confirmación...",
     });
-    setTimeout(() => router.push("/checkout/confirmation"), 1000);
+    setTimeout(() => router.push("/checkout/confirmation"), 1200);
   }
 
   return (
@@ -139,9 +146,10 @@ export function CheckoutForm() {
               <button
                 type="button"
                 onClick={handlePayment}
-                className="w-full h-12 rounded-full bg-foreground text-background font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+                disabled={isProcessing}
+                className="w-full h-12 rounded-full bg-foreground text-background font-medium hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Completar pedido (Demo)
+                {isProcessing ? "Procesando..." : "Completar pedido (Demo)"}
               </button>
             </div>
           )}

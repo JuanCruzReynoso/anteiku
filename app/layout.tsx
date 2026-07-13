@@ -3,8 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { ThemeProvider } from "@/components/ui/theme-provider";
-import { Navbar } from "@/features/layout/ui/navbar";
-import { Footer } from "@/features/layout/ui/footer";
+import { AuthSessionProvider } from "@/components/session-provider";
+import { LayoutWrapper } from "@/components/layout-wrapper";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = "https://anteiku.com";
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -91,26 +91,28 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.png" sizes="any" />
       </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
-        <ThemeProvider>
-          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:p-4 focus:bg-background focus:text-foreground">
-            Saltar al contenido
-          </a>
-          <Navbar />
-          <main id="main-content" className="flex-1">
-            <ErrorBoundary>{children}</ErrorBoundary>
-          </main>
-          <Footer />
-          <Toaster
-            position="bottom-right"
-            toastOptions={{
-              style: {
-                background: "var(--background)",
-                border: "1px solid var(--muted)",
-                color: "var(--foreground)",
-              },
-            }}
-          />
-        </ThemeProvider>
+        <AuthSessionProvider>
+          <ThemeProvider>
+            <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:p-4 focus:bg-background focus:text-foreground">
+              Saltar al contenido
+            </a>
+            <LayoutWrapper>
+              <main id="main-content" className="flex-1">
+                <ErrorBoundary>{children}</ErrorBoundary>
+              </main>
+            </LayoutWrapper>
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                style: {
+                  background: "var(--background)",
+                  border: "1px solid var(--muted)",
+                  color: "var(--foreground)",
+                },
+              }}
+            />
+          </ThemeProvider>
+        </AuthSessionProvider>
       </body>
     </html>
   );

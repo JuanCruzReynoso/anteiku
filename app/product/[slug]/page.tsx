@@ -1,25 +1,27 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { mockProducts } from "@/features/product/lib/mock-data";
+import { getProductBySlug, getAllProducts } from "@/features/product/lib/queries";
 import { formatPrice } from "@/lib/utils";
 import { ProductActions } from "./product-actions";
 
-const siteUrl = "https://anteiku.com";
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  return mockProducts.map((p) => ({ slug: p.slug }));
+  const products = await getAllProducts();
+  return products.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = mockProducts.find((p) => p.slug === slug);
+  const product = await getProductBySlug(slug);
   if (!product) return { title: "Producto no encontrado" };
 
   const minPrice = Math.min(...product.variants.map((v) => v.price));
@@ -27,13 +29,13 @@ export async function generateMetadata({
 
   return {
     title: product.name,
-    description: product.description,
+    description: product.description ?? undefined,
     alternates: {
       canonical: `${siteUrl}/product/${product.slug}`,
     },
     openGraph: {
       title: product.name,
-      description: product.description,
+      description: product.description ?? undefined,
       url: `${siteUrl}/product/${product.slug}`,
       type: "website",
       images: hasRealImage
@@ -43,7 +45,7 @@ export async function generateMetadata({
     twitter: {
       card: "summary_large_image",
       title: product.name,
-      description: product.description,
+      description: product.description ?? undefined,
       images: hasRealImage ? [product.images[0]] : [],
     },
   };
@@ -51,7 +53,7 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = mockProducts.find((p) => p.slug === slug);
+  const product = await getProductBySlug(slug);
 
   if (!product) notFound();
 
@@ -71,8 +73,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
     },
     offers: {
       "@type": "AggregateOffer",
-      lowPrice: minPrice / 100,
-      highPrice: Math.max(...product.variants.map((v) => v.price)) / 100,
+      lowPrice: minPrice,
+      highPrice: Math.max(...product.variants.map((v) => v.price)),
       priceCurrency: "ARS",
       availability: "https://schema.org/InStock",
       url: `${siteUrl}/product/${product.slug}`,
@@ -97,9 +99,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
         {/* Breadcrumbs — editorial micro text */}
         <nav aria-label="Breadcrumb" className="mb-10 text-xs text-muted-foreground">
           <ol className="flex items-center gap-2 uppercase tracking-[0.15em]">
-            <li><a href="/" className="hover:text-foreground transition-colors">Inicio</a></li>
+            <li><Link href="/" className="hover:text-foreground transition-colors">Inicio</Link></li>
             <li aria-hidden="true">/</li>
-            <li><a href="/shop" className="hover:text-foreground transition-colors">Tienda</a></li>
+            <li><Link href="/shop" className="hover:text-foreground transition-colors">Tienda</Link></li>
             <li aria-hidden="true">/</li>
             <li aria-current="page" className="text-foreground font-medium">{product.name}</li>
           </ol>
@@ -119,7 +121,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                {product.category}
+                {product.category?.name ?? "Producto"}
               </div>
             )}
           </div>
@@ -128,7 +130,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <div className="space-y-8">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4">
-                {product.category}
+                {product.category?.name ?? ""}
               </p>
               <h1 className="text-4xl md:text-5xl font-bold tracking-[-0.03em]">
                 {product.name}

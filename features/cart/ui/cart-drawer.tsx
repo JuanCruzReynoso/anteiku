@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Minus, Plus, ShoppingBag } from "lucide-react";
 import { useCartStore } from "../lib/cart-store";
 import { Button } from "@/components/ui/button";
@@ -62,13 +63,23 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                   key={item.variantId}
                   className="flex gap-4 py-6"
                 >
-                  {/* Image placeholder */}
-                  <div
-                    className="h-16 w-16 shrink-0 bg-muted flex items-center justify-center text-xs text-muted-foreground"
-                    aria-hidden="true"
-                  >
-                    img
-                  </div>
+                  {/* Image */}
+                  {item.image ? (
+                    <Image
+                      src={item.image}
+                      alt={item.name}
+                      width={64}
+                      height={64}
+                      className="h-16 w-16 shrink-0 object-cover bg-muted"
+                    />
+                  ) : (
+                    <div
+                      className="h-16 w-16 shrink-0 bg-muted flex items-center justify-center text-xs text-muted-foreground"
+                      aria-hidden="true"
+                    >
+                      {item.name.charAt(0)}
+                    </div>
+                  )}
 
                   {/* Info */}
                   <div className="flex flex-1 flex-col justify-between">

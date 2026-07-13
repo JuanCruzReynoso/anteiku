@@ -1,7 +1,5 @@
-import type { ProductCategory } from "./mock-data";
-
 export interface CategoryDefinition {
-  value: ProductCategory;
+  value: string;
   label: string;
   description: string;
 }
@@ -26,6 +24,6 @@ export const allCategories: CategoryDefinition[] = [
 ];
 
 /** Category value → label lookup */
-export const categoryLabel: Record<ProductCategory, string> = Object.fromEntries(
+export const categoryLabel: Record<string, string> = Object.fromEntries(
   allCategories.map((c) => [c.value, c.label])
-) as Record<ProductCategory, string>;
+);

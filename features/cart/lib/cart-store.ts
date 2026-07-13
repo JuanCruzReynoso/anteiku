@@ -8,7 +8,7 @@ export interface CartItem {
   productId: string;
   name: string;
   variantName: string;
-  price: number; // cents
+  price: number; // ARS integer
   quantity: number;
   image?: string;
 }
@@ -83,9 +83,28 @@ export const useCartStore = create<CartState & CartActions>()(
       name: "anteiku-cart",
       // Only persist items — totals are derived
       partialize: (state) => ({ items: state.items }),
-      // Rehydrate totals on load
+      // Rehydrate totals on load + validate stale items
       onRehydrateStorage: () => (state) => {
         if (state) {
+          // Validate each item has required fields — stale localStorage
+          // may contain items referencing deleted products or old schema
+          const before = state.items.length;
+          state.items = state.items.filter(
+            (item) =>
+              item.variantId &&
+              item.name &&
+              typeof item.price === "number" &&
+              item.price > 0 &&
+              typeof item.quantity === "number" &&
+              item.quantity > 0
+          );
+
+          if (state.items.length < before) {
+            console.warn(
+              `[cart] Removed ${before - state.items.length} stale item(s) with missing data`
+            );
+          }
+
           const totals = computeTotals(state.items);
           state.itemCount = totals.itemCount;
           state.total = totals.total;

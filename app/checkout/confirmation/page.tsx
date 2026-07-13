@@ -38,7 +38,7 @@ export default function ConfirmationPage() {
           <p>
             Número de pedido:{" "}
             <span className="font-mono font-medium text-foreground">
-              #ANT-{Math.random().toString(36).substring(2, 8).toUpperCase()}
+              #ANT-{Date.now().toString(36).toUpperCase()}-{Math.random().toString(36).substring(2, 5).toUpperCase()}
             </span>
           </p>
         </div>

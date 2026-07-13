@@ -1,21 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { mockProducts } from "@/features/product/lib/mock-data";
-import { allCategories } from "@/features/product/lib/categories";
+import { getAllProducts, getAllCategories } from "@/features/product/lib/queries";
 import { ProductCard } from "@/features/product/ui/product-card";
 
 export const metadata: Metadata = {
   title: "Tienda",
   description: "Explorá nuestra colección de merchandise geek y café de especialidad.",
   alternates: {
-    canonical: "https://anteiku.com/shop",
+    canonical: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/shop`,
   },
 };
-
-const filterTabs = [
-  { label: "Todos", value: "all" },
-  ...allCategories.map((c) => ({ label: c.label, value: c.value })),
-];
 
 interface ShopPageProps {
   searchParams: Promise<{ category?: string }>;
@@ -25,10 +19,20 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const params = await searchParams;
   const activeCategory = params.category ?? "all";
 
+  const [allProducts, allCategories] = await Promise.all([
+    getAllProducts(),
+    getAllCategories(),
+  ]);
+
+  const filterTabs = [
+    { label: "Todos", value: "all" },
+    ...allCategories.map((c) => ({ label: c.name, value: c.slug })),
+  ];
+
   const filtered =
     activeCategory === "all"
-      ? mockProducts
-      : mockProducts.filter((p) => p.category === activeCategory);
+      ? allProducts
+      : allProducts.filter((p) => p.category?.slug === activeCategory);
 
   return (
     <div className="container mx-auto px-6 md:px-8 py-16 md:py-24">
@@ -71,7 +75,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
       {filtered.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
           {filtered.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
+            <ProductCard key={product.id} product={product} index={index} priority={index === 0} />
           ))}
         </div>
       ) : (

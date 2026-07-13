@@ -24,17 +24,10 @@ export default function Icon() {
       >
         <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
           <circle cx="50" cy="50" r="48" stroke="#b91c1c" strokeWidth="4" fill="white" />
-          <text
-            x="50"
-            y="62"
-            textAnchor="middle"
-            fontSize="40"
-            fontWeight="bold"
+          <path
+            d="M50 15 L35 75 L45 75 L50 55 L55 75 L65 75 Z"
             fill="#b91c1c"
-            fontFamily="sans-serif"
-          >
-            A
-          </text>
+          />
         </svg>
       </div>
     ),

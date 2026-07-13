@@ -15,7 +15,7 @@ export function CartButton() {
         type="button"
         onClick={() => setOpen(true)}
         className="relative inline-flex size-12 items-center justify-center rounded-full hover:bg-muted transition-colors"
-        aria-label={`Cart (${itemCount} items)`}
+        aria-label={`Carrito (${itemCount} items)`}
       >
         <ShoppingBag className="h-5 w-5" />
         {itemCount > 0 && (

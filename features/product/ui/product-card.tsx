@@ -4,17 +4,35 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { formatPrice } from "@/lib/utils";
-import type { Product } from "../lib/mock-data";
 
-interface ProductCardProps {
-  product: Product;
-  index?: number;
+/** Compatible with both DB products (category as object) and legacy mock products (category as string) */
+export interface ProductCardProduct {
+  id: string;
+  name: string;
+  slug: string;
+  images: string[];
+  category?: { name: string } | string | null;
+  variants: { price: number }[];
 }
 
-export function ProductCard({ product, index = 0 }: ProductCardProps) {
+interface ProductCardProps {
+  product: ProductCardProduct;
+  index?: number;
+  priority?: boolean;
+}
+
+function resolveCategoryName(category: ProductCardProduct["category"]): string {
+  if (!category) return "";
+  if (typeof category === "string") return category;
+  return category.name;
+}
+
+export function ProductCard({ product, index = 0, priority = false }: ProductCardProps) {
   const minPrice = Math.min(...product.variants.map((v) => v.price));
   const hasVariants = product.variants.length > 1;
-  const hasRealImage = product.images[0] && !product.images[0].startsWith("/placeholder");
+  const hasRealImage =
+    product.images[0] && !product.images[0].startsWith("/placeholder");
+  const categoryName = resolveCategoryName(product.category);
 
   return (
     <motion.article
@@ -33,13 +51,14 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
               className="object-cover transition-transform duration-500 group-hover:scale-105"
+              priority={priority}
             />
           ) : (
             <div
               className="absolute inset-0 flex items-center justify-center text-muted-foreground text-sm"
               aria-hidden="true"
             >
-              {product.category}
+              {categoryName}
             </div>
           )}
         </div>

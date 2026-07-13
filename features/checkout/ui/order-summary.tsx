@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCartStore } from "@/features/cart/lib/cart-store";
 import { formatPrice } from "@/lib/utils";
 
@@ -20,9 +21,19 @@ export function OrderSummary() {
       <div className="space-y-4">
         {items.map((item) => (
           <div key={item.variantId} className="flex gap-3">
-            <div className="h-14 w-14 shrink-0 bg-muted flex items-center justify-center text-xs text-muted-foreground">
-              img
-            </div>
+            {item.image ? (
+              <Image
+                src={item.image}
+                alt={item.name}
+                width={56}
+                height={56}
+                className="h-14 w-14 shrink-0 object-cover bg-muted"
+              />
+            ) : (
+              <div className="h-14 w-14 shrink-0 bg-muted flex items-center justify-center text-xs text-muted-foreground">
+                {item.name.charAt(0)}
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{item.name}</p>
               <p className="text-xs text-muted-foreground">{item.variantName}</p>

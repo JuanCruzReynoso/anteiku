@@ -1,24 +1,32 @@
 import type { MetadataRoute } from "next";
-import { mockProducts } from "@/features/product/lib/mock-data";
+import { getAllProducts, getAllCategories } from "@/features/product/lib/queries";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = "https://anteiku.com";
 
-  const staticPages = [
-    { url: base, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 1 },
-    { url: `${base}/shop`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.9 },
-    { url: `${base}/shop?category=coffee`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.8 },
-    { url: `${base}/shop?category=figures`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.8 },
-    { url: `${base}/shop?category=apparel`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.8 },
-    { url: `${base}/shop?category=notebooks`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.8 },
+  const [products, categories] = await Promise.all([
+    getAllProducts(),
+    getAllCategories(),
+  ]);
+
+  const staticPages: MetadataRoute.Sitemap = [
+    { url: base, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
+    { url: `${base}/shop`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
   ];
 
-  const productPages = mockProducts.map((product) => ({
+  const categoryPages: MetadataRoute.Sitemap = categories.map((cat) => ({
+    url: `${base}/shop?category=${cat.slug}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.8,
+  }));
+
+  const productPages: MetadataRoute.Sitemap = products.map((product) => ({
     url: `${base}/product/${product.slug}`,
     lastModified: new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.7,
   }));
 
-  return [...staticPages, ...productPages];
+  return [...staticPages, ...categoryPages, ...productPages];
 }
