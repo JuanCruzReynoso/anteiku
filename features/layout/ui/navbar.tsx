@@ -42,6 +42,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
+                aria-current={isActive ? "page" : undefined}
                 className={`text-xs uppercase tracking-[0.2em] font-medium transition-colors relative ${
                   isActive
                     ? "text-foreground"
@@ -58,6 +59,7 @@ export function Navbar() {
           {user && adminRoles.includes(user.role as string) && (
             <Link
               href="/admin"
+              aria-current={pathname.startsWith("/admin") ? "page" : undefined}
               className={`text-xs uppercase tracking-[0.2em] font-medium transition-colors relative ${
                 pathname.startsWith("/admin")
                   ? "text-foreground"
@@ -136,6 +138,7 @@ export function Navbar() {
                       key={link.href}
                       href={link.href}
                       onClick={() => setOpen(false)}
+                      aria-current={isActive ? "page" : undefined}
                       className={`block py-4 text-xs uppercase tracking-[0.2em] font-medium transition-colors ${
                         isActive
                           ? "text-foreground"
@@ -150,6 +153,7 @@ export function Navbar() {
                   <Link
                     href="/admin"
                     onClick={() => setOpen(false)}
+                    aria-current={pathname.startsWith("/admin") ? "page" : undefined}
                     className={`block py-4 text-xs uppercase tracking-[0.2em] font-medium transition-colors ${
                       pathname.startsWith("/admin")
                         ? "text-foreground"

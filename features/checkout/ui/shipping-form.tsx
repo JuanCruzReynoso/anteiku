@@ -47,11 +47,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           id="email"
           type="email"
           {...register("email")}
+          required
+          aria-invalid={!!errors.email}
+          aria-describedby={errors.email ? "email-error" : undefined}
           className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
           placeholder="tu@email.com"
         />
         {errors.email && (
-          <p className="text-xs text-destructive">{errors.email.message}</p>
+          <p id="email-error" className="text-xs text-destructive">{errors.email.message}</p>
         )}
       </div>
 
@@ -64,11 +67,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           id="name"
           type="text"
           {...register("name")}
+          required
+          aria-invalid={!!errors.name}
+          aria-describedby={errors.name ? "name-error" : undefined}
           className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
           placeholder="Juan Pérez"
         />
         {errors.name && (
-          <p className="text-xs text-destructive">{errors.name.message}</p>
+          <p id="name-error" className="text-xs text-destructive">{errors.name.message}</p>
         )}
       </div>
 
@@ -81,11 +87,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           id="phone"
           type="tel"
           {...register("phone")}
+          required
+          aria-invalid={!!errors.phone}
+          aria-describedby={errors.phone ? "phone-error" : undefined}
           className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
           placeholder="+54 11 1234-5678"
         />
         {errors.phone && (
-          <p className="text-xs text-destructive">{errors.phone.message}</p>
+          <p id="phone-error" className="text-xs text-destructive">{errors.phone.message}</p>
         )}
       </div>
 
@@ -98,11 +107,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           id="line1"
           type="text"
           {...register("line1")}
+          required
+          aria-invalid={!!errors.line1}
+          aria-describedby={errors.line1 ? "line1-error" : undefined}
           className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
           placeholder="Av. Corrientes 1234"
         />
         {errors.line1 && (
-          <p className="text-xs text-destructive">{errors.line1.message}</p>
+          <p id="line1-error" className="text-xs text-destructive">{errors.line1.message}</p>
         )}
       </div>
 
@@ -130,11 +142,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
             id="city"
             type="text"
             {...register("city")}
+            required
+            aria-invalid={!!errors.city}
+            aria-describedby={errors.city ? "city-error" : undefined}
             className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
             placeholder="Buenos Aires"
           />
           {errors.city && (
-            <p className="text-xs text-destructive">{errors.city.message}</p>
+            <p id="city-error" className="text-xs text-destructive">{errors.city.message}</p>
           )}
         </div>
         <div className="space-y-2">
@@ -145,11 +160,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
             id="state"
             type="text"
             {...register("state")}
+            required
+            aria-invalid={!!errors.state}
+            aria-describedby={errors.state ? "state-error" : undefined}
             className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
             placeholder="CABA"
           />
           {errors.state && (
-            <p className="text-xs text-destructive">{errors.state.message}</p>
+            <p id="state-error" className="text-xs text-destructive">{errors.state.message}</p>
           )}
         </div>
       </div>
@@ -164,11 +182,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
             id="postalCode"
             type="text"
             {...register("postalCode")}
+            required
+            aria-invalid={!!errors.postalCode}
+            aria-describedby={errors.postalCode ? "postalCode-error" : undefined}
             className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
             placeholder="C1000"
           />
           {errors.postalCode && (
-            <p className="text-xs text-destructive">
+            <p id="postalCode-error" className="text-xs text-destructive">
               {errors.postalCode.message}
             </p>
           )}
@@ -181,10 +202,13 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
             id="country"
             type="text"
             {...register("country")}
+            required
+            aria-invalid={!!errors.country}
+            aria-describedby={errors.country ? "country-error" : undefined}
             className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
           />
           {errors.country && (
-            <p className="text-xs text-destructive">
+            <p id="country-error" className="text-xs text-destructive">
               {errors.country.message}
             </p>
           )}

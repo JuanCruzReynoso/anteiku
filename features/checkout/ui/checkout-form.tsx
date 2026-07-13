@@ -95,22 +95,28 @@ export function CheckoutForm() {
   return (
     <div className="container mx-auto px-6 md:px-8 py-12 md:py-20">
       {/* Step indicator */}
-      <div className="flex items-center gap-4 mb-12">
+      <div className="flex items-center gap-4 mb-12" role="group" aria-label="Pasos del checkout">
         <div className="flex items-center gap-2">
-          <span className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium ${
-            step === "shipping" ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
-          }`}>
+          <span
+            className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium ${
+              step === "shipping" ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
+            }`}
+            aria-current={step === "shipping" ? "step" : undefined}
+          >
             1
           </span>
           <span className={`text-sm font-medium ${step === "shipping" ? "text-foreground" : "text-muted-foreground"}`}>
             Envío
           </span>
         </div>
-        <div className="flex-1 h-px bg-muted" />
+        <div className="flex-1 h-px bg-muted" aria-hidden="true" />
         <div className="flex items-center gap-2">
-          <span className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium ${
-            step === "payment" ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
-          }`}>
+          <span
+            className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-medium ${
+              step === "payment" ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
+            }`}
+            aria-current={step === "payment" ? "step" : undefined}
+          >
             2
           </span>
           <span className={`text-sm font-medium ${step === "payment" ? "text-foreground" : "text-muted-foreground"}`}>
@@ -176,6 +182,7 @@ export function CheckoutForm() {
                 type="button"
                 onClick={handlePayment}
                 disabled={isProcessing}
+                aria-busy={isProcessing}
                 className="w-full h-12 rounded-full bg-foreground text-background font-medium hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isProcessing ? "Procesando..." : "Completar pedido (Demo)"}
