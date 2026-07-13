@@ -1,26 +1,26 @@
 import { db } from "@/db";
-import { products, categories, variants } from "@/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { products, categories, variants, discounts } from "@/db/schema";
+import { eq, desc, and, gte, lte, or, isNull } from "drizzle-orm";
 
 export async function getAllProducts() {
   return db.query.products.findMany({
     orderBy: [desc(products.createdAt)],
     where: eq(products.status, "active"),
-    with: { category: true, variants: true },
+    with: { category: true, variants: true, discounts: true },
   });
 }
 
 export async function getProductBySlug(slug: string) {
   return db.query.products.findFirst({
     where: eq(products.slug, slug),
-    with: { category: true, variants: true },
+    with: { category: true, variants: true, discounts: true },
   });
 }
 
 export async function getProductById(id: string) {
   return db.query.products.findFirst({
     where: eq(products.id, id),
-    with: { category: true, variants: true },
+    with: { category: true, variants: true, discounts: true },
   });
 }
 
@@ -31,14 +31,14 @@ export async function getProductsByCategory(categorySlug: string) {
   if (!category) return [];
   return db.query.products.findMany({
     where: and(eq(products.categoryId, category.id), eq(products.status, "active")),
-    with: { category: true, variants: true },
+    with: { category: true, variants: true, discounts: true },
   });
 }
 
 export async function getFeaturedProducts() {
   return db.query.products.findMany({
     where: and(eq(products.featured, "true"), eq(products.status, "active")),
-    with: { category: true, variants: true },
+    with: { category: true, variants: true, discounts: true },
     limit: 4,
   });
 }

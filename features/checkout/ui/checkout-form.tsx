@@ -9,6 +9,12 @@ import { OrderSummary } from "@/features/checkout/ui/order-summary";
 import { createOrder } from "@/features/checkout/lib/actions";
 import type { ShippingFormData } from "@/features/checkout/lib/schema";
 
+interface CouponDiscount {
+  type: "percentage" | "fixed" | "free_shipping";
+  value: number;
+  code: string;
+}
+
 export function CheckoutForm() {
   const router = useRouter();
   const items = useCartStore((s) => s.items);
@@ -17,7 +23,11 @@ export function CheckoutForm() {
   const [shippingData, setShippingData] = useState<ShippingFormData | null>(
     null
   );
+  const [shippingMethodId, setShippingMethodId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponDiscount | null>(
+    null
+  );
 
   // Redirect if cart is empty
   if (items.length === 0 && !shippingData) {
@@ -46,8 +56,10 @@ export function CheckoutForm() {
     );
   }
 
-  function handleShippingSubmit(data: ShippingFormData) {
-    setShippingData(data);
+  function handleShippingSubmit(data: ShippingFormData & { shippingMethodId: string }) {
+    const { shippingMethodId: methodId, ...address } = data;
+    setShippingData(address);
+    setShippingMethodId(methodId);
     setStep("payment");
   }
 
@@ -58,7 +70,7 @@ export function CheckoutForm() {
   // 4. Handle webhook callback for payment confirmation
   // 5. Create order in DB after payment approval
   async function handlePayment() {
-    if (!shippingData) return;
+    if (!shippingData || !shippingMethodId) return;
     setIsProcessing(true);
 
     try {
@@ -69,6 +81,8 @@ export function CheckoutForm() {
         })),
         shippingAddress: shippingData,
         email: shippingData.email,
+        couponCode: appliedCoupon?.code,
+        shippingMethodId,
       });
 
       if (result.error) {

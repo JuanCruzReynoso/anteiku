@@ -1,15 +1,42 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { useCartStore } from "@/features/cart/lib/cart-store";
 import { formatPrice } from "@/lib/utils";
+import { CouponInput } from "./coupon-input";
+
+interface CouponDiscount {
+  type: "percentage" | "fixed" | "free_shipping";
+  value: number;
+  code: string;
+}
 
 export function OrderSummary() {
   const items = useCartStore((s) => s.items);
   const total = useCartStore((s) => s.total);
+  const [appliedCoupon, setAppliedCoupon] = useState<CouponDiscount | null>(
+    null
+  );
 
-  const shipping = total >= 5000 ? 0 : 1500; // Envío gratis superando $50
-  const grandTotal = total + shipping;
+  // Calculate discount
+  let discountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.type === "percentage") {
+      discountAmount = Math.round(total * (appliedCoupon.value / 100));
+    } else if (appliedCoupon.type === "fixed") {
+      discountAmount = Math.min(appliedCoupon.value, total);
+    }
+  }
+
+  const subtotalAfterDiscount = total - discountAmount;
+
+  // Shipping calculation (free if coupon is free_shipping or subtotal >= 50000)
+  const freeShipping =
+    appliedCoupon?.type === "free_shipping" || subtotalAfterDiscount >= 50000;
+  const shipping = freeShipping ? 0 : 2500;
+
+  const grandTotal = subtotalAfterDiscount + shipping;
 
   return (
     <div className="space-y-6">
@@ -48,19 +75,37 @@ export function OrderSummary() {
         ))}
       </div>
 
+      {/* Coupon Input */}
+      <div className="pt-4">
+        <CouponInput
+          subtotal={total}
+          onCouponApplied={setAppliedCoupon}
+          onCouponRemoved={() => setAppliedCoupon(null)}
+          appliedCoupon={appliedCoupon}
+        />
+      </div>
+
       {/* Totals — clean separation */}
       <div className="pt-4 space-y-3">
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Subtotal</span>
           <span className="tabular-nums">{formatPrice(total)}</span>
         </div>
+        {discountAmount > 0 && (
+          <div className="flex justify-between text-sm text-destructive">
+            <span>Descuento ({appliedCoupon?.code})</span>
+            <span className="tabular-nums">-{formatPrice(discountAmount)}</span>
+          </div>
+        )}
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Envío</span>
-          <span className="tabular-nums">{shipping === 0 ? "Gratis" : formatPrice(shipping)}</span>
+          <span className="tabular-nums">
+            {shipping === 0 ? "Gratis" : formatPrice(shipping)}
+          </span>
         </div>
         {shipping > 0 && (
           <p className="text-xs text-muted-foreground">
-            Envío gratis en compras mayores a {formatPrice(5000)}
+            Envío gratis en compras mayores a {formatPrice(50000)}
           </p>
         )}
         <div className="flex justify-between text-lg font-semibold pt-3">

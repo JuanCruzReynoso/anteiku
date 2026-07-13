@@ -1,16 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { shippingSchema, type ShippingFormData } from "../lib/schema";
+import { getActiveShippingMethods, type ShippingMethod } from "../lib/shipping-actions";
+import { formatPrice } from "@/lib/utils";
 
 interface ShippingFormProps {
-  onSubmit: (data: ShippingFormData) => void;
+  onSubmit: (data: ShippingFormData & { shippingMethodId: string }) => void;
   defaultValues?: Partial<ShippingFormData>;
 }
 
 export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
+  const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
+  const [selectedMethod, setSelectedMethod] = useState<string>("");
+  const [isLoadingMethods, setIsLoadingMethods] = useState(true);
+
   const {
     register,
     handleSubmit,
@@ -23,6 +30,23 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
     },
   });
 
+  useEffect(() => {
+    async function loadMethods() {
+      try {
+        const methods = await getActiveShippingMethods();
+        setShippingMethods(methods);
+        if (methods.length > 0) {
+          setSelectedMethod(methods[0].id);
+        }
+      } catch {
+        toast.error("Error al cargar métodos de envío");
+      } finally {
+        setIsLoadingMethods(false);
+      }
+    }
+    loadMethods();
+  }, []);
+
   function handleFormError() {
     const errorMessages = Object.values(errors)
       .map((e) => e?.message)
@@ -34,8 +58,18 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
     }
   }
 
+  function handleFormSubmit(data: ShippingFormData) {
+    if (!selectedMethod) {
+      toast.error("Elegí un método de envío");
+      return;
+    }
+    onSubmit({ ...data, shippingMethodId: selectedMethod });
+  }
+
+  const selectedMethodData = shippingMethods.find((m) => m.id === selectedMethod);
+
   return (
-    <form onSubmit={handleSubmit(onSubmit, handleFormError)} className="space-y-8">
+    <form onSubmit={handleSubmit(handleFormSubmit, handleFormError)} className="space-y-8">
       <h2 className="text-xl font-semibold">Datos de envío</h2>
 
       {/* Email */}
@@ -213,6 +247,56 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
             </p>
           )}
         </div>
+      </div>
+
+      {/* Shipping Method Selector */}
+      <div className="space-y-4">
+        <h3 className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+          Método de envío
+        </h3>
+        {isLoadingMethods ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-20 bg-muted animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {shippingMethods.map((method) => (
+              <label
+                key={method.id}
+                className={`flex items-start gap-4 p-4 cursor-pointer transition-colors ${
+                  selectedMethod === method.id
+                    ? "bg-muted ring-1 ring-foreground"
+                    : "bg-muted/50 hover:bg-muted"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="shippingMethod"
+                  value={method.id}
+                  checked={selectedMethod === method.id}
+                  onChange={() => setSelectedMethod(method.id)}
+                  className="mt-1"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium">{method.name}</p>
+                    <p className="font-medium">
+                      {method.cost === 0 ? "Gratis" : formatPrice(method.cost)}
+                    </p>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{method.description}</p>
+                  {method.estimatedDays > 0 && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {method.estimatedDays} días hábiles
+                    </p>
+                  )}
+                </div>
+              </label>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Submit — pill button */}

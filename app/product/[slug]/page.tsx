@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProductBySlug, getAllProducts } from "@/features/product/lib/queries";
 import { getProductDisplayData } from "@/features/product/lib/display";
+import { getLowestDiscountedPrice } from "@/features/product/lib/discount";
 import { formatPrice } from "@/lib/utils";
 import { ProductActions } from "./product-actions";
 
@@ -58,6 +59,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   if (!product) notFound();
 
   const { minPrice, hasVariants, hasRealImage } = getProductDisplayData(product);
+  const discounted = getLowestDiscountedPrice(product.variants, product.discounts ?? []);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -133,10 +135,28 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <h1 className="text-4xl md:text-5xl font-bold tracking-[-0.03em]">
                 {product.name}
               </h1>
-              <p className="text-2xl font-semibold mt-4">
-                {hasVariants ? "Desde " : ""}
-                {formatPrice(minPrice)}
-              </p>
+              <div className="flex items-center gap-3 mt-4">
+                {discounted ? (
+                  <>
+                    <p className="text-2xl font-semibold text-destructive">
+                      {formatPrice(discounted.discountedPrice)}
+                    </p>
+                    <p className="text-lg text-muted-foreground line-through">
+                      {formatPrice(discounted.originalPrice)}
+                    </p>
+                    <span className="text-xs font-bold bg-destructive/10 text-destructive px-2 py-0.5 rounded">
+                      {discounted.discount.type === "percentage"
+                        ? `-${discounted.discount.value}%`
+                        : `-${formatPrice(discounted.discount.value)}`}
+                    </span>
+                  </>
+                ) : (
+                  <p className="text-2xl font-semibold">
+                    {hasVariants ? "Desde " : ""}
+                    {formatPrice(minPrice)}
+                  </p>
+                )}
+              </div>
             </div>
 
             <p className="text-muted-foreground leading-relaxed text-lg">

@@ -27,6 +27,8 @@ export const orderSchema = z.object({
     .min(1, "El carrito está vacío"),
   shippingAddress: shippingSchema,
   email: z.string().email("Ingresá un email válido"),
+  couponCode: z.string().optional(),
+  shippingMethodId: z.string().uuid("Elegí un método de envío"),
 });
 
 export type OrderInput = z.infer<typeof orderSchema>;

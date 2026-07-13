@@ -37,6 +37,7 @@ const VALID_INPUT = {
     phone: "+5491123456789",
   },
   email: "test@example.com",
+  shippingMethodId: "550e8400-e29b-41d4-a716-446655440099",
 };
 
 function mockAuth(user: { id: string } | null) {
@@ -53,8 +54,23 @@ function mockDbTransactionSuccess(orderId = "order-123") {
     },
   ];
 
+  const shippingMethodResult = [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440099",
+      name: "Envío estándar",
+      cost: 2500,
+    },
+  ];
+
   const mockTx = {
     execute: vi.fn().mockResolvedValue(lockedResult),
+    select: vi.fn().mockReturnValue({
+      from: vi.fn().mockReturnValue({
+        where: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue(shippingMethodResult),
+        }),
+      }),
+    }),
     insert: vi.fn().mockReturnValue({
       values: vi.fn().mockReturnValue({
         returning: vi.fn().mockResolvedValue([{ id: orderId }]),
@@ -84,9 +100,24 @@ function mockDbTransactionInsufficientStock() {
     },
   ];
 
+  const shippingMethodResult = [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440099",
+      name: "Envío estándar",
+      cost: 2500,
+    },
+  ];
+
   vi.mocked(db.transaction).mockImplementation(async (cb: any) => {
     const mockTx = {
       execute: vi.fn().mockResolvedValue(lockedResult),
+      select: vi.fn().mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            limit: vi.fn().mockResolvedValue(shippingMethodResult),
+          }),
+        }),
+      }),
     };
     return cb(mockTx);
   });
@@ -175,8 +206,24 @@ describe("createOrder", () => {
     mockAuth({ id: "user-1" });
 
     const lockedResult: any[] = []; // no variants returned
+    const shippingMethodResult = [
+      {
+        id: "550e8400-e29b-41d4-a716-446655440099",
+        name: "Envío estándar",
+        cost: 2500,
+      },
+    ];
     vi.mocked(db.transaction).mockImplementation(async (cb: any) => {
-      const mockTx = { execute: vi.fn().mockResolvedValue(lockedResult) };
+      const mockTx = {
+        execute: vi.fn().mockResolvedValue(lockedResult),
+        select: vi.fn().mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue(shippingMethodResult),
+            }),
+          }),
+        }),
+      };
       return cb(mockTx);
     });
 
