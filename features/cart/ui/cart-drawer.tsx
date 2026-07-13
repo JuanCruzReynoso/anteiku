@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Minus, Plus, ShoppingBag } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useCartStore } from "../lib/cart-store";
 import { Button } from "@/components/ui/button";
 import { formatPrice } from "@/lib/utils";
@@ -58,11 +59,17 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
           <>
             {/* Items — no borders, clean separation */}
             <section aria-label="Productos en el carrito" className="flex-1 overflow-y-auto px-6">
-              {items.map((item) => (
-                <article
-                  key={item.variantId}
-                  className="flex gap-4 py-6"
-                >
+              <AnimatePresence mode="popLayout">
+                {items.map((item) => (
+                  <motion.article
+                    key={item.variantId}
+                    layout
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -80 }}
+                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    className="flex gap-4 py-6"
+                  >
                   {/* Image */}
                   {item.image ? (
                     <Image
@@ -138,9 +145,10 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                         </button>
                       </div>
                     </div>
-                  </div>
-                </article>
-              ))}
+                    </div>
+                  </motion.article>
+                ))}
+              </AnimatePresence>
             </section>
 
             {/* Footer — no border-t */}

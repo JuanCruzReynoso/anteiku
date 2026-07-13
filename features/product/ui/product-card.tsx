@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useReducedMotion } from "@/components/motion";
 import { formatPrice } from "@/lib/utils";
 import { getProductDisplayData } from "@/features/product/lib/display";
 
@@ -31,12 +32,14 @@ function resolveCategoryName(category: ProductCardProduct["category"]): string {
 export function ProductCard({ product, index = 0, priority = false }: ProductCardProps) {
   const { minPrice, hasVariants, hasRealImage } = getProductDisplayData(product);
   const categoryName = resolveCategoryName(product.category);
+  const prefersReduced = useReducedMotion();
 
   return (
     <motion.article
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.08, ease: "easeOut" }}
+      whileHover={prefersReduced ? undefined : { scale: 1.02, transition: { duration: 0.2 } }}
       className="group"
     >
       <Link href={`/product/${product.slug}`} className="block space-y-4">
