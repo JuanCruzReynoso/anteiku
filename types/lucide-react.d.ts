@@ -206,4 +206,13 @@ declare module "lucide-react" {
   export const HeartPulse: Icon;
   export const Activity: Icon;
   export const Anchor2: Icon;
+  export const LayoutDashboard: Icon;
+  export const FolderTree: Icon;
+  export const DollarSign: Icon;
+  export const Clock: Icon;
+  export const TrendingUp: Icon;
+  export const AlertTriangle: Icon;
+  export const CreditCard: Icon;
+  export const ArrowLeft: Icon;
+  export const Tag: Icon;
 }
