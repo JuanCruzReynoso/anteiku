@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import type { CartItem } from "./cart-store";
 
 // Mock localStorage before importing the store
 const localStorageMock = (() => {
@@ -23,7 +24,9 @@ const { useCartStore } = await import("./cart-store");
 
 // ─── Helpers ────────────────────────────────────────────
 
-function baseItem(overrides: Partial<Parameters<typeof useCartStore.getState>["0"]> = {}) {
+type CartItemInput = Omit<CartItem, "quantity">;
+
+function baseItem(overrides: Partial<CartItemInput> = {}): CartItemInput {
   return {
     variantId: "v-001",
     productId: "p-001",
