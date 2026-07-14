@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import { useCartStore } from "@/features/cart/lib/cart-store";
 import { formatPrice } from "@/lib/utils";
@@ -12,12 +11,19 @@ interface CouponDiscount {
   code: string;
 }
 
-export function OrderSummary() {
+interface OrderSummaryProps {
+  appliedCoupon: CouponDiscount | null;
+  onCouponApplied: (discount: CouponDiscount) => void;
+  onCouponRemoved: () => void;
+}
+
+export function OrderSummary({
+  appliedCoupon,
+  onCouponApplied,
+  onCouponRemoved,
+}: OrderSummaryProps) {
   const items = useCartStore((s) => s.items);
   const total = useCartStore((s) => s.total);
-  const [appliedCoupon, setAppliedCoupon] = useState<CouponDiscount | null>(
-    null
-  );
 
   // Calculate discount
   let discountAmount = 0;
@@ -79,8 +85,8 @@ export function OrderSummary() {
       <div className="pt-4">
         <CouponInput
           subtotal={total}
-          onCouponApplied={setAppliedCoupon}
-          onCouponRemoved={() => setAppliedCoupon(null)}
+          onCouponApplied={onCouponApplied}
+          onCouponRemoved={onCouponRemoved}
           appliedCoupon={appliedCoupon}
         />
       </div>
@@ -98,14 +104,14 @@ export function OrderSummary() {
           </div>
         )}
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Envío</span>
+          <span className="text-muted-foreground">Envio</span>
           <span className="tabular-nums">
             {shipping === 0 ? "Gratis" : formatPrice(shipping)}
           </span>
         </div>
         {shipping > 0 && (
           <p className="text-xs text-muted-foreground">
-            Envío gratis en compras mayores a {formatPrice(50000)}
+            Envio gratis en compras mayores a {formatPrice(50000)}
           </p>
         )}
         <div className="flex justify-between text-lg font-semibold pt-3">

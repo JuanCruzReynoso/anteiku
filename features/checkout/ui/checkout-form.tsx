@@ -208,7 +208,11 @@ export function CheckoutForm() {
         {/* Order Summary */}
         <div className="lg:col-span-1">
           <div className="sticky top-24 bg-muted p-6">
-            <OrderSummary />
+            <OrderSummary
+              appliedCoupon={appliedCoupon}
+              onCouponApplied={setAppliedCoupon}
+              onCouponRemoved={() => setAppliedCoupon(null)}
+            />
           </div>
         </div>
       </div>
