@@ -28,24 +28,32 @@ export async function createInventoryMovement(data: {
 }) {
   await requireAdmin();
 
-  // Create the movement record
-  const [movement] = await db
-    .insert(inventoryMovements)
-    .values(data)
-    .returning();
+  // Wrap stock read+write in a transaction to prevent race conditions
+  const movement = await db.transaction(async (tx) => {
+    // Lock the variant row for update
+    const [variant] = await tx
+      .select()
+      .from(variants)
+      .where(eq(variants.id, data.variantId))
+      .for("update");
 
-  // Update variant stock
-  const variant = await db.query.variants.findFirst({
-    where: eq(variants.id, data.variantId),
+    // Create the movement record
+    const [movementRecord] = await tx
+      .insert(inventoryMovements)
+      .values(data)
+      .returning();
+
+    // Update variant stock atomically
+    if (variant) {
+      const newStock = variant.stock + data.change;
+      await tx
+        .update(variants)
+        .set({ stock: Math.max(0, newStock) })
+        .where(eq(variants.id, data.variantId));
+    }
+
+    return movementRecord;
   });
-
-  if (variant) {
-    const newStock = variant.stock + data.change;
-    await db
-      .update(variants)
-      .set({ stock: Math.max(0, newStock) })
-      .where(eq(variants.id, data.variantId));
-  }
 
   revalidatePath("/admin/products");
   return movement;

@@ -44,7 +44,7 @@ const seedProducts = [
     categorySlug: "cafe",
     images: ["/products/cafe-anteiku-black.png"],
     basePrice: 3800,
-    featured: "true",
+    featured: true,
     variants: [
       {
         name: "250g",
@@ -70,7 +70,7 @@ const seedProducts = [
     categorySlug: "cafe",
     images: ["/products/cafe-anteiku-red.png"],
     basePrice: 3800,
-    featured: "true",
+    featured: true,
     variants: [
       {
         name: "250g",
@@ -96,7 +96,7 @@ const seedProducts = [
     categorySlug: "apparel",
     images: ["/products/whitepony-chomba.png"],
     basePrice: 35000,
-    featured: "true",
+    featured: true,
     variants: [
       {
         name: "Negro / S",

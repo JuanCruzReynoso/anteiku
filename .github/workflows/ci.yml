@@ -24,6 +24,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Security audit
+        run: pnpm audit --audit-level=high
+
       - name: Lint
         run: pnpm lint
 
@@ -32,6 +35,9 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+      - name: Test coverage
+        run: pnpm test:coverage
 
       - name: Build
         run: pnpm build

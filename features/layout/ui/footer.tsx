@@ -78,14 +78,20 @@ export function Footer() {
             </h2>
             <ul className="space-y-3">
               <li>
-                <span className="text-sm text-muted-foreground/50">
+                <Link
+                  href="/privacy"
+                  className="text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                >
                   Política de privacidad
-                </span>
+                </Link>
               </li>
               <li>
-                <span className="text-sm text-muted-foreground/50">
+                <Link
+                  href="/terms"
+                  className="text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                >
                   Términos y condiciones
-                </span>
+                </Link>
               </li>
             </ul>
           </section>

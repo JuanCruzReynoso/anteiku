@@ -5,6 +5,7 @@ import { updateOrderStatus } from "@/features/admin/lib/order-actions";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { ORDER_STATUS_LABELS } from "@/lib/status-labels";
 
 interface OrderStatusFormProps {
   orderId: string;
@@ -53,11 +54,11 @@ export function OrderStatusForm({
             onChange={(e) => setStatus(e.target.value)}
             className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           >
-            <option value="pending">Pendiente</option>
-            <option value="paid">Pagado</option>
-            <option value="shipped">Enviado</option>
-            <option value="delivered">Entregado</option>
-            <option value="cancelled">Cancelado</option>
+            {Object.entries(ORDER_STATUS_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
           </select>
         </div>
 

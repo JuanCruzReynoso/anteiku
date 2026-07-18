@@ -9,7 +9,7 @@ export default async function AccountLayout({
 }) {
   const session = await auth();
   if (!session?.user) {
-    redirect("/auth/signin");
+    redirect("/login");
   }
 
   const navItems = [

@@ -41,7 +41,6 @@ export async function createProduct(data: {
     .insert(products)
     .values({
       ...validated.data,
-      featured: validated.data.featured ? "true" : "false",
     })
     .returning();
   revalidatePath("/admin/products");
@@ -70,7 +69,6 @@ export async function updateProduct(
     .update(products)
     .set({
       ...validated.data,
-      featured: validated.data.featured !== undefined ? (validated.data.featured ? "true" : "false") : undefined,
       updatedAt: new Date(),
     })
     .where(eq(products.id, id))

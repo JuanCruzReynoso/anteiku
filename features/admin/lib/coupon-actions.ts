@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { coupons } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { coupons, orders } from "@/db/schema";
+import { eq, and, count } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "./actions";
 import { couponSchema } from "./schemas";
@@ -14,7 +14,7 @@ export async function getCoupons() {
   });
 }
 
-export async function validateCoupon(code: string, purchaseAmount: number) {
+export async function validateCoupon(code: string, purchaseAmount: number, userId?: string) {
   const coupon = await db.query.coupons.findFirst({
     where: eq(coupons.code, code.toUpperCase()),
   });
@@ -33,6 +33,23 @@ export async function validateCoupon(code: string, purchaseAmount: number) {
 
   if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
     return { valid: false, error: "El cupon alcanzo el maximo de usos" };
+  }
+
+  // Per-user usage check
+  if (coupon.maxUsesPerUser && userId) {
+    const [{ userUsageCount }] = await db
+      .select({ userUsageCount: count() })
+      .from(orders)
+      .where(
+        and(
+          eq(orders.userId, userId),
+          eq(orders.couponCode, code.toUpperCase())
+        )
+      );
+
+    if (userUsageCount >= coupon.maxUsesPerUser) {
+      return { valid: false, error: "Ya usaste este cupón el máximo de veces permitido" };
+    }
   }
 
   if (coupon.minPurchase && purchaseAmount < coupon.minPurchase) {

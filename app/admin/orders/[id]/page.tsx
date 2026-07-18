@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { orders } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { formatPrice } from "@/lib/utils";
+import { ORDER_STATUS_LABELS } from "@/lib/status-labels";
 import { OrderStatusForm } from "./order-status-form";
 
 export const dynamic = "force-dynamic";
@@ -35,13 +36,7 @@ export default async function OrderDetailPage({ params }: Props) {
     notFound();
   }
 
-  const statusLabel: Record<string, string> = {
-    pending: "Pendiente",
-    paid: "Pagado",
-    shipped: "Enviado",
-    delivered: "Entregado",
-    cancelled: "Cancelado",
-  };
+  const statusLabel = ORDER_STATUS_LABELS;
 
   const paymentStatusLabel: Record<string, string> = {
     pending: "Pendiente",

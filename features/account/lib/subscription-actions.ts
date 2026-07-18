@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { userSubscriptions, subscriptionPlans } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { auth } from "@/auth";
 
 export interface UserSubscription {
@@ -140,4 +140,76 @@ export async function resumeSubscription(subscriptionId: string) {
     .where(eq(userSubscriptions.id, subscriptionId));
 
   return { success: true };
+}
+
+export async function enrollInSubscription(planId: string) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { error: "Tenés que estar logueado." };
+  }
+
+  // Verify plan exists and is active
+  const [plan] = await db
+    .select()
+    .from(subscriptionPlans)
+    .where(and(eq(subscriptionPlans.id, planId), eq(subscriptionPlans.active, true)))
+    .limit(1);
+
+  if (!plan) {
+    return { error: "Plan no encontrado o inactivo." };
+  }
+
+  // Check if user already has an active subscription to this plan
+  const [existingSub] = await db
+    .select()
+    .from(userSubscriptions)
+    .where(
+      and(
+        eq(userSubscriptions.userId, session.user.id),
+        eq(userSubscriptions.planId, planId),
+        sql`${userSubscriptions.status} IN ('active', 'paused')`
+      )
+    )
+    .limit(1);
+
+  if (existingSub) {
+    return { error: "Ya tenés una suscripción activa a este plan." };
+  }
+
+  // Calculate period end based on interval
+  const now = new Date();
+  const periodEnd = new Date(now);
+  switch (plan.interval) {
+    case "monthly":
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+      break;
+    case "quarterly":
+      periodEnd.setMonth(periodEnd.getMonth() + 3);
+      break;
+    case "yearly":
+      periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+      break;
+    default:
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+  }
+
+  const [subscription] = await db
+    .insert(userSubscriptions)
+    .values({
+      userId: session.user.id,
+      planId,
+      status: "pending_payment",
+      currentPeriodStart: now,
+      currentPeriodEnd: periodEnd,
+    })
+    .returning();
+
+  return { subscription };
+}
+
+export async function getActiveSubscriptionPlans() {
+  return db.query.subscriptionPlans.findMany({
+    where: eq(subscriptionPlans.active, true),
+    orderBy: (plans, { asc }) => [asc(plans.price)],
+  });
 }

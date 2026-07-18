@@ -1,11 +1,12 @@
 "use server";
 
 import { db } from "@/db";
-import { orders, orderItems, payments, variants, inventoryMovements, coupons, shipmentMethods } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { orders, orderItems, payments, variants, inventoryMovements, coupons, shipmentMethods, discounts, products } from "@/db/schema";
+import { eq, sql, and, count } from "drizzle-orm";
 import { auth } from "@/auth";
 import { orderSchema, type OrderInput } from "./schema";
 import { sendOrderConfirmation } from "@/lib/email";
+import { FREE_SHIPPING_THRESHOLD } from "@/lib/config";
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -45,21 +46,21 @@ export async function createOrder(input: OrderInput): Promise<CreateOrderResult>
         throw new Error("Método de envío no encontrado.");
       }
 
-      // 5. Lock stock rows with SELECT FOR UPDATE + re-fetch current stock + get product names
+      // 5. Lock stock rows with SELECT FOR UPDATE + re-fetch current stock + get product info (name, categoryId)
       const variantIds = items.map((item) => item.variantId);
       const lockedResult = await tx.execute(sql`
-        SELECT v.id, v.stock, v.price, p.name as product_name
+        SELECT v.id, v.stock, v.price, p.name as product_name, p.category_id, p.id as product_id
         FROM ${variants} v
         JOIN products p ON v.product_id = p.id
         WHERE v.id = ANY(${variantIds})
         FOR UPDATE
       `);
 
-      // Parse rows into a typed map
-      type LockedVariant = { id: string; stock: number; price: number; product_name: string };
+      // Parse rows into typed maps
+      type LockedVariant = { id: string; stock: number; price: number; product_name: string; category_id: string | null; product_id: string };
       const rows = lockedResult as unknown as LockedVariant[];
-      const variantMap = new Map<string, { stock: number; price: number; productName: string }>(
-        rows.map((v) => [v.id, { stock: v.stock, price: v.price, productName: v.product_name }])
+      const variantMap = new Map<string, { stock: number; price: number; productName: string; categoryId: string | null; productId: string }>(
+        rows.map((v) => [v.id, { stock: v.stock, price: v.price, productName: v.product_name, categoryId: v.category_id, productId: v.product_id }])
       );
 
       // 6. Validate stock for each item
@@ -75,75 +76,156 @@ export async function createOrder(input: OrderInput): Promise<CreateOrderResult>
         }
       }
 
-      // 7. Calculate subtotal
-      const subtotal = items.reduce((sum, item) => {
-        const variant = variantMap.get(item.variantId)!;
-        return sum + variant.price * item.quantity;
-      }, 0);
+      // 7. Fetch product/category discounts for all items (active, within date range)
+      const now = new Date();
+      const productIds = [...new Set(rows.map((v) => v.product_id))];
+      const categoryIds = [...new Set(rows.map((v) => v.category_id).filter(Boolean))] as string[];
 
-      // 8. Apply coupon discount if provided
-      let discountAmount = 0;
-      if (couponCode) {
-        const [coupon] = await tx
-          .select()
-          .from(coupons)
-          .where(eq(coupons.code, couponCode.toUpperCase()))
-          .limit(1);
+      const itemDiscounts = await tx
+        .select()
+        .from(discounts)
+        .where(
+          and(
+            eq(discounts.active, true),
+            sql`(${discounts.startsAt} IS NULL OR ${discounts.startsAt} <= ${now})`,
+            sql`(${discounts.endsAt} IS NULL OR ${discounts.endsAt} >= ${now})`,
+            sql`(${discounts.productId} IN (${sql.join(productIds.map((id) => sql`${id}`), sql`, `)}) OR ${discounts.categoryId} IN (${sql.join(categoryIds.map((id) => sql`${id}`), sql`, `)}))`
+          )
+        );
 
-        if (coupon && coupon.active) {
-          // Validate coupon (time, usage, min purchase)
-          const now = new Date();
-          const isValid =
-            (!coupon.startsAt || now >= coupon.startsAt) &&
-            (!coupon.endsAt || now <= coupon.endsAt) &&
-            (!coupon.maxUses || coupon.usedCount < coupon.maxUses) &&
-            (!coupon.minPurchase || subtotal >= coupon.minPurchase);
+      // Build discount lookup: productId → discount, categoryId → discount
+      const productDiscountMap = new Map<string, typeof itemDiscounts[0]>();
+      const categoryDiscountMap = new Map<string, typeof itemDiscounts[0]>();
+      for (const d of itemDiscounts) {
+        if (d.productId && !productDiscountMap.has(d.productId)) {
+          productDiscountMap.set(d.productId, d);
+        }
+        if (d.categoryId && !categoryDiscountMap.has(d.categoryId)) {
+          categoryDiscountMap.set(d.categoryId, d);
+        }
+      }
 
-          if (isValid) {
-            if (coupon.type === "percentage") {
-              discountAmount = Math.round(subtotal * (coupon.value / 100));
-            } else if (coupon.type === "fixed") {
-              discountAmount = Math.min(coupon.value, subtotal);
-            }
-            // free_shipping handled in shipping calculation below
+      // 8. Calculate subtotal with product/category discounts applied per item
+      let subtotal = 0;
+      for (const item of items) {
+        const variant = variantMap.get(item.variantId);
+        if (!variant) {
+          throw new Error(`Variante ${item.variantId} no encontrada.`);
+        }
+        let itemPrice = variant.price;
 
-            // Increment usage count
-            await tx
-              .update(coupons)
-              .set({ usedCount: sql`${coupons.usedCount} + 1` })
-              .where(eq(coupons.id, coupon.id));
+        // Apply product-specific discount first (keyed by product ID)
+        const prodDiscount = productDiscountMap.get(variant.productId);
+        if (prodDiscount) {
+          if (prodDiscount.type === "percentage") {
+            itemPrice = Math.round(itemPrice * (1 - prodDiscount.value / 100));
+          } else {
+            itemPrice = Math.max(0, itemPrice - prodDiscount.value);
           }
         }
+
+        // Apply category discount on top
+        if (variant.categoryId) {
+          const catDiscount = categoryDiscountMap.get(variant.categoryId);
+          if (catDiscount) {
+            if (catDiscount.type === "percentage") {
+              itemPrice = Math.round(itemPrice * (1 - catDiscount.value / 100));
+            } else {
+              itemPrice = Math.max(0, itemPrice - catDiscount.value);
+            }
+          }
+        }
+
+        subtotal += itemPrice * item.quantity;
+      }
+
+      // 9. Fetch coupon ONCE with SELECT FOR UPDATE (Task 2.2 + 2.3)
+      let coupon: typeof coupons.$inferSelect | null = null;
+      if (couponCode) {
+        const lockedCouponResult = await tx.execute(sql`
+          SELECT * FROM ${coupons}
+          WHERE ${coupons.code} = ${couponCode.toUpperCase()}
+          FOR UPDATE
+        `);
+        const couponRows = lockedCouponResult as unknown as typeof coupons.$inferSelect[];
+        coupon = couponRows[0] ?? null;
+      }
+
+      // 10. Apply coupon discount and validate per-user usage (Task 2.1)
+      let discountAmount = 0;
+      if (coupon && coupon.active) {
+        const isValid =
+          (!coupon.startsAt || now >= coupon.startsAt) &&
+          (!coupon.endsAt || now <= coupon.endsAt) &&
+          (!coupon.maxUses || coupon.usedCount < coupon.maxUses) &&
+          (!coupon.minPurchase || subtotal >= coupon.minPurchase);
+
+        if (!isValid) {
+          throw new Error("El cupón no es válido para esta compra.");
+        }
+
+        // Per-user usage check (Task 2.1)
+        if (coupon.maxUsesPerUser) {
+          const userId = session.user?.id;
+          if (!userId) {
+            throw new Error("Usuario no autenticado.");
+          }
+          const [{ userUsageCount }] = await tx
+            .select({ userUsageCount: count() })
+            .from(orders)
+            .where(
+              and(
+                eq(orders.userId, userId),
+                eq(orders.couponCode, (couponCode ?? "").toUpperCase())
+              )
+            );
+
+          if (userUsageCount >= coupon.maxUsesPerUser) {
+            throw new Error("Ya usaste este cupón el máximo de veces permitido");
+          }
+        }
+
+        if (coupon.type === "percentage") {
+          discountAmount = Math.round(subtotal * (coupon.value / 100));
+        } else if (coupon.type === "fixed") {
+          discountAmount = Math.min(coupon.value, subtotal);
+        }
+        // free_shipping handled in shipping calculation below
+
+        // Increment usage count
+        await tx
+          .update(coupons)
+          .set({ usedCount: sql`${coupons.usedCount} + 1` })
+          .where(eq(coupons.id, coupon.id));
       }
 
       const totalAfterDiscount = subtotal - discountAmount;
 
-      // 9. Calculate shipping (free if coupon is free_shipping or total >= 50000)
+      // 11. Calculate shipping (free if coupon is free_shipping or total >= threshold)
       let shippingCost = shippingMethod.cost;
-      if (couponCode) {
-        const [coupon] = await tx
-          .select()
-          .from(coupons)
-          .where(eq(coupons.code, couponCode.toUpperCase()))
-          .limit(1);
-        if (coupon?.type === "free_shipping") {
-          shippingCost = 0;
-        }
+      if (coupon?.type === "free_shipping") {
+        shippingCost = 0;
       }
-      if (totalAfterDiscount >= 50000) {
+      if (totalAfterDiscount >= FREE_SHIPPING_THRESHOLD) {
         shippingCost = 0;
       }
 
       const total = totalAfterDiscount + shippingCost;
 
-      // 10. Insert order (status: pending)
+      // 12. Insert order (status: pending) — includes shipmentMethodId and couponCode
+      const orderUserId = session.user?.id;
+      if (!orderUserId) {
+        throw new Error("Usuario no autenticado.");
+      }
       const [order] = await tx
         .insert(orders)
         .values({
-          userId: session.user!.id!,
+          userId: orderUserId,
           customerEmail: email,
           status: "pending",
           total,
+          shipmentMethodId: shippingMethod.id,
+          couponCode: couponCode?.toUpperCase() ?? null,
           shippingAddress: {
             name: shippingAddress.name,
             line1: shippingAddress.line1,
@@ -158,7 +240,10 @@ export async function createOrder(input: OrderInput): Promise<CreateOrderResult>
 
       // 11. Insert order items + decrement stock + record inventory movement
       for (const item of items) {
-        const variant = variantMap.get(item.variantId)!;
+        const variant = variantMap.get(item.variantId);
+        if (!variant) {
+          throw new Error(`Variante ${item.variantId} no encontrada.`);
+        }
 
         // Insert order item
         await tx.insert(orderItems).values({
@@ -200,7 +285,10 @@ export async function createOrder(input: OrderInput): Promise<CreateOrderResult>
       orderId: result.orderId,
       email: validated.data.email,
       items: result.items.map((item) => {
-        const variant = result.variantMap.get(item.variantId)!;
+        const variant = result.variantMap.get(item.variantId);
+        if (!variant) {
+          throw new Error(`Variante ${item.variantId} no encontrada.`);
+        }
         return {
           name: variant.productName,
           quantity: item.quantity,

@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useCartStore } from "@/features/cart/lib/cart-store";
 import { formatPrice } from "@/lib/utils";
+import { FREE_SHIPPING_THRESHOLD, DEFAULT_SHIPPING_COST } from "@/lib/config";
+import { getActiveShippingMethods } from "@/features/checkout/lib/shipping-actions";
 import { CouponInput } from "./coupon-input";
 
 interface CouponDiscount {
@@ -24,6 +27,20 @@ export function OrderSummary({
 }: OrderSummaryProps) {
   const items = useCartStore((s) => s.items);
   const total = useCartStore((s) => s.total);
+  const [defaultShippingCost, setDefaultShippingCost] = useState(DEFAULT_SHIPPING_COST);
+
+  // Fetch cheapest active shipping method from DB on mount
+  useEffect(() => {
+    getActiveShippingMethods()
+      .then((methods) => {
+        if (methods.length > 0) {
+          setDefaultShippingCost(methods[0].cost);
+        }
+      })
+      .catch(() => {
+        // Fallback to config constant if fetch fails
+      });
+  }, []);
 
   // Calculate discount
   let discountAmount = 0;
@@ -37,10 +54,10 @@ export function OrderSummary({
 
   const subtotalAfterDiscount = total - discountAmount;
 
-  // Shipping calculation (free if coupon is free_shipping or subtotal >= 50000)
+  // Shipping calculation (free if coupon is free_shipping or subtotal >= threshold)
   const freeShipping =
-    appliedCoupon?.type === "free_shipping" || subtotalAfterDiscount >= 50000;
-  const shipping = freeShipping ? 0 : 2500;
+    appliedCoupon?.type === "free_shipping" || subtotalAfterDiscount >= FREE_SHIPPING_THRESHOLD;
+  const shipping = freeShipping ? 0 : defaultShippingCost;
 
   const grandTotal = subtotalAfterDiscount + shipping;
 
@@ -111,7 +128,7 @@ export function OrderSummary({
         </div>
         {shipping > 0 && (
           <p className="text-xs text-muted-foreground">
-            Envio gratis en compras mayores a {formatPrice(50000)}
+            Envio gratis en compras mayores a {formatPrice(FREE_SHIPPING_THRESHOLD)}
           </p>
         )}
         <div className="flex justify-between text-lg font-semibold pt-3">

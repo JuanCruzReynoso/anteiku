@@ -1,12 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
 import { shippingSchema, type ShippingFormData } from "../lib/schema";
 import { getActiveShippingMethods, type ShippingMethod } from "../lib/shipping-actions";
+import { getSavedAddresses } from "@/features/account/lib/actions";
 import { formatPrice } from "@/lib/utils";
+
+interface SavedAddress {
+  id: string;
+  name: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  phone?: string;
+  isDefault: boolean;
+}
 
 interface ShippingFormProps {
   onSubmit: (data: ShippingFormData & { shippingMethodId: string }) => void;
@@ -14,14 +29,19 @@ interface ShippingFormProps {
 }
 
 export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
+  const { data: session } = useSession();
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [selectedMethod, setSelectedMethod] = useState<string>("");
   const [isLoadingMethods, setIsLoadingMethods] = useState(true);
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("new");
+  const [isPending, startTransition] = useTransition();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<ShippingFormData>({
     resolver: zodResolver(shippingSchema),
     defaultValues: {
@@ -47,6 +67,68 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
     loadMethods();
   }, []);
 
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    async function loadAddresses() {
+      try {
+        const addresses = await getSavedAddresses();
+        setSavedAddresses(addresses);
+        // Auto-select default address
+        const defaultAddr = addresses.find((a) => a.isDefault);
+        if (defaultAddr) {
+          setSelectedAddressId(defaultAddr.id);
+          reset({
+            email: defaultValues?.email || "",
+            name: defaultAddr.name,
+            phone: defaultAddr.phone || defaultValues?.phone || "",
+            line1: defaultAddr.line1,
+            line2: defaultAddr.line2 || "",
+            city: defaultAddr.city,
+            state: defaultAddr.state,
+            postalCode: defaultAddr.postalCode,
+            country: defaultAddr.country || "Argentina",
+          });
+        }
+      } catch {
+        // Silently fail — user can still enter address manually
+      }
+    }
+    loadAddresses();
+  }, [session?.user?.id, reset, defaultValues]);
+
+  function handleAddressSelect(addressId: string) {
+    setSelectedAddressId(addressId);
+    if (addressId === "new") {
+      reset({
+        email: defaultValues?.email || "",
+        name: "",
+        phone: "",
+        line1: "",
+        line2: "",
+        city: "",
+        state: "",
+        postalCode: "",
+        country: "Argentina",
+      });
+      return;
+    }
+    const addr = savedAddresses.find((a) => a.id === addressId);
+    if (addr) {
+      reset({
+        email: defaultValues?.email || "",
+        name: addr.name,
+        phone: addr.phone || "",
+        line1: addr.line1,
+        line2: addr.line2 || "",
+        city: addr.city,
+        state: addr.state,
+        postalCode: addr.postalCode,
+        country: addr.country || "Argentina",
+      });
+    }
+  }
+
   function handleFormError() {
     const errorMessages = Object.values(errors)
       .map((e) => e?.message)
@@ -71,6 +153,66 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
   return (
     <form onSubmit={handleSubmit(handleFormSubmit, handleFormError)} className="space-y-8">
       <h2 className="text-xl font-semibold">Datos de envío</h2>
+
+      {/* Saved Address Selector */}
+      {session?.user?.id && savedAddresses.length > 0 && (
+        <div className="space-y-3">
+          <label className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+            Dirección guardada
+          </label>
+          <div className="space-y-2">
+            <label
+              className={`flex items-center gap-3 p-3 cursor-pointer transition-colors ${
+                selectedAddressId === "new"
+                  ? "bg-muted ring-1 ring-foreground"
+                  : "bg-muted/50 hover:bg-muted"
+              }`}
+            >
+              <input
+                type="radio"
+                name="savedAddress"
+                value="new"
+                checked={selectedAddressId === "new"}
+                onChange={() => handleAddressSelect("new")}
+                className="mt-0.5"
+              />
+              <span className="text-sm">Usar nueva dirección</span>
+            </label>
+            {savedAddresses.map((addr) => (
+              <label
+                key={addr.id}
+                className={`flex items-start gap-3 p-3 cursor-pointer transition-colors ${
+                  selectedAddressId === addr.id
+                    ? "bg-muted ring-1 ring-foreground"
+                    : "bg-muted/50 hover:bg-muted"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="savedAddress"
+                  value={addr.id}
+                  checked={selectedAddressId === addr.id}
+                  onChange={() => handleAddressSelect(addr.id)}
+                  className="mt-0.5"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{addr.name}</span>
+                    {addr.isDefault && (
+                      <span className="text-[10px] uppercase tracking-wider bg-foreground text-background px-1.5 py-0.5">
+                        Default
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {addr.line1}{addr.line2 && `, ${addr.line2}`} — {addr.city}, {addr.state} {addr.postalCode}
+                  </p>
+                </div>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Email */}
       <div className="space-y-2">

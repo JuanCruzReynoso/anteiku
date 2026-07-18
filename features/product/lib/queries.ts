@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { products, categories, variants, discounts } from "@/db/schema";
-import { eq, desc, and, gte, lte, or, isNull } from "drizzle-orm";
+import { eq, desc, and, gte, lte, or, isNull, sql } from "drizzle-orm";
+import { FEATURED_LIMIT, SEARCH_RESULTS_LIMIT } from "@/lib/config";
 
 export async function getAllProducts() {
   return db.query.products.findMany({
@@ -35,16 +36,33 @@ export async function getProductsByCategory(categorySlug: string) {
   });
 }
 
-export async function getFeaturedProducts() {
+export async function getFeaturedProducts(limit = FEATURED_LIMIT) {
   return db.query.products.findMany({
-    where: and(eq(products.featured, "true"), eq(products.status, "active")),
+    where: and(eq(products.featured, true), eq(products.status, "active")),
     with: { category: true, variants: true, discounts: true },
-    limit: 4,
+    limit,
   });
 }
 
 export async function getAllCategories() {
   return db.query.categories.findMany({
     orderBy: [categories.sortOrder],
+  });
+}
+
+export async function searchProducts(query: string, limit = SEARCH_RESULTS_LIMIT) {
+  // Sanitize wildcards to prevent ILIKE injection
+  const sanitized = query.replace(/[%_]/g, "\\$&");
+
+  return db.query.products.findMany({
+    where: and(
+      or(
+        sql`${products.name} ILIKE ${`%${sanitized}%`}`,
+        sql`${products.description} ILIKE ${`%${sanitized}%`}`
+      ),
+      eq(products.status, "active")
+    ),
+    with: { category: true, variants: true, discounts: true },
+    limit,
   });
 }

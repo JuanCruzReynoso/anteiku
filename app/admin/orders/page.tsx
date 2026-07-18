@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { orders } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { formatPrice } from "@/lib/utils";
+import { ORDER_STATUS_LABELS } from "@/lib/status-labels";
 
 export const dynamic = "force-dynamic";
 
@@ -14,13 +15,7 @@ export default async function AdminOrders() {
     orderBy: [desc(orders.createdAt)],
   });
 
-  const statusLabel: Record<string, string> = {
-    pending: "Pendiente",
-    paid: "Pagado",
-    shipped: "Enviado",
-    delivered: "Entregado",
-    cancelled: "Cancelado",
-  };
+
 
   const statusColor: Record<string, string> = {
     pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
@@ -70,7 +65,7 @@ export default async function AdminOrders() {
                         statusColor[order.status] ?? ""
                       }`}
                     >
-                      {statusLabel[order.status] ?? order.status}
+                      {ORDER_STATUS_LABELS[order.status] ?? order.status}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">

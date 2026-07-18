@@ -3,6 +3,9 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
+
+const log = logger.create("product");
 
 export default function ProductError({
   error,
@@ -12,7 +15,7 @@ export default function ProductError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error(error);
+    log.error(error.message, { digest: error.digest });
   }, [error]);
 
   return (

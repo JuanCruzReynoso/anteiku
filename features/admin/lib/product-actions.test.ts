@@ -139,8 +139,8 @@ describe("product-actions", () => {
       expect(result).toHaveProperty("error");
     });
 
-    it("converts featured boolean to string", async () => {
-      const mockProduct = createMockProduct({ featured: "true" });
+    it("passes featured boolean directly to DB", async () => {
+      const mockProduct = createMockProduct({ featured: true });
       const insertChain = {
         values: vi.fn().mockReturnValue({
           returning: vi.fn().mockResolvedValue([mockProduct]),
@@ -160,7 +160,7 @@ describe("product-actions", () => {
       });
 
       expect(insertChain.values).toHaveBeenCalledWith(
-        expect.objectContaining({ featured: "true" })
+        expect.objectContaining({ featured: true })
       );
     });
   });

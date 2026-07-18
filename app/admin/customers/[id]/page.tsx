@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { users, orders, addresses } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { formatPrice } from "@/lib/utils";
+import { ORDER_STATUS_LABELS } from "@/lib/status-labels";
 
 export const dynamic = "force-dynamic";
 
@@ -35,13 +36,7 @@ export default async function CustomerDetailPage({ params }: Props) {
 
   const totalSpent = userOrders.reduce((acc, o) => acc + o.total, 0);
 
-  const statusLabel: Record<string, string> = {
-    pending: "Pendiente",
-    paid: "Pagado",
-    shipped: "Enviado",
-    delivered: "Entregado",
-    cancelled: "Cancelado",
-  };
+
 
   return (
     <div className="max-w-3xl">
@@ -168,7 +163,7 @@ export default async function CustomerDetailPage({ params }: Props) {
                   </td>
                   <td className="px-4 py-2">
                     <span className="text-xs">
-                      {statusLabel[order.status] ?? order.status}
+                      {ORDER_STATUS_LABELS[order.status] ?? order.status}
                     </span>
                   </td>
                   <td className="px-4 py-2 text-right">

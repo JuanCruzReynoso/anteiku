@@ -106,7 +106,7 @@ export const products = pgTable("products", {
   images: jsonb("images").$type<string[]>().default([]).notNull(),
   basePrice: integer("base_price").notNull(), // prices in ARS (integer)
   status: text("status").notNull().default("active"), // "active" | "inactive" | "draft"
-  featured: text("featured").notNull().default("false"), // "true" | "false" stored as text for simplicity
+  featured: boolean("featured").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -142,6 +142,7 @@ export const orders = pgTable("orders", {
   total: integer("total").notNull(), // prices in ARS (integer)
   notes: text("notes"),
   shipmentMethodId: text("shipment_method_id").references(() => shipmentMethods.id),
+  couponCode: text("coupon_code"),
   shippingAddress: jsonb("shipping_address")
     .$type<{
       name: string;

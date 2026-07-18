@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllProducts, getAllCategories } from "@/features/product/lib/queries";
-import { searchProducts } from "@/db/queries";
+import { searchProducts } from "@/features/product/lib/queries";
+import { SEARCH_RESULTS_LIMIT } from "@/lib/config";
 import { ProductCard } from "@/features/product/ui/product-card";
 import { SearchInput } from "@/features/shop/ui/search-input";
 
@@ -47,7 +48,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     ...allCategories.map((c) => ({ label: c.name, value: c.slug })),
   ];
 
-  const limitedProducts = filtered.slice(0, 20);
+  const limitedProducts = filtered.slice(0, SEARCH_RESULTS_LIMIT);
 
   const jsonLd = {
     "@context": "https://schema.org",

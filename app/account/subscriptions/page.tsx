@@ -1,33 +1,39 @@
-import { auth } from "@/auth";
-import { db } from "@/db";
-import { userSubscriptions, subscriptionPlans } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { formatPrice } from "@/lib/utils";
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import {
+  getUserSubscriptions,
+  type UserSubscription,
+} from "@/features/account/lib/subscription-actions";
+import { SubscriptionCard } from "@/features/account/ui/subscription-card";
 
-export default async function AccountSubscriptionsPage() {
-  const session = await auth();
+export default function AccountSubscriptionsPage() {
+  const [subscriptions, setSubscriptions] = useState<UserSubscription[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const subscriptions = await db
-    .select({
-      id: userSubscriptions.id,
-      status: userSubscriptions.status,
-      currentPeriodStart: userSubscriptions.currentPeriodStart,
-      currentPeriodEnd: userSubscriptions.currentPeriodEnd,
-      planName: subscriptionPlans.name,
-      planPrice: subscriptionPlans.price,
-      planInterval: subscriptionPlans.interval,
-    })
-    .from(userSubscriptions)
-    .innerJoin(subscriptionPlans, eq(userSubscriptions.planId, subscriptionPlans.id))
-    .where(eq(userSubscriptions.userId, session!.user!.id!));
+  async function loadSubscriptions() {
+    const subs = await getUserSubscriptions();
+    setSubscriptions(subs);
+    setIsLoading(false);
+  }
 
-  const statusLabels: Record<string, string> = {
-    active: "Activa",
-    paused: "Pausada",
-    cancelled: "Cancelada",
-    past_due: "Pago pendiente",
-  };
+  useEffect(() => {
+    loadSubscriptions();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <h2 className="text-xl font-semibold">Suscripciones</h2>
+        <div className="space-y-4">
+          {[1, 2].map((i) => (
+            <div key={i} className="h-32 bg-muted animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   if (subscriptions.length === 0) {
     return (
@@ -54,35 +60,11 @@ export default async function AccountSubscriptionsPage() {
 
       <div className="space-y-4">
         {subscriptions.map((sub) => (
-          <div key={sub.id} className="bg-muted p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium">{sub.planName}</p>
-                <p className="text-sm text-muted-foreground">
-                  {formatPrice(sub.planPrice)}/
-                  {sub.planInterval === "monthly" ? "mes" : "año"}
-                </p>
-              </div>
-              <span className="text-xs font-medium bg-foreground text-background px-3 py-1">
-                {statusLabels[sub.status] || sub.status}
-              </span>
-            </div>
-
-            {sub.status === "active" && (
-              <div className="text-xs text-muted-foreground space-y-1">
-                <p>
-                  Periodo actual:{" "}
-                  {sub.currentPeriodStart
-                    ? new Date(sub.currentPeriodStart).toLocaleDateString("es-AR")
-                    : "—"}{" "}
-                  —{" "}
-                  {sub.currentPeriodEnd
-                    ? new Date(sub.currentPeriodEnd).toLocaleDateString("es-AR")
-                    : "—"}
-                </p>
-              </div>
-            )}
-          </div>
+          <SubscriptionCard
+            key={sub.id}
+            subscription={sub}
+            onStatusChange={loadSubscriptions}
+          />
         ))}
       </div>
     </div>

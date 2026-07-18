@@ -1,29 +1,46 @@
 /**
  * Centralized environment variable validation.
- * Fails fast at startup with a clear message instead of cryptic runtime errors.
+ * Uses Zod for build-time validation — missing vars fail the build with clear messages.
  */
 
-function required(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(
-      `[env] Missing required environment variable: ${name}\n` +
-        `Add it to your .env file or environment configuration.`
-    );
-  }
-  return value;
+import { z } from "zod";
+
+const envSchema = z.object({
+  // Database
+  DATABASE_URL: z.string().url(),
+
+  // Auth.js
+  AUTH_SECRET: z.string().min(1),
+  GOOGLE_CLIENT_ID: z.string().min(1),
+  GOOGLE_CLIENT_SECRET: z.string().min(1),
+
+  // Supabase
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+
+  // App
+  NEXT_PUBLIC_APP_URL: z.string().url(),
+
+  // Optional
+  OWNER_EMAILS: z.string().optional(),
+
+  // Upstash Redis (optional in dev, required in production)
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
+});
+
+const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  const missing = parsed.error.issues
+    .map((issue) => `  - ${issue.path.join(".")}: ${issue.message}`)
+    .join("\n");
+
+  throw new Error(
+    `[env] Invalid or missing environment variables:\n${missing}\n\n` +
+      `Copy .env.example to .env.local and fill in the required values.`
+  );
 }
 
-function optional(name: string): string | undefined {
-  return process.env[name] || undefined;
-}
-
-export const env = {
-  DATABASE_URL: required("DATABASE_URL"),
-  AUTH_SECRET: required("AUTH_SECRET"),
-  GOOGLE_CLIENT_ID: required("GOOGLE_CLIENT_ID"),
-  GOOGLE_CLIENT_SECRET: required("GOOGLE_CLIENT_SECRET"),
-  NEXT_PUBLIC_SUPABASE_URL: required("NEXT_PUBLIC_SUPABASE_URL"),
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: required("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"),
-  OWNER_EMAILS: optional("OWNER_EMAILS"),
-} as const;
+export const env = parsed.data;

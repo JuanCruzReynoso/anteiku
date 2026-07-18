@@ -7,6 +7,10 @@
 
 // const resend = new Resend(process.env.RESEND_API_KEY);
 
+import { logger } from "@/lib/logger";
+
+const log = logger.create("email");
+
 // ─── Types ──────────────────────────────────────────────
 
 export interface OrderEmailData {
@@ -20,7 +24,7 @@ export interface OrderEmailData {
 
 export async function sendOrderConfirmation(data: OrderEmailData): Promise<void> {
   if (!process.env.RESEND_API_KEY) {
-    console.warn("[email] RESEND_API_KEY not configured — skipping order confirmation email.");
+    log.warn("RESEND_API_KEY not configured — skipping order confirmation email.");
     return;
   }
 
@@ -33,10 +37,10 @@ export async function sendOrderConfirmation(data: OrderEmailData): Promise<void>
     //   html: buildOrderHtml(data),
     // });
 
-    console.log(`[email] Order confirmation sent to ${data.email} for order ${data.orderId}`);
+    log.info(`Order confirmation sent to ${data.email} for order ${data.orderId}`);
   } catch (error) {
     // Never block order creation on email failure
-    console.error("[email] Failed to send order confirmation:", error);
+    log.error("Failed to send order confirmation", { error: String(error) });
   }
 }
 

@@ -26,7 +26,7 @@ export interface MockProduct {
   basePrice: number;
   categoryId: string;
   status: "active" | "inactive" | "draft";
-  featured: string;
+  featured: boolean;
   images: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -41,7 +41,7 @@ export function createMockProduct(overrides: Partial<MockProduct> = {}): MockPro
     basePrice: 1500,
     categoryId: "cat-1",
     status: "active",
-    featured: "false",
+    featured: false,
     images: ["/test.jpg"],
     createdAt: new Date(),
     updatedAt: new Date(),

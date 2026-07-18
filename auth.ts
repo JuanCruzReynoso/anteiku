@@ -14,7 +14,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 // Emails with owner access — configurable via env var (comma-separated)
-const OWNER_EMAILS = env.OWNER_EMAILS?.split(",").map(e => e.trim()) ?? [];
+const OWNER_EMAILS = env.OWNER_EMAILS?.split(",").map((e) => e.trim()) ?? [];
 
 declare module "next-auth" {
   interface Session {
@@ -32,16 +32,20 @@ declare module "next-auth" {
   }
 }
 
-// Auth.js adapter-compatible tables (snake_case JS properties, same DB column names)
-const adapterUsers = pgTable("users", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: text("name"),
-  email: text("email").notNull().unique(),
-  emailVerified: timestamp("email_verified", { mode: "date" }),
-  image: text("image"),
-});
+// Extended user type that includes the role field from our DB schema
+interface AuthUser {
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  role?: string;
+}
+
+// ─── Auth.js adapter-compatible tables ────────────────────────
+// The adapter requires specific column names and primary keys that differ
+// from our canonical schema (e.g. schema.ts uses `id` PK for sessions,
+// but the adapter expects `sessionToken` as PK). These minimal definitions
+// map to the same DB tables while satisfying the adapter's type constraints.
 
 const adapterAccounts = pgTable(
   "accounts",
@@ -51,7 +55,7 @@ const adapterAccounts = pgTable(
       .$defaultFn(() => crypto.randomUUID()),
     userId: text("user_id")
       .notNull()
-      .references(() => adapterUsers.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     type: text("type").notNull(),
     provider: text("provider").notNull(),
     providerAccountId: text("provider_account_id").notNull(),
@@ -74,7 +78,7 @@ const adapterSessions = pgTable("sessions", {
   sessionToken: text("session_token").primaryKey(),
   userId: text("user_id")
     .notNull()
-    .references(() => adapterUsers.id, { onDelete: "cascade" }),
+    .references(() => users.id, { onDelete: "cascade" }),
   expires: timestamp("expires", { mode: "date" }).notNull(),
 });
 
@@ -94,7 +98,7 @@ const adapterVerificationTokens = pgTable(
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: DrizzleAdapter(db, {
-    usersTable: adapterUsers,
+    usersTable: users,
     accountsTable: adapterAccounts,
     sessionsTable: adapterSessions,
     verificationTokensTable: adapterVerificationTokens,
@@ -118,13 +122,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const dbUser = await db.query.users.findFirst({
             where: eq(users.email, user.email),
           });
-          
+
           if (dbUser) {
             if (dbUser.role === "customer" && OWNER_EMAILS.includes(user.email)) {
               await db.update(users).set({ role: "owner" }).where(eq(users.id, dbUser.id));
-              (user as any).role = "owner";
+              (user as AuthUser).role = "owner";
             } else {
-              (user as any).role = dbUser.role;
+              (user as AuthUser).role = dbUser.role;
             }
           }
         } catch {
@@ -145,7 +149,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // On initial sign-in, set user data from OAuth
       if (user) {
         token.sub = user.id;
-        token.role = (user as any).role;
+        token.role = (user as AuthUser).role;
       }
 
       // Always refresh role from DB to catch admin changes without re-login

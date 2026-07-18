@@ -21,7 +21,7 @@ interface ProductFormProps {
     basePrice: number;
     categoryId: string | null;
     status: string;
-    featured: string;
+    featured: boolean;
     images: string[];
   };
 }
@@ -46,7 +46,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
       basePrice: initialData?.basePrice ?? 0,
       categoryId: initialData?.categoryId ?? "",
       status: (initialData?.status as "active" | "inactive" | "draft") ?? "active",
-      featured: initialData?.featured === "true",
+      featured: initialData?.featured ?? false,
       images: initialData?.images ?? [],
     },
   });

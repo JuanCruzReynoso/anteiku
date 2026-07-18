@@ -17,7 +17,10 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-const navLinks = [{ href: "/shop", label: "Tienda" }];
+const navLinks = [
+  { href: "/shop", label: "Tienda" },
+  { href: "/subscriptions", label: "Suscripciones" },
+];
 
 const adminRoles = ["owner", "admin"];
 

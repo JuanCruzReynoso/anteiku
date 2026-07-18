@@ -1,5 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { logger } from "@/lib/logger";
+import { CART_EXPIRATION_DAYS } from "@/lib/config";
+
+const log = logger.create("cart");
 
 // ─── Types ──────────────────────────────────────────────
 
@@ -10,7 +14,8 @@ export interface CartItem {
   variantName: string;
   price: number; // ARS integer
   quantity: number;
-  stock: number; // available stock at add time
+  stock: number | null; // available stock at add time; null = unknown (legacy)
+  addedAt?: number; // timestamp when item was added
   image?: string;
 }
 
@@ -49,20 +54,20 @@ export const useCartStore = create<CartState & CartActions>()(
         const { items } = get();
         const existing = items.find((i) => i.variantId === item.variantId);
 
-        // Use stock from item data if available, fallback to 999 for legacy items
-        const maxStock = "stock" in item ? (item as any).stock : 999;
+        // Use stock from item data if available, fallback to null (unknown) for legacy items
+        const maxStock = item.stock ?? null;
 
         let next: CartItem[];
         if (existing) {
-          const newQty = Math.min(existing.quantity + quantity, maxStock);
+          const newQty = maxStock !== null ? Math.min(existing.quantity + quantity, maxStock) : existing.quantity + quantity;
           next = items.map((i) =>
             i.variantId === item.variantId
               ? { ...i, quantity: newQty }
               : i
           );
         } else {
-          const cappedQty = Math.min(quantity, maxStock);
-          next = [...items, { ...item, quantity: cappedQty, stock: maxStock }];
+          const cappedQty = maxStock !== null ? Math.min(quantity, maxStock) : quantity;
+          next = [...items, { ...item, quantity: cappedQty, stock: maxStock, addedAt: Date.now() }];
         }
 
         set({ items: next, ...computeTotals(next) });
@@ -105,16 +110,27 @@ export const useCartStore = create<CartState & CartActions>()(
               item.quantity > 0
           );
 
-          // Ensure stock field exists on all items (migrate legacy items)
+          // Migrate legacy items: unknown stock → null, add timestamp if missing
           state.items = state.items.map((item) => ({
             ...item,
-            stock: typeof item.stock === "number" ? item.stock : 999,
+            stock: typeof item.stock === "number" ? item.stock : null,
+            addedAt: typeof item.addedAt === "number" ? item.addedAt : Date.now(),
           }));
 
-          if (state.items.length < before) {
-            console.warn(
-              `[cart] Removed ${before - state.items.length} stale item(s) with missing data`
+          // Remove expired cart items
+          const cutoff = Date.now() - CART_EXPIRATION_DAYS * 24 * 60 * 60 * 1000;
+          const expiredCount = state.items.filter(
+            (item) => typeof item.addedAt === "number" && item.addedAt < cutoff
+          ).length;
+          if (expiredCount > 0) {
+            state.items = state.items.filter(
+              (item) => typeof item.addedAt !== "number" || item.addedAt >= cutoff
             );
+            log.warn(`Removed ${expiredCount} expired cart item(s) older than ${CART_EXPIRATION_DAYS} days`);
+          }
+
+          if (state.items.length < before) {
+            log.warn(`Removed ${before - state.items.length} stale item(s) with missing data`);
           }
 
           const totals = computeTotals(state.items);

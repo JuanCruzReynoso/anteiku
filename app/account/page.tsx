@@ -1,20 +1,23 @@
 import { auth } from "@/auth";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { AddressManager } from "@/features/account/ui/address-manager";
 
 export default async function AccountPage() {
   const session = await auth();
+
+  const [user] = await db
+    .select({ name: users.name, phone: users.phone })
+    .from(users)
+    .where(eq(users.id, session!.user!.id!))
+    .limit(1);
 
   return (
     <div className="space-y-8">
       <h2 className="text-xl font-semibold">Perfil</h2>
 
       <div className="bg-muted p-6 space-y-4">
-        <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
-            Nombre
-          </p>
-          <p className="text-sm">{session?.user?.name || "Sin nombre"}</p>
-        </div>
-
         <div className="space-y-2">
           <p className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             Email
@@ -30,9 +33,13 @@ export default async function AccountPage() {
         </div>
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        Para modificar tu perfil, contactanos a soporte@anteiku.com
-      </p>
+      {/* Profile Edit */}
+      <div className="bg-muted p-6">
+        <AddressManager
+          initialName={user?.name || session?.user?.name || ""}
+          initialPhone={user?.phone || null}
+        />
+      </div>
     </div>
   );
 }

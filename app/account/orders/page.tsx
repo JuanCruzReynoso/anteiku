@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { orders, orderItems, variants, products } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { formatPrice } from "@/lib/utils";
+import { ORDER_STATUS_LABELS } from "@/lib/status-labels";
 
 export default async function AccountOrdersPage() {
   const session = await auth();
@@ -36,13 +37,7 @@ export default async function AccountOrdersPage() {
     })
   );
 
-  const statusLabels: Record<string, string> = {
-    pending: "Pendiente",
-    confirmed: "Confirmado",
-    shipped: "Enviado",
-    delivered: "Entregado",
-    cancelled: "Cancelado",
-  };
+  const statusLabels = ORDER_STATUS_LABELS;
 
   if (ordersWithItems.length === 0) {
     return (

@@ -1,20 +1,13 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
-import { useCartStore } from "@/features/cart/lib/cart-store";
 
 function ConfirmationContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
-  const clearCart = useCartStore((s) => s.clearCart);
-
-  // Clear cart on mount (order placed)
-  useEffect(() => {
-    clearCart();
-  }, [clearCart]);
 
   return (
     <div className="container mx-auto px-6 md:px-8 py-32 text-center">

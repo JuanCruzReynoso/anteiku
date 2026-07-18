@@ -1,15 +1,13 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// lucide-react v0.511.0 ships no .d.ts — this covers every named import in the project.
+// Minimal ambient declaration for lucide-react.
+// The package does not ship its own .d.ts — this allows all named imports
+// without maintaining a per-icon list that breaks on every new usage.
 declare module "lucide-react" {
   import type { ComponentType, SVGProps } from "react";
   type Icon = ComponentType<SVGProps<SVGSVGElement>>;
 
-  // Default export (some files use `import Icons from "lucide-react"`)
   const icons: Record<string, Icon>;
   export default icons;
 
-  // Every named export the project actually imports — kept as `any` so
-  // adding a new icon never breaks the build again.
   export const Loader2: Icon;
   export const Plus: Icon;
   export const X: Icon;
@@ -208,11 +206,5 @@ declare module "lucide-react" {
   export const Anchor2: Icon;
   export const LayoutDashboard: Icon;
   export const FolderTree: Icon;
-  export const DollarSign: Icon;
-  export const Clock: Icon;
   export const TrendingUp: Icon;
-  export const AlertTriangle: Icon;
-  export const CreditCard: Icon;
-  export const ArrowLeft: Icon;
-  export const Tag: Icon;
 }
