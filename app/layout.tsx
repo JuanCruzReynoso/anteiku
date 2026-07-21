@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Toaster } from "sonner";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { ThemeProvider } from "@/components/ui/theme-provider";
@@ -104,6 +106,8 @@ export default function RootLayout({
             />
           </ThemeProvider>
         </AuthSessionProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
