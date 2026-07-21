@@ -21,7 +21,7 @@
     "@auth/drizzle-adapter": "^1.11.2",
     "@base-ui/react": "^1.6.0",
     "@hookform/resolvers": "^5.4.0",
-    "@supabase/ssr": "^0.12.0",
+    "@supabase/ssr": "^0.12.3",
     "@supabase/supabase-js": "^2.110.2",
     "@upstash/ratelimit": "^2.0.8",
     "@vercel/analytics": "^1.5.0",
