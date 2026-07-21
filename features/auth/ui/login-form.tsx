@@ -17,7 +17,12 @@ function LoginFormInner() {
     setGoogleLoading(true);
     try {
       await signInWithGoogle(redirectedFrom || undefined);
-    } catch {
+    } catch (e: unknown) {
+      // NextAuth's signIn uses redirect() which throws a NEXT_REDIRECT error.
+      // This is expected behavior, not an actual error — let it propagate.
+      if (e && typeof e === "object" && "digest" in e && typeof (e as { digest: string }).digest === "string" && (e as { digest: string }).digest.startsWith("NEXT_REDIRECT")) {
+        throw e;
+      }
       toast.error("Error al conectar con Google", {
         description: "Intentá de nuevo más tarde.",
       });
