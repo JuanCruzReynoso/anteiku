@@ -5,6 +5,7 @@ import { desc } from "drizzle-orm";
 import { formatPrice } from "@/lib/utils";
 import { DiscountActions } from "./discount-actions-cell";
 import { CreateDiscountButton } from "./create-discount-button";
+import { DataTable, type Column, type ActionConfig } from "@/components/admin/data-table";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,73 @@ export type Discount = {
   updatedAt: Date;
 };
 
+type DiscountRow = Discount & {
+  productName: string | null;
+  categoryName: string | null;
+  dateRange: string;
+};
+
+const columns: Column<DiscountRow>[] = [
+  {
+    key: "name",
+    header: "Nombre",
+    type: "text",
+    fontWeight: "bold",
+  },
+  {
+    key: "type",
+    header: "Tipo",
+    type: "text",
+    render: (row) => (
+      <span className="text-muted-foreground">
+        {row.type === "percentage" ? "Porcentaje" : "Fijo"}
+      </span>
+    ),
+  },
+  {
+    key: "value",
+    header: "Valor",
+    type: "conditional",
+    align: "right",
+    render: (row) =>
+      row.type === "percentage" ? `${row.value}%` : formatPrice(row.value),
+  },
+  {
+    key: "productName",
+    header: "Producto/Categoria",
+    type: "text",
+    render: (row) => (
+      <span className="text-muted-foreground">
+        {row.productName ?? row.categoryName ?? "—"}
+      </span>
+    ),
+  },
+  {
+    key: "dateRange",
+    header: "Vigencia",
+    type: "text",
+    hideOnMobile: true,
+    render: (row) => (
+      <span className="text-muted-foreground text-xs">{row.dateRange}</span>
+    ),
+  },
+  {
+    key: "active",
+    header: "Estado",
+    type: "badge",
+    badgeMap: {
+      true: {
+        label: "Activo",
+        className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+      },
+      false: {
+        label: "Inactivo",
+        className: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
+      },
+    },
+  },
+];
+
 export default async function AdminDiscounts() {
   await requireAdmin();
 
@@ -31,76 +99,41 @@ export default async function AdminDiscounts() {
     with: { product: true, category: true },
   });
 
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Descuentos</h1>
-        <CreateDiscountButton />
-      </div>
+  const data: DiscountRow[] = allDiscounts.map((d) => {
+    let dateRange = "Sin limite";
+    if (d.startsAt && d.endsAt) {
+      dateRange = `${d.startsAt.toLocaleDateString("es-AR")} - ${d.endsAt.toLocaleDateString("es-AR")}`;
+    } else if (d.startsAt) {
+      dateRange = `Desde ${d.startsAt.toLocaleDateString("es-AR")}`;
+    }
 
-      {allDiscounts.length === 0 ? (
-        <div className="border rounded-lg p-8 text-center text-muted-foreground">
-          <p className="text-lg font-medium">Sin descuentos</p>
-          <p className="text-sm mt-2">
-            Agragate tu primer descuento para ofrecer precios especiales.
-          </p>
-        </div>
-      ) : (
-        <div className="border rounded-lg overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium">Nombre</th>
-                <th className="text-left px-4 py-3 font-medium">Tipo</th>
-                <th className="text-right px-4 py-3 font-medium">Valor</th>
-                <th className="text-left px-4 py-3 font-medium">Producto/Categoria</th>
-                <th className="text-left px-4 py-3 font-medium">Vigencia</th>
-                <th className="text-left px-4 py-3 font-medium">Estado</th>
-                <th className="text-right px-4 py-3 font-medium">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {allDiscounts.map((discount) => (
-                <tr key={discount.id} className="hover:bg-muted/30">
-                  <td className="px-4 py-3 font-medium">{discount.name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {discount.type === "percentage" ? "Porcentaje" : "Fijo"}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    {discount.type === "percentage"
-                      ? `${discount.value}%`
-                      : formatPrice(discount.value)}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {discount.product?.name ?? discount.category?.name ?? "—"}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">
-                    {discount.startsAt && discount.endsAt
-                      ? `${discount.startsAt.toLocaleDateString("es-AR")} - ${discount.endsAt.toLocaleDateString("es-AR")}`
-                      : discount.startsAt
-                        ? `Desde ${discount.startsAt.toLocaleDateString("es-AR")}`
-                        : "Sin limite"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        discount.active
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                          : "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
-                      }`}
-                    >
-                      {discount.active ? "Activo" : "Inactivo"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <DiscountActions discount={discount} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+    return {
+      ...d,
+      productName: d.product?.name ?? null,
+      categoryName: d.category?.name ?? null,
+      dateRange,
+    };
+  });
+
+  const actions: ActionConfig<DiscountRow> = {
+    type: "inline-modal",
+    component: ({ row }) => <DiscountActions discount={row} />,
+  };
+
+  return (
+    <DataTable
+      data={data}
+      columns={columns}
+      actions={actions}
+      header={{
+        title: "Descuentos",
+        cta: <CreateDiscountButton />,
+      }}
+      empty={{
+        title: "Sin descuentos",
+        description: "Agragate tu primer descuento para ofrecer precios especiales.",
+      }}
+      keyExtractor={(row) => row.id}
+    />
   );
 }

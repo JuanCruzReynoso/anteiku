@@ -5,6 +5,7 @@ import { asc, desc } from "drizzle-orm";
 import { formatPrice } from "@/lib/utils";
 import { PlanActions } from "./plan-actions-cell";
 import { CreatePlanButton } from "./create-plan-button";
+import { DataTable, type Column, type ActionConfig } from "@/components/admin/data-table";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,129 @@ export type SubscriptionPlan = {
   updatedAt: Date;
 };
 
+type PlanRow = SubscriptionPlan & {
+  featureCount: number;
+  intervalLabel: string;
+};
+
+type ActiveSubRow = {
+  id: string;
+  userName: string;
+  planName: string;
+  status: string;
+  currentPeriodStart: Date | null;
+  currentPeriodEnd: Date | null;
+};
+
+const planColumns: Column<PlanRow>[] = [
+  {
+    key: "name",
+    header: "Nombre",
+    type: "text",
+    fontWeight: "bold",
+  },
+  {
+    key: "price",
+    header: "Precio",
+    type: "currency",
+    align: "right",
+    render: (row) => <span>{formatPrice(row.price)}/mes</span>,
+  },
+  {
+    key: "intervalLabel",
+    header: "Intervalo",
+    type: "text",
+    render: (row) => (
+      <span className="capitalize">{row.intervalLabel}</span>
+    ),
+  },
+  {
+    key: "featureCount",
+    header: "Features",
+    type: "count",
+    render: (row) => (
+      <span className="text-muted-foreground text-xs max-w-[200px] truncate block">
+        {row.features?.join(", ") ?? "—"}
+      </span>
+    ),
+    hideOnMobile: true,
+  },
+  {
+    key: "active",
+    header: "Estado",
+    type: "badge",
+    badgeMap: {
+      true: {
+        label: "Activo",
+        className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+      },
+      false: {
+        label: "Inactivo",
+        className: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
+      },
+    },
+  },
+];
+
+const subColumns: Column<ActiveSubRow>[] = [
+  {
+    key: "userName",
+    header: "Cliente",
+    type: "text",
+    fontWeight: "bold",
+  },
+  {
+    key: "planName",
+    header: "Plan",
+    type: "text",
+  },
+  {
+    key: "status",
+    header: "Estado",
+    type: "badge",
+    badgeMap: {
+      active: {
+        label: "Activa",
+        className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+      },
+      cancelled: {
+        label: "Cancelada",
+        className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+      },
+      past_due: {
+        label: "Vencida",
+        className: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
+      },
+      paused: {
+        label: "Pausada",
+        className: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
+      },
+    },
+  },
+  {
+    key: "currentPeriodStart",
+    header: "Periodo",
+    type: "text",
+    hideOnMobile: true,
+    render: (row) => (
+      <span className="text-xs text-muted-foreground">
+        {row.currentPeriodStart?.toLocaleDateString("es-AR")} -{" "}
+        {row.currentPeriodEnd?.toLocaleDateString("es-AR")}
+      </span>
+    ),
+  },
+  {
+    key: "id",
+    header: "Inicio",
+    type: "date",
+    render: (row) => {
+      // We need to use a custom field for created date
+      return null;
+    },
+    hideOnMobile: true,
+  },
+];
+
 export default async function AdminSubscriptions() {
   await requireAdmin();
 
@@ -33,6 +157,35 @@ export default async function AdminSubscriptions() {
     with: { user: true, plan: true },
   });
 
+  const planData: PlanRow[] = plans.map((p) => ({
+    ...p,
+    featureCount: p.features?.length ?? 0,
+    intervalLabel:
+      p.interval === "monthly"
+        ? "Mensual"
+        : p.interval === "quarterly"
+          ? "Trimestral"
+          : "Anual",
+  }));
+
+  const subData: ActiveSubRow[] = activeSubscriptions.map((s) => ({
+    id: s.id,
+    userName: s.user?.name ?? s.user?.email ?? "—",
+    planName: s.plan?.name ?? "—",
+    status: s.status,
+    currentPeriodStart: s.currentPeriodStart,
+    currentPeriodEnd: s.currentPeriodEnd,
+  }));
+
+  const planActions: ActionConfig<PlanRow> = {
+    type: "text-buttons",
+    component: ({ row }) => <PlanActions plan={row} />,
+  };
+
+  const subActions: ActionConfig<ActiveSubRow> = {
+    type: "none",
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -41,123 +194,34 @@ export default async function AdminSubscriptions() {
       </div>
 
       {/* Plans */}
-      <h2 className="text-lg font-semibold mb-4">Planes</h2>
-      {plans.length === 0 ? (
-        <div className="border rounded-lg p-8 text-center text-muted-foreground mb-8">
-          <p className="text-lg font-medium">Sin planes</p>
-          <p className="text-sm mt-2">
-            Agragate tu primer plan de suscripcion para ofrecer cafecito recurrente.
-          </p>
-        </div>
-      ) : (
-        <div className="border rounded-lg overflow-x-auto mb-8">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium">Nombre</th>
-                <th className="text-right px-4 py-3 font-medium">Precio</th>
-                <th className="text-left px-4 py-3 font-medium">Intervalo</th>
-                <th className="text-left px-4 py-3 font-medium">Features</th>
-                <th className="text-left px-4 py-3 font-medium">Estado</th>
-                <th className="text-right px-4 py-3 font-medium">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {plans.map((plan) => (
-                <tr key={plan.id} className="hover:bg-muted/30">
-                  <td className="px-4 py-3 font-medium">{plan.name}</td>
-                  <td className="px-4 py-3 text-right">{formatPrice(plan.price)}/mes</td>
-                  <td className="px-4 py-3 text-muted-foreground capitalize">
-                    {plan.interval === "monthly"
-                      ? "Mensual"
-                      : plan.interval === "quarterly"
-                        ? "Trimestral"
-                        : "Anual"}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs max-w-[200px] truncate">
-                    {plan.features?.join(", ") ?? "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        plan.active
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                          : "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
-                      }`}
-                    >
-                      {plan.active ? "Activo" : "Inactivo"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <PlanActions plan={plan} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <DataTable
+        data={planData}
+        columns={planColumns}
+        actions={planActions}
+        header={{ title: "Planes" }}
+        empty={{
+          title: "Sin planes",
+          description:
+            "Agragate tu primer plan de suscripcion para ofrecer cafecito recurrente.",
+        }}
+        keyExtractor={(row) => row.id}
+      />
+
+      <div className="mt-8" />
 
       {/* Active Subscriptions */}
-      <h2 className="text-lg font-semibold mb-4">Suscripciones activas</h2>
-      {activeSubscriptions.length === 0 ? (
-        <div className="border rounded-lg p-8 text-center text-muted-foreground">
-          <p className="text-lg font-medium">Sin suscripciones activas</p>
-          <p className="text-sm mt-2">
-            Cuando los clientes se suscriban, apareceran aca.
-          </p>
-        </div>
-      ) : (
-        <div className="border rounded-lg overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium">Cliente</th>
-                <th className="text-left px-4 py-3 font-medium">Plan</th>
-                <th className="text-left px-4 py-3 font-medium">Estado</th>
-                <th className="text-left px-4 py-3 font-medium">Periodo</th>
-                <th className="text-left px-4 py-3 font-medium">Inicio</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {activeSubscriptions.map((sub) => (
-                <tr key={sub.id} className="hover:bg-muted/30">
-                  <td className="px-4 py-3 font-medium">
-                    {sub.user?.name ?? sub.user?.email ?? "—"}
-                  </td>
-                  <td className="px-4 py-3">{sub.plan?.name ?? "—"}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        sub.status === "active"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                          : sub.status === "cancelled"
-                            ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                            : "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
-                      }`}
-                    >
-                      {sub.status === "active"
-                        ? "Activa"
-                        : sub.status === "cancelled"
-                          ? "Cancelada"
-                          : sub.status === "past_due"
-                            ? "Vencida"
-                            : "Pausada"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">
-                    {sub.currentPeriodStart?.toLocaleDateString("es-AR")} -{" "}
-                    {sub.currentPeriodEnd?.toLocaleDateString("es-AR")}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">
-                    {sub.createdAt?.toLocaleDateString("es-AR")}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <DataTable
+        data={subData}
+        columns={subColumns}
+        actions={subActions}
+        header={{ title: "Suscripciones activas" }}
+        empty={{
+          title: "Sin suscripciones activas",
+          description:
+            "Cuando los clientes se suscriban, apareceran aca.",
+        }}
+        keyExtractor={(row) => row.id}
+      />
     </div>
   );
 }

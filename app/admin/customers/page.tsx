@@ -1,11 +1,59 @@
-import Link from "next/link";
 import { requireAdmin } from "@/features/admin/lib/actions";
 import { db } from "@/db";
 import { users, orders } from "@/db/schema";
 import { desc, sql } from "drizzle-orm";
 import { formatPrice } from "@/lib/utils";
+import { DataTable, type Column, type ActionConfig } from "@/components/admin/data-table";
 
 export const dynamic = "force-dynamic";
+
+type CustomerRow = {
+  id: string;
+  name: string | null;
+  email: string;
+  phone: string | null;
+  orderCount: number;
+  totalSpent: number;
+};
+
+const columns: Column<CustomerRow>[] = [
+  {
+    key: "name",
+    header: "Nombre",
+    type: "text",
+    fontWeight: "bold",
+    fallback: "—",
+  },
+  {
+    key: "email",
+    header: "Email",
+    type: "text",
+  },
+  {
+    key: "phone",
+    header: "Telefono",
+    type: "text",
+    hideOnMobile: true,
+  },
+  {
+    key: "orderCount",
+    header: "Total ordenes",
+    type: "count",
+    align: "right",
+  },
+  {
+    key: "totalSpent",
+    header: "Total gastado",
+    type: "currency",
+    align: "right",
+  },
+];
+
+const actions: ActionConfig<CustomerRow> = {
+  type: "link",
+  href: (row) => `/admin/customers/${row.id}`,
+  label: "Ver perfil",
+};
 
 export default async function AdminCustomers() {
   await requireAdmin();
@@ -14,7 +62,6 @@ export default async function AdminCustomers() {
     orderBy: [desc(users.email)],
   });
 
-  // Get order counts and totals per user
   const customerStats = await db.execute(sql`
     SELECT
       ${orders.userId} as user_id,
@@ -48,6 +95,18 @@ export default async function AdminCustomers() {
     0
   );
 
+  const data: CustomerRow[] = allUsers.map((user) => {
+    const stats = statsMap.get(user.id);
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      orderCount: stats?.order_count ?? 0,
+      totalSpent: stats?.total_spent ?? 0,
+    };
+  });
+
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Clientes</h1>
@@ -68,65 +127,16 @@ export default async function AdminCustomers() {
         </div>
       </div>
 
-      {allUsers.length === 0 ? (
-        <div className="border rounded-lg p-8 text-center text-muted-foreground">
-          <p className="text-lg font-medium">Sin clientes</p>
-          <p className="text-sm mt-2">
-            Los clientes que se registren apareceran aqui.
-          </p>
-        </div>
-      ) : (
-        <div className="border rounded-lg overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium">Nombre</th>
-                <th className="text-left px-4 py-3 font-medium">Email</th>
-                <th className="text-left px-4 py-3 font-medium">Telefono</th>
-                <th className="text-right px-4 py-3 font-medium">
-                  Total ordenes
-                </th>
-                <th className="text-right px-4 py-3 font-medium">
-                  Total gastado
-                </th>
-                <th className="text-right px-4 py-3 font-medium">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {allUsers.map((user) => {
-                const stats = statsMap.get(user.id);
-                return (
-                  <tr key={user.id} className="hover:bg-muted/30">
-                    <td className="px-4 py-3 font-medium">
-                      {user.name ?? "—"}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {user.email}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {user.phone ?? "—"}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {stats?.order_count ?? 0}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {formatPrice(stats?.total_spent ?? 0)}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <Link
-                        href={`/admin/customers/${user.id}`}
-                        className="text-sm text-primary hover:underline"
-                      >
-                        Ver perfil
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <DataTable
+        data={data}
+        columns={columns}
+        actions={actions}
+        empty={{
+          title: "Sin clientes",
+          description: "Los clientes que se registren apareceran aqui.",
+        }}
+        keyExtractor={(row) => row.id}
+      />
     </div>
   );
 }
