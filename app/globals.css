@@ -24,6 +24,8 @@
   --radius: 0px;
   --sidebar: #ffffff;
   --sidebar-foreground: #0a0a0a;
+  --popover: #ffffff;
+  --popover-foreground: #0a0a0a;
 }
 
 .dark {
@@ -43,6 +45,8 @@
   --ring: #dc2626;
   --sidebar: #0a0a0a;
   --sidebar-foreground: #ededed;
+  --popover: #171717;
+  --popover-foreground: #ededed;
 }
 
 @theme inline {
@@ -60,6 +64,8 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-ring: var(--ring);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --radius: var(--radius);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
