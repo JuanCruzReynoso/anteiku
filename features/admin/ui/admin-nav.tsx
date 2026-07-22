@@ -18,6 +18,7 @@ import {
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/ui/logo";
 
 const navSections = [
   {
@@ -67,7 +68,7 @@ function SidebarContent({ pathname }: { pathname: string }) {
       <nav className="flex-1 p-3 space-y-5 overflow-y-auto">
         {navSections.map((section) => (
           <div key={section.label}>
-            <p className="px-3 text-[10px] uppercase tracking-[0.2em] font-medium text-muted-foreground/60 mb-1.5">
+            <p className="px-3 text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground/60 mb-1.5">
               {section.label}
             </p>
             <div className="space-y-0.5">
@@ -103,33 +104,39 @@ export function AdminNav({ userInitial, userName, userRole }: AdminNavProps) {
 
   return (
     <>
-      {/* Mobile hamburger — fixed top-left */}
-      <div className="lg:hidden fixed top-4 left-4 z-40">
-        <Sheet>
-          <SheetTrigger render={<Button variant="outline" size="icon-sm" />}>
-            <Menu className="size-4" />
-          </SheetTrigger>
-          <SheetContent side="left" className="w-full p-0 bg-background/95 backdrop-blur-sm">
-            <SheetHeader className="sr-only">
-              <SheetTitle>Menu de administración</SheetTitle>
-            </SheetHeader>
-            <div className="flex flex-col h-full">
-              <SidebarContent pathname={pathname} />
-              <div className="p-4 border-t border-border/50">
-                <div className="flex items-center gap-3">
-                  <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-xs font-bold text-primary">{userInitial}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{userName}</p>
-                    <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground capitalize">{userRole}</p>
+      {/* Mobile header — logo + hamburger */}
+      <header className="lg:hidden sticky top-0 z-40 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border/50">
+        <div className="flex h-16 items-center justify-between px-4">
+          <Link href="/shop" className="flex items-center gap-2">
+            <Logo variant="mono" size={32} />
+            <span className="text-xs text-muted-foreground">Admin</span>
+          </Link>
+          <Sheet>
+            <SheetTrigger render={<Button variant="ghost" size="icon-lg" aria-label="Abrir menú" />}>
+              <Menu className="size-4" />
+            </SheetTrigger>
+            <SheetContent side="left" className="w-full p-0 bg-background/95 backdrop-blur-sm">
+              <SheetHeader className="sr-only">
+                <SheetTitle>Menu de administración</SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col h-full">
+                <SidebarContent pathname={pathname} />
+                <div className="p-4 border-t border-border/50">
+                  <div className="flex items-center gap-3">
+                    <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <span className="text-xs font-bold text-primary">{userInitial}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{userName}</p>
+                      <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground capitalize">{userRole}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </SheetContent>
-        </Sheet>
-      </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </header>
 
       {/* Desktop sidebar — hidden on mobile */}
       <aside className="hidden lg:flex w-64 border-r border-border/50 bg-muted/30 flex-col shrink-0">
@@ -141,7 +148,7 @@ export function AdminNav({ userInitial, userName, userRole }: AdminNavProps) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{userName}</p>
-              <p className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground capitalize">{userRole}</p>
+              <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground capitalize">{userRole}</p>
             </div>
           </div>
         </div>
