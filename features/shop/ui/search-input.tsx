@@ -16,6 +16,7 @@ export function SearchInput({ placeholder = "Buscar productos..." }: SearchInput
 
   // Sync URL → input on mount (handles browser back/forward)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- legitimate URL sync
     setQuery(searchParams.get("q") ?? "");
   }, [searchParams]);
 

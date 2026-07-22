@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { requireAdmin } from "@/features/admin/lib/actions";
 import { db } from "@/db";
 import { products, categories } from "@/db/schema";
@@ -60,9 +61,11 @@ export default async function AdminProducts() {
                   <td className="px-4 py-3">
                     {product.images && product.images.length > 0 ? (
                       <div className="w-10 h-10 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground overflow-hidden">
-                        <img
+                        <Image
                           src={product.images[0]}
                           alt={product.name}
+                          width={40}
+                          height={40}
                           className="w-full h-full object-cover"
                         />
                       </div>

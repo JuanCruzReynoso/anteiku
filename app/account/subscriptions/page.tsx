@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import {
   getUserSubscriptions,
@@ -12,15 +12,16 @@ export default function AccountSubscriptionsPage() {
   const [subscriptions, setSubscriptions] = useState<UserSubscription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  async function loadSubscriptions() {
+  const loadSubscriptions = useCallback(async () => {
     const subs = await getUserSubscriptions();
     setSubscriptions(subs);
     setIsLoading(false);
-  }
+  }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial data fetch
     loadSubscriptions();
-  }, []);
+  }, [loadSubscriptions]);
 
   if (isLoading) {
     return (

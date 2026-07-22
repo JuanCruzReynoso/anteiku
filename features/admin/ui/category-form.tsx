@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { categorySchema, type CategoryInput } from "../lib/schemas";
 import { createCategory, updateCategory } from "../lib/category-actions";
@@ -30,7 +30,7 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(categorySchema),
@@ -44,7 +44,7 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
     },
   });
 
-  const name = watch("name");
+  const name = useWatch({ control, name: "name" });
 
   // Auto-generate slug from name
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {

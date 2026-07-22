@@ -8,7 +8,10 @@ export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration-safe mount check
+    setMounted(true);
+  }, []);
 
   // Static label to avoid hydration mismatch
   const label = "Cambiar tema";

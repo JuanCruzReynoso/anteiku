@@ -19,6 +19,7 @@ vi.mock("@/db", () => ({
     },
     insert: vi.fn(),
     update: vi.fn(),
+    transaction: vi.fn(),
   },
 }));
 
@@ -47,18 +48,27 @@ describe("inventory-actions", () => {
       const mockMovement = { id: "mov-1", variantId: "var-1", change: -5, reason: "sale" };
       const mockVariant = createMockVariant({ stock: 10 });
 
-      const insertChain = {
-        values: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([mockMovement]),
+      const mockTx = {
+        select: vi.fn().mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              for: vi.fn().mockResolvedValue([mockVariant]),
+            }),
+          }),
+        }),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([mockMovement]),
+          }),
+        }),
+        update: vi.fn().mockReturnValue({
+          set: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue(undefined),
+          }),
         }),
       };
-      (db.insert as any).mockReturnValue(insertChain);
-      (db.query.variants.findFirst as any).mockResolvedValue(mockVariant);
-      (db.update as any).mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
-        }),
-      });
+
+      (db.transaction as any).mockImplementation(async (cb: any) => cb(mockTx));
 
       const result = await createInventoryMovement({
         variantId: "var-1",
@@ -67,25 +77,36 @@ describe("inventory-actions", () => {
       });
 
       expect(result).toEqual(mockMovement);
-      expect(db.update).toHaveBeenCalled();
+      expect(db.transaction).toHaveBeenCalled();
+      expect(mockTx.update).toHaveBeenCalled();
     });
 
     it("clamps stock to zero (no negative)", async () => {
       const mockVariant = createMockVariant({ stock: 3 });
-      const insertChain = {
-        values: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([{ id: "mov-1" }]),
-        }),
-      };
-      (db.insert as any).mockReturnValue(insertChain);
-      (db.query.variants.findFirst as any).mockResolvedValue(mockVariant);
 
       const updateChain = {
         set: vi.fn().mockReturnValue({
           where: vi.fn().mockResolvedValue(undefined),
         }),
       };
-      (db.update as any).mockReturnValue(updateChain);
+
+      const mockTx = {
+        select: vi.fn().mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              for: vi.fn().mockResolvedValue([mockVariant]),
+            }),
+          }),
+        }),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: "mov-1" }]),
+          }),
+        }),
+        update: vi.fn().mockReturnValue(updateChain),
+      };
+
+      (db.transaction as any).mockImplementation(async (cb: any) => cb(mockTx));
 
       await createInventoryMovement({
         variantId: "var-1",
@@ -99,20 +120,30 @@ describe("inventory-actions", () => {
 
     it("handles positive stock change", async () => {
       const mockVariant = createMockVariant({ stock: 5 });
-      const insertChain = {
-        values: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([{ id: "mov-1" }]),
-        }),
-      };
-      (db.insert as any).mockReturnValue(insertChain);
-      (db.query.variants.findFirst as any).mockResolvedValue(mockVariant);
 
       const updateChain = {
         set: vi.fn().mockReturnValue({
           where: vi.fn().mockResolvedValue(undefined),
         }),
       };
-      (db.update as any).mockReturnValue(updateChain);
+
+      const mockTx = {
+        select: vi.fn().mockReturnValue({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              for: vi.fn().mockResolvedValue([mockVariant]),
+            }),
+          }),
+        }),
+        insert: vi.fn().mockReturnValue({
+          values: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([{ id: "mov-1" }]),
+          }),
+        }),
+        update: vi.fn().mockReturnValue(updateChain),
+      };
+
+      (db.transaction as any).mockImplementation(async (cb: any) => cb(mockTx));
 
       await createInventoryMovement({
         variantId: "var-1",

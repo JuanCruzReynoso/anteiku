@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productSchema, type ProductInput } from "../lib/schemas";
 import { createProduct, updateProduct } from "../lib/product-actions";
@@ -35,7 +35,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm<ProductInput>({
     resolver: zodResolver(productSchema),
@@ -51,7 +51,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
     },
   });
 
-  const images = watch("images");
+  const images = useWatch({ control, name: "images" });
 
   // Auto-generate slug from name
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {

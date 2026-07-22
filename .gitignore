@@ -29,6 +29,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+pnpm-debug.log*
+
+# package manager lockfiles (use pnpm only)
+package-lock.json
 
 # dev server logs
 dev-server.log*
@@ -38,6 +42,9 @@ dev-server.log*
 
 # vercel
 .vercel
+
+# playwright mcp
+.playwright-mcp/
 
 # typescript
 *.tsbuildinfo

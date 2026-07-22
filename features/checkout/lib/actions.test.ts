@@ -51,6 +51,8 @@ function mockDbTransactionSuccess(orderId = "order-123") {
       stock: 10,
       price: 1500,
       product_name: "Test Product",
+      category_id: null,
+      product_id: "prod-1",
     },
   ];
 
@@ -62,13 +64,25 @@ function mockDbTransactionSuccess(orderId = "order-123") {
     },
   ];
 
+  // thenableWithLimit: works both as `await where(...)` (returns discounts array)
+  // and as `where(...).limit(1)` (returns shipping method)
+  function thenableWithLimit(discountsArray: any[], limitResult: any) {
+    const result = {
+      then: (resolve: any, reject: any) =>
+        Promise.resolve(discountsArray).then(resolve, reject),
+      limit: vi.fn().mockResolvedValue(limitResult),
+      [Symbol.toStringTag]: "Promise",
+    };
+    return result;
+  }
+
   const mockTx = {
     execute: vi.fn().mockResolvedValue(lockedResult),
     select: vi.fn().mockReturnValue({
       from: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          limit: vi.fn().mockResolvedValue(shippingMethodResult),
-        }),
+        where: vi.fn().mockReturnValue(
+          thenableWithLimit([], shippingMethodResult)
+        ),
       }),
     }),
     insert: vi.fn().mockReturnValue({
@@ -97,6 +111,8 @@ function mockDbTransactionInsufficientStock() {
       stock: 2, // insufficient for qty 5
       price: 1500,
       product_name: "Test Product",
+      category_id: null,
+      product_id: "prod-1",
     },
   ];
 
@@ -108,14 +124,24 @@ function mockDbTransactionInsufficientStock() {
     },
   ];
 
+  function thenableWithLimit(discountsArray: any[], limitResult: any) {
+    const result = {
+      then: (resolve: any, reject: any) =>
+        Promise.resolve(discountsArray).then(resolve, reject),
+      limit: vi.fn().mockResolvedValue(limitResult),
+      [Symbol.toStringTag]: "Promise",
+    };
+    return result;
+  }
+
   vi.mocked(db.transaction).mockImplementation(async (cb: any) => {
     const mockTx = {
       execute: vi.fn().mockResolvedValue(lockedResult),
       select: vi.fn().mockReturnValue({
         from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            limit: vi.fn().mockResolvedValue(shippingMethodResult),
-          }),
+          where: vi.fn().mockReturnValue(
+            thenableWithLimit([], shippingMethodResult)
+          ),
         }),
       }),
     };
@@ -213,14 +239,25 @@ describe("createOrder", () => {
         cost: 2500,
       },
     ];
+
+    function thenableWithLimit(discountsArray: any[], limitResult: any) {
+      const result = {
+        then: (resolve: any, reject: any) =>
+          Promise.resolve(discountsArray).then(resolve, reject),
+        limit: vi.fn().mockResolvedValue(limitResult),
+        [Symbol.toStringTag]: "Promise",
+      };
+      return result;
+    }
+
     vi.mocked(db.transaction).mockImplementation(async (cb: any) => {
       const mockTx = {
         execute: vi.fn().mockResolvedValue(lockedResult),
         select: vi.fn().mockReturnValue({
           from: vi.fn().mockReturnValue({
-            where: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue(shippingMethodResult),
-            }),
+            where: vi.fn().mockReturnValue(
+              thenableWithLimit([], shippingMethodResult)
+            ),
           }),
         }),
       };

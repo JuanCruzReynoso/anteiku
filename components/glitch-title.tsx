@@ -40,7 +40,6 @@ export function GlitchTitle({ className = "" }: GlitchTitleProps) {
   const [mysteryFlash, setMysteryFlash] = useState(false);
   const [mysteryWord, setMysteryWord] = useState("");
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const pickRandomIndices = useCallback((count: number): Set<number> => {
     const indices = new Set<number>();
@@ -124,8 +123,8 @@ export function GlitchTitle({ className = "" }: GlitchTitleProps) {
     }, 1500);
 
     return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      const timeout = timeoutRef.current;
+      if (timeout) clearTimeout(timeout);
     };
   }, [triggerGlitch]);
 
