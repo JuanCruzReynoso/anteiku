@@ -116,7 +116,7 @@ export function AdminNav({ userInitial, userName, userRole }: AdminNavProps) {
       <header className="lg:hidden relative z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border/50">
         <div className="flex h-16 items-center justify-between px-4">
           <Link href="/shop" className="flex items-center gap-2">
-            <Logo variant="mono" size={32} />
+            <Logo variant="mono" size={32} href={null} />
             <span className="text-xs text-muted-foreground">Admin</span>
           </Link>
           <Sheet open={open} onOpenChange={setOpen}>

@@ -7,7 +7,7 @@ interface LogoProps {
   variant?: LogoVariant;
   size?: number;
   priority?: boolean;
-  href?: string;
+  href?: string | null;
   className?: string;
 }
 
@@ -24,16 +24,21 @@ export function Logo({
   className,
 }: LogoProps) {
   const logo = logos[variant];
+  const img = (
+    <Image
+      src={logo.src}
+      alt={logo.alt}
+      width={size}
+      height={size}
+      priority={priority}
+    />
+  );
+
+  if (href === null) return img;
 
   return (
     <Link href={href} className={className}>
-      <Image
-        src={logo.src}
-        alt={logo.alt}
-        width={size}
-        height={size}
-        priority={priority}
-      />
+      {img}
     </Link>
   );
 }

@@ -143,7 +143,7 @@ export default async function AdminDashboard() {
   };
 
   return (
-    <div className="max-w-6xl">
+    <div>
       {/* Welcome banner */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-[-0.03em]">
