@@ -133,16 +133,6 @@ const subColumns: Column<ActiveSubRow>[] = [
       </span>
     ),
   },
-  {
-    key: "id",
-    header: "Inicio",
-    type: "date",
-    render: (row) => {
-      // We need to use a custom field for created date
-      return null;
-    },
-    hideOnMobile: true,
-  },
 ];
 
 export default async function AdminSubscriptions() {

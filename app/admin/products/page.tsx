@@ -2,7 +2,6 @@ import { requireAdmin } from "@/features/admin/lib/actions";
 import { db } from "@/db";
 import { products, categories } from "@/db/schema";
 import { desc } from "drizzle-orm";
-import { formatPrice } from "@/lib/utils";
 import { ProductActions } from "./product-actions-cell";
 import { DataTable, type Column, type ActionConfig } from "@/components/admin/data-table";
 
