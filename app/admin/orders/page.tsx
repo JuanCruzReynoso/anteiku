@@ -26,7 +26,7 @@ export default async function AdminOrders() {
   };
 
   return (
-    <div>
+    <div className="max-w-6xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Ordenes</h1>
       </div>

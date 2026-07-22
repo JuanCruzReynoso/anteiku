@@ -16,7 +16,7 @@ export default async function AdminCategories() {
   });
 
   return (
-    <div>
+    <div className="max-w-6xl">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Categorías</h1>
         <Link
