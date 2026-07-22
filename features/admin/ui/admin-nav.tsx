@@ -111,7 +111,7 @@ export function AdminNav({ userInitial, userName, userRole }: AdminNavProps) {
           <SheetTrigger render={<Button variant="outline" size="icon-sm" />}>
             <Menu className="size-4" />
           </SheetTrigger>
-          <SheetContent side="left" showCloseButton={false} className="w-full p-0">
+          <SheetContent side="left" className="w-full p-0 bg-background/95 backdrop-blur-sm">
             <SheetHeader className="sr-only">
               <SheetTitle>Menu de administración</SheetTitle>
             </SheetHeader>
