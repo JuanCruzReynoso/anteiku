@@ -1,13 +1,30 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-import Link from "next/link";
+"use client";
 
-export default async function AccountLayout({
+import { redirect } from "next/navigation";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+
+export default function AccountLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  const { data: session, status } = useSession();
+  const pathname = usePathname();
+
+  if (status === "loading") {
+    return (
+      <div className="container mx-auto px-6 md:px-8 py-12 md:py-20">
+        <div className="animate-pulse space-y-4">
+          <div className="h-12 w-48 bg-muted rounded" />
+          <div className="h-8 w-32 bg-muted rounded" />
+        </div>
+      </div>
+    );
+  }
+
   if (!session?.user) {
     redirect("/login");
   }
@@ -28,16 +45,24 @@ export default async function AccountLayout({
         {/* Sidebar nav */}
         <nav className="lg:col-span-1">
           <ul className="space-y-1">
-            {navItems.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className="block px-4 py-2 text-sm hover:bg-muted transition-colors"
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "block px-4 py-2 text-sm transition-colors",
+                      isActive
+                        ? "bg-accent text-foreground font-medium"
+                        : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
