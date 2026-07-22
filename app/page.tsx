@@ -1,7 +1,8 @@
 import { getFeaturedProducts } from "@/features/product/lib/queries";
 import { HomeContent } from "@/features/home/ui/home-content";
 
-export const dynamic = "force-dynamic";
+// ISR: cache estático que se refresca cada 60s sin redeploy
+export const revalidate = 60;
 
 export default async function Home() {
   const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
