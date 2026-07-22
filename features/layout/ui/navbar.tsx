@@ -129,7 +129,7 @@ export function Navbar() {
             >
               <Menu className="h-5 w-5" />
             </SheetTrigger>
-            <SheetContent side="left" showCloseButton={false}>
+            <SheetContent side="left" className="bg-popover/95 backdrop-blur-sm">
               <SheetHeader>
                 <SheetTitle>Menú</SheetTitle>
               </SheetHeader>
