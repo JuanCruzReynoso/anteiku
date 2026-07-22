@@ -4,10 +4,10 @@ import { env } from "@/lib/env";
 import * as schema from "./schema";
 
 // Disable prefetch — not supported for Supabase Transaction pool mode
-// max: 3 — fits serverless concurrency without exhausting Supabase pool
+// max: 1 — conservative for build workers; Supabase free tier pool = 15
 const client = postgres(env.DATABASE_URL, {
   prepare: false,
-  max: 3,
+  max: 1,
   connect_timeout: 10,
 });
 

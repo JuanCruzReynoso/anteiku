@@ -58,6 +58,9 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export const viewport: Viewport = {
@@ -80,9 +83,6 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <link rel="icon" href="/favicon.png" sizes="any" />
-      </head>
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <AuthSessionProvider>
           <ThemeProvider>
