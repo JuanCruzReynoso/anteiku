@@ -10,7 +10,7 @@ export function CreateDiscountButton() {
 
   if (isOpen) {
     return (
-      <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4">
         <div className="bg-background rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
           <h2 className="text-lg font-bold mb-4">Agregar descuento</h2>
           <DiscountForm
