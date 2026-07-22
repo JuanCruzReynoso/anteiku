@@ -7,6 +7,8 @@ import { useCartStore } from "@/features/cart/lib/cart-store";
 import { ShippingForm } from "@/features/checkout/ui/shipping-form";
 import { OrderSummary } from "@/features/checkout/ui/order-summary";
 import { createOrder } from "@/features/checkout/lib/actions";
+import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/ui/back-button";
 import type { ShippingFormData } from "@/features/checkout/lib/schema";
 
 interface CouponDiscount {
@@ -108,6 +110,7 @@ export function CheckoutForm() {
 
   return (
     <div className="container mx-auto px-6 md:px-8 py-12 md:py-20">
+      <BackButton href="/shop" />
       {/* Step indicator */}
       <div className="flex items-center gap-4 mb-12" role="group" aria-label="Pasos del checkout">
         <div className="flex items-center gap-2">
@@ -150,13 +153,14 @@ export function CheckoutForm() {
             <div className="space-y-8">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Pago</h2>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
                   onClick={() => setStep("shipping")}
-                  className="text-xs uppercase tracking-[0.15em] text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-xs uppercase tracking-[0.15em]"
                 >
                   Editar envío
-                </button>
+                </Button>
               </div>
 
               {/* Shipping summary — borderless */}
@@ -192,15 +196,17 @@ export function CheckoutForm() {
                 </p>
               </div>
 
-              <button
+              <Button
                 type="button"
+                variant="default"
+                size="lg"
                 onClick={handlePayment}
                 disabled={isProcessing}
                 aria-busy={isProcessing}
-                className="w-full h-12 rounded-full bg-foreground text-background font-medium hover:bg-primary hover:text-primary-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full"
               >
                 {isProcessing ? "Procesando..." : "Completar pedido (Demo)"}
-              </button>
+              </Button>
             </div>
           )}
         </div>

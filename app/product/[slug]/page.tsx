@@ -7,6 +7,8 @@ import { getProductDisplayData } from "@/features/product/lib/display";
 import { getLowestDiscountedPrice } from "@/features/product/lib/discount";
 import { formatPrice } from "@/lib/utils";
 import { ProductActions } from "./product-actions";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { BackButton } from "@/components/ui/back-button";
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
@@ -96,16 +98,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="container mx-auto px-6 md:px-8 py-12 md:py-20">
-        {/* Breadcrumbs — editorial micro text */}
-        <nav aria-label="Breadcrumb" className="mb-10 text-xs text-muted-foreground">
-          <ol className="flex items-center gap-2 uppercase tracking-[0.15em]">
-            <li><Link href="/" className="hover:text-foreground transition-colors">Inicio</Link></li>
-            <li aria-hidden="true">/</li>
-            <li><Link href="/shop" className="hover:text-foreground transition-colors">Tienda</Link></li>
-            <li aria-hidden="true">/</li>
-            <li aria-current="page" className="text-foreground font-medium">{product.name}</li>
-          </ol>
-        </nav>
+        <BackButton href="/shop" />
+        <Breadcrumb
+          items={[
+            { label: "Inicio", href: "/" },
+            { label: "Tienda", href: "/shop" },
+            { label: product.name },
+          ]}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
           {/* Image — borderless, full bleed */}

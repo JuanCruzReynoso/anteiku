@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -100,14 +99,13 @@ function SidebarContent({ pathname }: { pathname: string }) {
 }
 
 export function AdminNav({ userInitial, userName, userRole }: AdminNavProps) {
-  const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
   return (
     <>
       {/* Mobile hamburger — fixed top-left */}
       <div className="lg:hidden fixed top-4 left-4 z-40">
-        <Sheet open={open} onOpenChange={setOpen}>
+        <Sheet>
           <SheetTrigger render={<Button variant="outline" size="icon-sm" />}>
             <Menu className="size-4" />
           </SheetTrigger>
