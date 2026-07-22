@@ -50,7 +50,7 @@ export default async function AdminSubscriptions() {
           </p>
         </div>
       ) : (
-        <div className="border rounded-lg overflow-hidden mb-8">
+        <div className="border rounded-lg overflow-x-auto mb-8">
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
               <tr>
@@ -108,7 +108,7 @@ export default async function AdminSubscriptions() {
           </p>
         </div>
       ) : (
-        <div className="border rounded-lg overflow-hidden">
+        <div className="border rounded-lg overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
               <tr>
