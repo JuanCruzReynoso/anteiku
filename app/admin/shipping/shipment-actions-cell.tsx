@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils";
 import { deleteShipmentMethod } from "@/features/admin/lib/shipment-actions";
 import { ShipmentForm } from "@/features/admin/ui/shipment-form";
-import type { ShipmentMethod } from "./page";
+import type { ShipmentMethod } from "./shipping-list";
 
 interface ShipmentActionsProps {
   method: ShipmentMethod;

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { deleteSubscriptionPlan } from "@/features/admin/lib/subscription-actions";
 import { SubscriptionPlanForm } from "@/features/admin/ui/subscription-form";
-import type { SubscriptionPlan } from "./page";
+import type { SubscriptionPlan } from "./subscriptions-list";
 
 interface PlanActionsProps {
   plan: SubscriptionPlan;

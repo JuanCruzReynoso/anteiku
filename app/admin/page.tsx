@@ -1,4 +1,3 @@
-import { requireAdmin } from "@/features/admin/lib/actions";
 import { db } from "@/db";
 import { products, orders, users, variants } from "@/db/schema";
 import { count, sql, eq, gte, desc } from "drizzle-orm";
@@ -13,13 +12,14 @@ import {
   TrendingUp,
   AlertTriangle,
 } from "lucide-react";
+import { auth } from "@/auth";
 
 export const dynamic = "force-dynamic";
 
 const LOW_STOCK_THRESHOLD = Number(process.env.LOW_STOCK_THRESHOLD ?? 5);
 
 export default async function AdminDashboard() {
-  const session = await requireAdmin();
+  const session = await auth();
 
   // ─── Queries ───────────────────────────────────────────
   const [productCount] = await db

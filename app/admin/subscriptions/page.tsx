@@ -1,11 +1,7 @@
-import { requireAdmin } from "@/features/admin/lib/actions";
 import { db } from "@/db";
 import { subscriptionPlans, userSubscriptions } from "@/db/schema";
 import { asc, desc } from "drizzle-orm";
-import { formatPrice } from "@/lib/utils";
-import { PlanActions } from "./plan-actions-cell";
-import { CreatePlanButton } from "./create-plan-button";
-import { DataTable, type Column, type ActionConfig } from "@/components/admin/data-table";
+import { SubscriptionsList } from "./subscriptions-list";
 
 export const dynamic = "force-dynamic";
 
@@ -22,122 +18,7 @@ export type SubscriptionPlan = {
   updatedAt: Date;
 };
 
-type PlanRow = SubscriptionPlan & {
-  featureCount: number;
-  intervalLabel: string;
-};
-
-type ActiveSubRow = {
-  id: string;
-  userName: string;
-  planName: string;
-  status: string;
-  currentPeriodStart: Date | null;
-  currentPeriodEnd: Date | null;
-};
-
-const planColumns: Column<PlanRow>[] = [
-  {
-    key: "name",
-    header: "Nombre",
-    type: "text",
-    fontWeight: "bold",
-  },
-  {
-    key: "price",
-    header: "Precio",
-    type: "currency",
-    align: "right",
-    render: (row) => <span>{formatPrice(row.price)}/mes</span>,
-  },
-  {
-    key: "intervalLabel",
-    header: "Intervalo",
-    type: "text",
-    render: (row) => (
-      <span className="capitalize">{row.intervalLabel}</span>
-    ),
-  },
-  {
-    key: "featureCount",
-    header: "Features",
-    type: "count",
-    render: (row) => (
-      <span className="text-muted-foreground text-xs max-w-[200px] truncate block">
-        {row.features?.join(", ") ?? "—"}
-      </span>
-    ),
-    hideOnMobile: true,
-  },
-  {
-    key: "active",
-    header: "Estado",
-    type: "badge",
-    badgeMap: {
-      true: {
-        label: "Activo",
-        className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-      },
-      false: {
-        label: "Inactivo",
-        className: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
-      },
-    },
-  },
-];
-
-const subColumns: Column<ActiveSubRow>[] = [
-  {
-    key: "userName",
-    header: "Cliente",
-    type: "text",
-    fontWeight: "bold",
-  },
-  {
-    key: "planName",
-    header: "Plan",
-    type: "text",
-  },
-  {
-    key: "status",
-    header: "Estado",
-    type: "badge",
-    badgeMap: {
-      active: {
-        label: "Activa",
-        className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-      },
-      cancelled: {
-        label: "Cancelada",
-        className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-      },
-      past_due: {
-        label: "Vencida",
-        className: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
-      },
-      paused: {
-        label: "Pausada",
-        className: "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400",
-      },
-    },
-  },
-  {
-    key: "currentPeriodStart",
-    header: "Periodo",
-    type: "text",
-    hideOnMobile: true,
-    render: (row) => (
-      <span className="text-xs text-muted-foreground">
-        {row.currentPeriodStart?.toLocaleDateString("es-AR")} -{" "}
-        {row.currentPeriodEnd?.toLocaleDateString("es-AR")}
-      </span>
-    ),
-  },
-];
-
 export default async function AdminSubscriptions() {
-  await requireAdmin();
-
   const plans = await db.query.subscriptionPlans.findMany({
     orderBy: [asc(subscriptionPlans.price)],
   });
@@ -147,7 +28,7 @@ export default async function AdminSubscriptions() {
     with: { user: true, plan: true },
   });
 
-  const planData: PlanRow[] = plans.map((p) => ({
+  const planData = plans.map((p) => ({
     ...p,
     featureCount: p.features?.length ?? 0,
     intervalLabel:
@@ -158,7 +39,7 @@ export default async function AdminSubscriptions() {
           : "Anual",
   }));
 
-  const subData: ActiveSubRow[] = activeSubscriptions.map((s) => ({
+  const subData = activeSubscriptions.map((s) => ({
     id: s.id,
     userName: s.user?.name ?? s.user?.email ?? "—",
     planName: s.plan?.name ?? "—",
@@ -167,51 +48,5 @@ export default async function AdminSubscriptions() {
     currentPeriodEnd: s.currentPeriodEnd,
   }));
 
-  const planActions: ActionConfig<PlanRow> = {
-    type: "text-buttons",
-    component: ({ row }) => <PlanActions plan={row} />,
-  };
-
-  const subActions: ActionConfig<ActiveSubRow> = {
-    type: "none",
-  };
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Suscripciones</h1>
-        <CreatePlanButton />
-      </div>
-
-      {/* Plans */}
-      <DataTable
-        data={planData}
-        columns={planColumns}
-        actions={planActions}
-        header={{ title: "Planes" }}
-        empty={{
-          title: "Sin planes",
-          description:
-            "Agragate tu primer plan de suscripcion para ofrecer cafecito recurrente.",
-        }}
-        keyExtractor={(row) => row.id}
-      />
-
-      <div className="mt-8" />
-
-      {/* Active Subscriptions */}
-      <DataTable
-        data={subData}
-        columns={subColumns}
-        actions={subActions}
-        header={{ title: "Suscripciones activas" }}
-        empty={{
-          title: "Sin suscripciones activas",
-          description:
-            "Cuando los clientes se suscriban, apareceran aca.",
-        }}
-        keyExtractor={(row) => row.id}
-      />
-    </div>
-  );
+  return <SubscriptionsList plans={planData} subscriptions={subData} />;
 }
