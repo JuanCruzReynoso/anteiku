@@ -152,21 +152,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = (user as AuthUser).role;
       }
 
-      // Always refresh role from DB to catch admin changes without re-login
-      if (token.sub) {
-        try {
-          const dbUser = await db.query.users.findFirst({
-            where: eq(users.id, token.sub),
-            columns: { role: true },
-          });
-          if (dbUser) {
-            token.role = dbUser.role;
-          }
-        } catch {
-          // DB unreachable — keep cached role from token
-        }
-      }
-
       return token;
     },
   },

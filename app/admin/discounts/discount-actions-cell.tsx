@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils";
 import { deleteDiscount } from "@/features/admin/lib/discount-actions";
 import { DiscountForm } from "@/features/admin/ui/discount-form";
-import type { Discount } from "./page";
+import type { Discount } from "./discounts-list";
 
 interface DiscountActionsProps {
   discount: Discount;

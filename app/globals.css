@@ -24,6 +24,11 @@
   --radius: 0px;
   --sidebar: #ffffff;
   --sidebar-foreground: #0a0a0a;
+  --sidebar-background: #ffffff;
+  --sidebar-accent: #f5f5f5;
+  --sidebar-accent-foreground: #0a0a0a;
+  --sidebar-border: transparent;
+  --sidebar-ring: #b91c1c;
   --popover: #ffffff;
   --popover-foreground: #0a0a0a;
 }
@@ -45,6 +50,11 @@
   --ring: #dc2626;
   --sidebar: #0a0a0a;
   --sidebar-foreground: #ededed;
+  --sidebar-background: #0a0a0a;
+  --sidebar-accent: #171717;
+  --sidebar-accent-foreground: #ededed;
+  --sidebar-border: transparent;
+  --sidebar-ring: #dc2626;
   --popover: #171717;
   --popover-foreground: #ededed;
 }
@@ -64,6 +74,13 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-background: var(--sidebar-background);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --radius: var(--radius);

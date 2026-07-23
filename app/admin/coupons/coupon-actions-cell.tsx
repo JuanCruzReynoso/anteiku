@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { deleteCoupon } from "@/features/admin/lib/coupon-actions";
 import { CouponForm } from "@/features/admin/ui/coupon-form";
-import type { Coupon } from "./page";
+import type { Coupon } from "./coupons-list";
 
 interface CouponActionsProps {
   coupon: Coupon;
