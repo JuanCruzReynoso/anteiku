@@ -7,7 +7,7 @@ import * as schema from "./schema";
 // max: 1 — conservative for build workers; Supabase free tier pool = 15
 const client = postgres(env.DATABASE_URL, {
   prepare: false,
-  max: 1,
+  max: 5,
   connect_timeout: 10,
 });
 
