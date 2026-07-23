@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect } from "react";
 import {
   LayoutDashboard,
   Package,
@@ -14,11 +14,18 @@ import {
   Percent,
   CreditCard,
   ArrowLeft,
-  Menu,
 } from "lucide-react";
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import {
+  Sidebar,
+  SidebarContent as SidebarContentArea,
+  SidebarHeader,
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarSeparator,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import { Logo } from "@/components/ui/logo";
 
 const navSections = [
@@ -54,113 +61,85 @@ interface AdminNavProps {
   userRole: string;
 }
 
-function SidebarContent({ pathname, onClose }: { pathname: string; onClose: () => void }) {
+export function AdminNav({ userInitial, userName, userRole }: AdminNavProps) {
+  const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
+
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [pathname, setOpenMobile]);
+
   return (
-    <>
-      <div className="p-5 border-b border-border/50">
-        <Link href="/shop" onClick={onClose} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors">
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <Link
+          href="/shop"
+          className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
+        >
           <ArrowLeft className="size-3" />
           Volver a la tienda
         </Link>
-        <div className="flex items-center gap-3 mt-3">
+        <div className="flex items-center gap-3 px-2 py-1">
           <Logo variant="mono" size={32} />
-          <div>
-            <h1 className="text-base font-bold tracking-[-0.02em]">Admin Panel</h1>
+          <div className="group-data-[collapsible=icon]:hidden">
+            <h1 className="text-base font-bold tracking-[-0.02em]">
+              Admin Panel
+            </h1>
             <p className="text-xs text-muted-foreground mt-0.5">Anteiku</p>
           </div>
         </div>
-      </div>
+      </SidebarHeader>
 
-      <nav className="flex-1 p-3 space-y-5 overflow-y-auto">
+      <SidebarSeparator />
+
+      <SidebarContentArea>
         {navSections.map((section) => (
-          <div key={section.label}>
-            <p className="px-3 text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground/60 mb-1.5">
+          <SidebarMenu key={section.label}>
+            <p className="px-3 text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground/60 mb-1.5 group-data-[collapsible=icon]:hidden">
               {section.label}
             </p>
-            <div className="space-y-0.5">
-              {section.items.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={onClose}
-                    className={cn(
-                      "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all border-l-2",
-                      isActive
-                        ? "text-foreground bg-accent border-primary"
-                        : "text-muted-foreground hover:text-foreground hover:bg-accent/50 border-transparent"
-                    )}
+            {section.items.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              return (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    isActive={isActive}
+                    tooltip={item.label}
+                    render={
+                      <Link
+                        href={item.href}
+                        className="border-l-2 border-transparent data-[active]:border-primary"
+                      />
+                    }
                   >
-                    <Icon className="size-4 shrink-0" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
+                    <Icon />
+                    <span>{item.label}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
         ))}
-      </nav>
-    </>
-  );
-}
+      </SidebarContentArea>
 
-export function AdminNav({ userInitial, userName, userRole }: AdminNavProps) {
-  const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+      <SidebarSeparator />
 
-  return (
-    <>
-      {/* Mobile header — logo + hamburger */}
-      <header className="lg:hidden relative z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border/50">
-        <div className="flex h-16 items-center justify-between px-4">
-          <Link href="/shop" className="flex items-center gap-2">
-            <Logo variant="mono" size={32} href={null} />
-            <span className="text-xs text-muted-foreground">Admin</span>
-          </Link>
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger render={<Button variant="ghost" size="icon-lg" aria-label="Abrir menú" />}>
-              <Menu className="size-4" />
-            </SheetTrigger>
-            <SheetContent side="left" className="w-full p-0 bg-background/95 backdrop-blur-sm">
-              <SheetHeader className="sr-only">
-                <SheetTitle>Menu de administración</SheetTitle>
-              </SheetHeader>
-              <div className="flex flex-col h-full">
-                <SidebarContent pathname={pathname} onClose={() => setOpen(false)} />
-                <div className="p-4 border-t border-border/50">
-                  <div className="flex items-center gap-3">
-                    <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-xs font-bold text-primary">{userInitial}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{userName}</p>
-                      <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground capitalize">{userRole}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </header>
-
-      {/* Desktop sidebar — hidden on mobile */}
-      <aside className="hidden lg:flex sticky top-0 h-screen w-64 border-r border-border/50 bg-muted/30 flex-col shrink-0">
-        <SidebarContent pathname={pathname} onClose={() => {}} />
-        <div className="p-4 border-t border-border/50">
-          <div className="flex items-center gap-3">
-            <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-xs font-bold text-primary">{userInitial}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{userName}</p>
-              <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground capitalize">{userRole}</p>
-            </div>
+      <SidebarFooter>
+        <div className="flex items-center gap-3 px-2 py-1">
+          <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <span className="text-xs font-bold text-primary">
+              {userInitial}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
+            <p className="text-sm font-medium truncate">{userName}</p>
+            <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground capitalize">
+              {userRole}
+            </p>
           </div>
         </div>
-      </aside>
-    </>
+      </SidebarFooter>
+    </Sidebar>
   );
 }
