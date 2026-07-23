@@ -13,22 +13,13 @@ export default async function AdminLayout({
   const userRole = session.user.role;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Desktop: sidebar layout */}
-      <div className="hidden lg:flex min-h-screen">
-        <AdminNav userInitial={userInitial} userName={userName} userRole={userRole} />
-        <main className="flex-1 min-w-0 overflow-y-auto p-6">
-          {children}
-        </main>
-      </div>
+    <div className="min-h-screen bg-background flex">
+      <AdminNav userInitial={userInitial} userName={userName} userRole={userRole} />
 
-      {/* Mobile: header + content layout */}
-      <div className="lg:hidden">
-        <AdminNav userInitial={userInitial} userName={userName} userRole={userRole} />
-        <main className="p-4 min-h-[calc(100dvh-4rem)] overflow-y-auto">
-          {children}
-        </main>
-      </div>
+      {/* Main content */}
+      <main className="flex-1 min-w-0 overflow-y-auto p-4 lg:p-6">
+        {children}
+      </main>
     </div>
   );
 }
