@@ -27,6 +27,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/ui/logo";
+import { UserMenu } from "@/components/ui/user-menu";
 
 const navSections = [
   {
@@ -59,9 +60,10 @@ interface AdminNavProps {
   userInitial: string;
   userName: string;
   userRole: string;
+  userImage?: string | null;
 }
 
-export function AdminNav({ userInitial, userName, userRole }: AdminNavProps) {
+export function AdminNav({ userInitial, userName, userRole, userImage }: AdminNavProps) {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
 
@@ -74,7 +76,7 @@ export function AdminNav({ userInitial, userName, userRole }: AdminNavProps) {
       <SidebarHeader>
         <Link
           href="/shop"
-          className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
+          className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 group-data-[collapsible=icon]:hidden"
         >
           <ArrowLeft className="size-3" />
           Volver a la tienda
@@ -126,19 +128,14 @@ export function AdminNav({ userInitial, userName, userRole }: AdminNavProps) {
       <SidebarSeparator />
 
       <SidebarFooter>
-        <div className="flex items-center gap-3 px-2 py-1">
-          <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-            <span className="text-xs font-bold text-primary">
-              {userInitial}
-            </span>
-          </div>
-          <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
-            <p className="text-sm font-medium truncate">{userName}</p>
-            <p className="text-xs uppercase tracking-[0.15em] text-muted-foreground capitalize">
-              {userRole}
-            </p>
-          </div>
-        </div>
+        <UserMenu
+          user={{
+            name: userName,
+            image: userImage,
+            role: userRole,
+          }}
+          showBackToShop
+        />
       </SidebarFooter>
     </Sidebar>
   );

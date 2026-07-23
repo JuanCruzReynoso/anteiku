@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ShoppingBag } from "lucide-react";
 import { useCartStore } from "../lib/cart-store";
 import { CartDrawer } from "./cart-drawer";
+import { Badge } from "@/components/ui/badge";
 
 export function CartButton() {
   const itemCount = useCartStore((s) => s.itemCount);
@@ -19,9 +20,9 @@ export function CartButton() {
       >
         <ShoppingBag className="h-5 w-5" />
         {itemCount > 0 && (
-          <span className="absolute top-0 right-0 flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground tabular-nums">
+          <Badge className="absolute top-0 right-0 size-5 flex items-center justify-center rounded-full p-0 text-[10px] tabular-nums">
             {itemCount > 99 ? "99+" : itemCount}
-          </span>
+          </Badge>
         )}
       </button>
       <CartDrawer open={open} onClose={() => setOpen(false)} />

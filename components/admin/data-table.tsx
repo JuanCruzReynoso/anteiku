@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { cn, formatPrice } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -81,14 +83,15 @@ function CellValue<T>({ column, row }: { column: Column<T>; row: T }) {
       const str = String(value ?? "");
       const mapping = column.badgeMap?.[str];
       return (
-        <span
+        <Badge
+          variant="secondary"
           className={cn(
-            "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap",
-            mapping?.className ?? "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
+            "whitespace-nowrap",
+            mapping?.className
           )}
         >
           {mapping?.label ?? str}
-        </span>
+        </Badge>
       );
     }
 
@@ -365,14 +368,16 @@ export function DataTable<T>({
 
       {/* Empty state */}
       {data.length === 0 ? (
-        <div className="border rounded-lg p-8 text-center text-muted-foreground">
-          <p className="text-lg font-medium">
-            {empty?.title ?? "Sin datos"}
-          </p>
-          {empty?.description && (
-            <p className="text-sm mt-2">{empty.description}</p>
-          )}
-        </div>
+        <Card className="p-8 text-center">
+          <CardContent>
+            <p className="text-lg font-medium text-muted-foreground">
+              {empty?.title ?? "Sin datos"}
+            </p>
+            {empty?.description && (
+              <p className="text-sm mt-2 text-muted-foreground">{empty.description}</p>
+            )}
+          </CardContent>
+        </Card>
       ) : (
         <>
           {/* Desktop table (hidden on mobile) */}

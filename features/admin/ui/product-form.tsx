@@ -1,11 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productSchema, type ProductInput } from "../lib/schemas";
 import { createProduct, updateProduct } from "../lib/product-actions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2, Plus, X } from "lucide-react";
@@ -105,15 +116,14 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
       {/* Name */}
       <div>
-        <label htmlFor="name" className="block text-sm font-medium mb-1">
+        <Label htmlFor="name" className="block text-sm font-medium mb-1">
           Nombre
-        </label>
-        <input
+        </Label>
+        <Input
           id="name"
           type="text"
           {...register("name")}
           onChange={handleNameChange}
-          className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
         {errors.name && (
           <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
@@ -122,14 +132,13 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
 
       {/* Slug */}
       <div>
-        <label htmlFor="slug" className="block text-sm font-medium mb-1">
+        <Label htmlFor="slug" className="block text-sm font-medium mb-1">
           Slug
-        </label>
-        <input
+        </Label>
+        <Input
           id="slug"
           type="text"
           {...register("slug")}
-          className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
         {errors.slug && (
           <p className="text-sm text-destructive mt-1">{errors.slug.message}</p>
@@ -138,14 +147,14 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
 
       {/* Description */}
       <div>
-        <label htmlFor="description" className="block text-sm font-medium mb-1">
+        <Label htmlFor="description" className="block text-sm font-medium mb-1">
           Descripción
-        </label>
-        <textarea
+        </Label>
+        <Textarea
           id="description"
           {...register("description")}
           rows={4}
-          className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring resize-y"
+          className="resize-y"
         />
         {errors.description && (
           <p className="text-sm text-destructive mt-1">
@@ -157,14 +166,13 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
       {/* Price + Category */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="basePrice" className="block text-sm font-medium mb-1">
+          <Label htmlFor="basePrice" className="block text-sm font-medium mb-1">
             Precio (ARS)
-          </label>
-          <input
+          </Label>
+          <Input
             id="basePrice"
             type="number"
             {...register("basePrice", { valueAsNumber: true })}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
           {errors.basePrice && (
             <p className="text-sm text-destructive mt-1">
@@ -173,21 +181,28 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
           )}
         </div>
         <div>
-          <label htmlFor="categoryId" className="block text-sm font-medium mb-1">
+          <Label htmlFor="categoryId" className="block text-sm font-medium mb-1">
             Categoría
-          </label>
-          <select
-            id="categoryId"
-            {...register("categoryId")}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="">Seleccionar categoría</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+          </Label>
+          <Controller
+            control={control}
+            name="categoryId"
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Seleccionar categoría" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Seleccionar categoría</SelectItem>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
           {errors.categoryId && (
             <p className="text-sm text-destructive mt-1">
               {errors.categoryId.message}
@@ -199,34 +214,46 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
       {/* Status + Featured */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="status" className="block text-sm font-medium mb-1">
+          <Label htmlFor="status" className="block text-sm font-medium mb-1">
             Estado
-          </label>
-          <select
-            id="status"
-            {...register("status")}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="active">Activo</option>
-            <option value="inactive">Inactivo</option>
-            <option value="draft">Borrador</option>
-          </select>
+          </Label>
+          <Controller
+            control={control}
+            name="status"
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Activo</SelectItem>
+                  <SelectItem value="inactive">Inactivo</SelectItem>
+                  <SelectItem value="draft">Borrador</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
         <div className="flex items-end pb-1">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              {...register("featured")}
-              className="rounded border-input"
+          <Label className="flex items-center gap-2 cursor-pointer">
+            <Controller
+              control={control}
+              name="featured"
+              render={({ field }) => (
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              )}
             />
             <span className="text-sm font-medium">Destacado</span>
-          </label>
+          </Label>
         </div>
       </div>
 
       {/* Images */}
       <div>
-        <label className="block text-sm font-medium mb-1">Imágenes</label>
+        <Label className="block text-sm font-medium mb-1">Imágenes</Label>
         <ImageUpload
           onUpload={(url) => {
             setValue("images", [...images, url]);
@@ -234,12 +261,12 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
           disabled={isSubmitting}
         />
         <div className="flex gap-2 mb-2 mt-2">
-          <input
+          <Input
             type="text"
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
             placeholder="O pegá una URL de imagen"
-            className="flex-1 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+            className="flex-1"
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 e.preventDefault();

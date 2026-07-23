@@ -135,14 +135,14 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
                         <span className="text-sm font-medium tabular-nums">
                           {formatPrice(item.price * item.quantity)}
                         </span>
-                        <button
-                          type="button"
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => removeItem(item.variantId)}
-                          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                           aria-label={`Quitar ${item.name} del carrito`}
                         >
                           Quitar
-                        </button>
+                        </Button>
                       </div>
                     </div>
                     </div>
@@ -161,7 +161,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
               </div>
               <Button
                 size="lg"
-                variant="accent"
+                variant="default"
                 className="w-full"
                 render={<Link href="/checkout" onClick={onClose} />}
               >

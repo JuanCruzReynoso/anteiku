@@ -4,6 +4,9 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { validateCheckoutCoupon } from "@/features/checkout/lib/coupon-actions";
 import { formatPrice } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface CouponInputProps {
   subtotal: number;
@@ -61,9 +64,9 @@ export function CouponInput({
     return (
       <div className="flex items-center justify-between bg-muted/50 p-3">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-mono bg-foreground text-background px-2 py-1 rounded">
+          <Badge variant="secondary" className="font-mono">
             {appliedCoupon.code}
-          </span>
+          </Badge>
           <span className="text-sm text-muted-foreground">
             {appliedCoupon.type === "percentage"
               ? `-${appliedCoupon.value}%`
@@ -72,25 +75,27 @@ export function CouponInput({
               : "Envío gratis"}
           </span>
         </div>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={onCouponRemoved}
-          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
         >
           Quitar
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="flex gap-2">
-      <input
+      <Input
         type="text"
         value={code}
         onChange={(e) => setCode(e.target.value.toUpperCase())}
         placeholder="Cupón"
-        className="flex-1 h-10 px-3 bg-muted text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        className="h-10 flex-1 bg-muted"
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
@@ -98,14 +103,15 @@ export function CouponInput({
           }
         }}
       />
-      <button
+      <Button
         type="button"
+        variant="outline"
         onClick={handleApply}
         disabled={isValidating || !code.trim()}
-        className="h-10 px-4 bg-muted text-sm font-medium hover:bg-muted/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="h-10 px-4"
       >
         {isValidating ? "..." : "Aplicar"}
-      </button>
+      </Button>
     </div>
   );
 }

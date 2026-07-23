@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ProfileForm } from "./profile-form";
 import { AddressForm } from "./address-form";
 import {
@@ -140,7 +141,7 @@ export function AddressManager({ initialName, initialPhone }: AddressManagerProp
         ) : isLoadingAddresses ? (
           <div className="space-y-3">
             {[1, 2].map((i) => (
-              <div key={i} className="h-24 bg-background animate-pulse" />
+              <Skeleton key={i} className="h-24 w-full" />
             ))}
           </div>
         ) : addresses.length === 0 ? (

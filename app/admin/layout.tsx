@@ -28,6 +28,7 @@ export default async function AdminLayout({
           userInitial={userInitial}
           userName={userName}
           userRole={userRole}
+          userImage={session.user.image}
         />
       }
     >

@@ -6,6 +6,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { updateProfile } from "@/features/account/lib/actions";
 
 const profileFormSchema = z.object({
@@ -90,14 +92,14 @@ export function ProfileForm({ initialName, initialPhone, onSaved }: ProfileFormP
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-2">
-        <label htmlFor="profile-name" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+        <Label htmlFor="profile-name" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Nombre
-        </label>
-        <input
+        </Label>
+        <Input
           id="profile-name"
           type="text"
           {...register("name")}
-          className="w-full h-10 bg-muted px-3 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+          className="h-10 bg-muted"
         />
         {errors.name && (
           <p className="text-xs text-destructive">{errors.name.message}</p>
@@ -105,14 +107,14 @@ export function ProfileForm({ initialName, initialPhone, onSaved }: ProfileFormP
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="profile-phone" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+        <Label htmlFor="profile-phone" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Teléfono <span className="normal-case tracking-normal">(opcional)</span>
-        </label>
-        <input
+        </Label>
+        <Input
           id="profile-phone"
           type="tel"
           {...register("phone")}
-          className="w-full h-10 bg-muted px-3 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+          className="h-10 bg-muted"
           placeholder="+54 11 1234-5678"
         />
       </div>

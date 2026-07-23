@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, User } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { Logo } from "@/components/ui/logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { CartButton } from "@/features/cart/ui/cart-button";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { UserMenu } from "@/components/ui/user-menu";
 import {
   Sheet,
   SheetContent,
@@ -85,20 +87,9 @@ export function Navbar() {
           {/* Desktop auth */}
           <div className="hidden md:flex items-center gap-2">
             {loading ? (
-              <div className="h-8 w-20 animate-pulse bg-muted" />
+              <Skeleton className="size-8 rounded-full" />
             ) : user ? (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground max-w-[120px] truncate">
-                  {user.name || user.email?.split("@")[0]}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                >
-                  Cerrar sesión
-                </Button>
-              </div>
+              <UserMenu user={user} />
             ) : (
               <>
                 <Link href="/login">
@@ -107,7 +98,7 @@ export function Navbar() {
                   </Button>
                 </Link>
                 <Link href="/register">
-                  <Button variant="accent" size="sm">
+                  <Button variant="default" size="sm">
                     Crear cuenta
                   </Button>
                 </Link>
@@ -172,12 +163,7 @@ export function Navbar() {
               <div className="mt-auto px-6 pb-6 space-y-3">
                 {user ? (
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2 px-4 py-3 bg-muted">
-                      <User className="size-4 text-muted-foreground" />
-                      <span className="text-sm truncate">
-                        {user.name || user.email?.split("@")[0]}
-                      </span>
-                    </div>
+                    <UserMenu user={user} variant="sheet" />
                     <Button
                       variant="outline"
                       className="w-full"
@@ -197,7 +183,7 @@ export function Navbar() {
                       </Button>
                     </Link>
                     <Link href="/register" className="block" onClick={() => setOpen(false)}>
-                      <Button variant="accent" className="w-full">
+                      <Button variant="default" className="w-full">
                         Crear cuenta
                       </Button>
                     </Link>

@@ -1,11 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   createAddress,
   updateAddress,
@@ -40,6 +43,7 @@ export function AddressForm({ initialData, onSuccess, onCancel }: AddressFormPro
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<AddressFormData>({
     resolver: zodResolver(addressFormSchema),
@@ -94,14 +98,14 @@ export function AddressForm({ initialData, onSuccess, onCancel }: AddressFormPro
 
       {/* Name */}
       <div className="space-y-2">
-        <label htmlFor="addr-name" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+        <Label htmlFor="addr-name" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Nombre
-        </label>
-        <input
+        </Label>
+        <Input
           id="addr-name"
           type="text"
           {...register("name")}
-          className="w-full h-10 bg-muted px-3 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+          className="h-10 bg-muted"
           placeholder="Casa, Trabajo, etc."
         />
         {errors.name && (
@@ -112,14 +116,14 @@ export function AddressForm({ initialData, onSuccess, onCancel }: AddressFormPro
       {/* Street + Number */}
       <div className="grid grid-cols-3 gap-4">
         <div className="col-span-2 space-y-2">
-          <label htmlFor="addr-street" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+          <Label htmlFor="addr-street" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             Calle
-          </label>
-          <input
+          </Label>
+          <Input
             id="addr-street"
             type="text"
             {...register("street")}
-            className="w-full h-10 bg-muted px-3 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+            className="h-10 bg-muted"
             placeholder="Av. Corrientes"
           />
           {errors.street && (
@@ -127,14 +131,14 @@ export function AddressForm({ initialData, onSuccess, onCancel }: AddressFormPro
           )}
         </div>
         <div className="space-y-2">
-          <label htmlFor="addr-streetNumber" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+          <Label htmlFor="addr-streetNumber" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             Número
-          </label>
-          <input
+          </Label>
+          <Input
             id="addr-streetNumber"
             type="text"
             {...register("streetNumber")}
-            className="w-full h-10 bg-muted px-3 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+            className="h-10 bg-muted"
             placeholder="1234"
           />
         </div>
@@ -142,14 +146,14 @@ export function AddressForm({ initialData, onSuccess, onCancel }: AddressFormPro
 
       {/* Apartment */}
       <div className="space-y-2">
-        <label htmlFor="addr-apartment" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+        <Label htmlFor="addr-apartment" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Piso / Departamento <span className="normal-case tracking-normal">(opcional)</span>
-        </label>
-        <input
+        </Label>
+        <Input
           id="addr-apartment"
           type="text"
           {...register("apartment")}
-          className="w-full h-10 bg-muted px-3 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+          className="h-10 bg-muted"
           placeholder="Piso 4, Depto B"
         />
       </div>
@@ -157,14 +161,14 @@ export function AddressForm({ initialData, onSuccess, onCancel }: AddressFormPro
       {/* City + State */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="addr-city" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+          <Label htmlFor="addr-city" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             Ciudad
-          </label>
-          <input
+          </Label>
+          <Input
             id="addr-city"
             type="text"
             {...register("city")}
-            className="w-full h-10 bg-muted px-3 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+            className="h-10 bg-muted"
             placeholder="Buenos Aires"
           />
           {errors.city && (
@@ -172,14 +176,14 @@ export function AddressForm({ initialData, onSuccess, onCancel }: AddressFormPro
           )}
         </div>
         <div className="space-y-2">
-          <label htmlFor="addr-state" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+          <Label htmlFor="addr-state" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             Provincia
-          </label>
-          <input
+          </Label>
+          <Input
             id="addr-state"
             type="text"
             {...register("state")}
-            className="w-full h-10 bg-muted px-3 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+            className="h-10 bg-muted"
             placeholder="CABA"
           />
           {errors.state && (
@@ -191,14 +195,14 @@ export function AddressForm({ initialData, onSuccess, onCancel }: AddressFormPro
       {/* Postal Code + Country */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="addr-postalCode" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+          <Label htmlFor="addr-postalCode" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             Código postal
-          </label>
-          <input
+          </Label>
+          <Input
             id="addr-postalCode"
             type="text"
             {...register("postalCode")}
-            className="w-full h-10 bg-muted px-3 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+            className="h-10 bg-muted"
             placeholder="C1000"
           />
           {errors.postalCode && (
@@ -206,14 +210,14 @@ export function AddressForm({ initialData, onSuccess, onCancel }: AddressFormPro
           )}
         </div>
         <div className="space-y-2">
-          <label htmlFor="addr-country" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+          <Label htmlFor="addr-country" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             País
-          </label>
-          <input
+          </Label>
+          <Input
             id="addr-country"
             type="text"
             {...register("country")}
-            className="w-full h-10 bg-muted px-3 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+            className="h-10 bg-muted"
           />
           {errors.country && (
             <p className="text-xs text-destructive">{errors.country.message}</p>
@@ -223,27 +227,32 @@ export function AddressForm({ initialData, onSuccess, onCancel }: AddressFormPro
 
       {/* Phone */}
       <div className="space-y-2">
-        <label htmlFor="addr-phone" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+        <Label htmlFor="addr-phone" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Teléfono <span className="normal-case tracking-normal">(opcional)</span>
-        </label>
-        <input
+        </Label>
+        <Input
           id="addr-phone"
           type="tel"
           {...register("phone")}
-          className="w-full h-10 bg-muted px-3 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+          className="h-10 bg-muted"
           placeholder="+54 11 1234-5678"
         />
       </div>
 
       {/* Default checkbox */}
-      <label className="flex items-center gap-3 cursor-pointer">
-        <input
-          type="checkbox"
-          {...register("isDefault")}
-          className="size-4 rounded border-border accent-foreground"
+      <Label className="flex items-center gap-3 cursor-pointer">
+        <Controller
+          control={control}
+          name="isDefault"
+          render={({ field }) => (
+            <Checkbox
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
         />
         <span className="text-sm">Establecer como dirección predeterminada</span>
-      </label>
+      </Label>
 
       {/* Actions */}
       <div className="flex gap-3 pt-2">

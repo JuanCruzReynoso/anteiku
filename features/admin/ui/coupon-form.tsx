@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { couponSchema, type CouponInput } from "../lib/schemas";
 import {
@@ -9,6 +9,16 @@ import {
   updateCoupon,
 } from "../lib/coupon-actions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -34,6 +44,7 @@ export function CouponForm({ initialData, onSuccess }: CouponFormProps) {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(couponSchema),
@@ -72,30 +83,29 @@ export function CouponForm({ initialData, onSuccess }: CouponFormProps) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="code" className="block text-sm font-medium mb-1">
+          <Label htmlFor="code" className="block text-sm font-medium mb-1">
             Codigo
-          </label>
-          <input
+          </Label>
+          <Input
             id="code"
             type="text"
             {...register("code")}
             placeholder="Ej: VERANO2024"
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring uppercase"
+            className="uppercase"
           />
           {errors.code && (
             <p className="text-sm text-destructive mt-1">{errors.code.message}</p>
           )}
         </div>
         <div>
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
+          <Label htmlFor="name" className="block text-sm font-medium mb-1">
             Nombre
-          </label>
-          <input
+          </Label>
+          <Input
             id="name"
             type="text"
             {...register("name")}
             placeholder="Ej: Descuento de verano"
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
           {errors.name && (
             <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
@@ -105,29 +115,35 @@ export function CouponForm({ initialData, onSuccess }: CouponFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="type" className="block text-sm font-medium mb-1">
+          <Label htmlFor="type" className="block text-sm font-medium mb-1">
             Tipo
-          </label>
-          <select
-            id="type"
-            {...register("type")}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="percentage">Porcentaje</option>
-            <option value="fixed">Monto fijo</option>
-            <option value="free_shipping">Envio gratis</option>
-          </select>
+          </Label>
+          <Controller
+            control={control}
+            name="type"
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="percentage">Porcentaje</SelectItem>
+                  <SelectItem value="fixed">Monto fijo</SelectItem>
+                  <SelectItem value="free_shipping">Envio gratis</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
         <div>
-          <label htmlFor="value" className="block text-sm font-medium mb-1">
+          <Label htmlFor="value" className="block text-sm font-medium mb-1">
             Valor
-          </label>
-          <input
+          </Label>
+          <Input
             id="value"
             type="number"
             {...register("value", { valueAsNumber: true })}
             min={0}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
           {errors.value && (
             <p className="text-sm text-destructive mt-1">{errors.value.message}</p>
@@ -137,68 +153,69 @@ export function CouponForm({ initialData, onSuccess }: CouponFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="minPurchase" className="block text-sm font-medium mb-1">
+          <Label htmlFor="minPurchase" className="block text-sm font-medium mb-1">
             Compra minima (ARS, opcional)
-          </label>
-          <input
+          </Label>
+          <Input
             id="minPurchase"
             type="number"
             {...register("minPurchase", { valueAsNumber: true })}
             min={0}
             placeholder="0"
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <div>
-          <label htmlFor="maxUses" className="block text-sm font-medium mb-1">
+          <Label htmlFor="maxUses" className="block text-sm font-medium mb-1">
             Maximo de usos (opcional)
-          </label>
-          <input
+          </Label>
+          <Input
             id="maxUses"
             type="number"
             {...register("maxUses", { valueAsNumber: true })}
             min={0}
             placeholder="Sin limite"
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="startsAt" className="block text-sm font-medium mb-1">
+          <Label htmlFor="startsAt" className="block text-sm font-medium mb-1">
             Fecha de inicio (opcional)
-          </label>
-          <input
+          </Label>
+          <Input
             id="startsAt"
             type="date"
             {...register("startsAt", { valueAsDate: true })}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <div>
-          <label htmlFor="endsAt" className="block text-sm font-medium mb-1">
+          <Label htmlFor="endsAt" className="block text-sm font-medium mb-1">
             Fecha de fin (opcional)
-          </label>
-          <input
+          </Label>
+          <Input
             id="endsAt"
             type="date"
             {...register("endsAt", { valueAsDate: true })}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="active"
-          {...register("active")}
-          className="rounded border-input"
+        <Controller
+          control={control}
+          name="active"
+          render={({ field }) => (
+            <Checkbox
+              id="active"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
         />
-        <label htmlFor="active" className="text-sm font-medium">
+        <Label htmlFor="active" className="text-sm font-medium">
           Activo
-        </label>
+        </Label>
       </div>
 
       <div className="flex gap-3 pt-4">

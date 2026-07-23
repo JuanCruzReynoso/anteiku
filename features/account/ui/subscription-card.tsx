@@ -3,6 +3,19 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   cancelSubscription,
   pauseSubscription,
@@ -29,7 +42,6 @@ export function SubscriptionCard({
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleCancel() {
-    if (!confirm("Seguro que querés cancelar esta suscripción?")) return;
     setIsLoading(true);
     try {
       const result = await cancelSubscription(subscription.id);
@@ -90,9 +102,9 @@ export function SubscriptionCard({
             {subscription.planInterval === "monthly" ? "mes" : "ano"}
           </p>
         </div>
-        <span className="text-xs font-medium bg-foreground text-background px-3 py-1">
+        <Badge variant="secondary">
           {STATUS_LABELS[subscription.status] || subscription.status}
-        </span>
+        </Badge>
       </div>
 
       {subscription.status === "active" && (
@@ -113,34 +125,53 @@ export function SubscriptionCard({
       {/* Actions */}
       <div className="flex gap-2 pt-2">
         {subscription.status === "active" && (
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handlePause}
             disabled={isLoading}
-            className="px-4 py-2 text-xs font-medium bg-background hover:bg-muted transition-colors disabled:opacity-50"
           >
             Pausar
-          </button>
+          </Button>
         )}
         {subscription.status === "paused" && (
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleResume}
             disabled={isLoading}
-            className="px-4 py-2 text-xs font-medium bg-background hover:bg-muted transition-colors disabled:opacity-50"
           >
             Reanudar
-          </button>
+          </Button>
         )}
         {subscription.status !== "cancelled" && (
-          <button
-            type="button"
-            onClick={handleCancel}
-            disabled={isLoading}
-            className="px-4 py-2 text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50"
-          >
-            Cancelar
-          </button>
+          <AlertDialog>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  disabled={isLoading}
+                />
+              }
+            >
+              Cancelar
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Cancelar suscripción</AlertDialogTitle>
+                <AlertDialogDescription>
+                  ¿Seguro que querés cancelar esta suscripción? Esta acción no se puede deshacer.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>No, mantener</AlertDialogCancel>
+                <AlertDialogAction onClick={handleCancel}>
+                  Sí, cancelar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
     </div>

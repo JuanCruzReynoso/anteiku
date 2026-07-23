@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { shipmentMethodSchema, type ShipmentMethodInput } from "../lib/schemas";
 import {
@@ -9,6 +9,10 @@ import {
   updateShipmentMethod,
 } from "../lib/shipment-actions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -30,6 +34,7 @@ export function ShipmentForm({ initialData, onSuccess }: ShipmentFormProps) {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(shipmentMethodSchema),
@@ -63,15 +68,14 @@ export function ShipmentForm({ initialData, onSuccess }: ShipmentFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium mb-1">
+        <Label htmlFor="name" className="block text-sm font-medium mb-1">
           Nombre
-        </label>
-        <input
+        </Label>
+        <Input
           id="name"
           type="text"
           {...register("name")}
           placeholder="Ej: Envío estándar"
-          className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
         {errors.name && (
           <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
@@ -79,44 +83,41 @@ export function ShipmentForm({ initialData, onSuccess }: ShipmentFormProps) {
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium mb-1">
+        <Label htmlFor="description" className="block text-sm font-medium mb-1">
           Descripción
-        </label>
-        <textarea
+        </Label>
+        <Textarea
           id="description"
           {...register("description")}
           rows={2}
           placeholder="Opcional: describe el método de envío"
-          className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring resize-y"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="cost" className="block text-sm font-medium mb-1">
+          <Label htmlFor="cost" className="block text-sm font-medium mb-1">
             Costo (ARS)
-          </label>
-          <input
+          </Label>
+          <Input
             id="cost"
             type="number"
             {...register("cost", { valueAsNumber: true })}
             min={0}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
           {errors.cost && (
             <p className="text-sm text-destructive mt-1">{errors.cost.message}</p>
           )}
         </div>
         <div>
-          <label htmlFor="estimatedDays" className="block text-sm font-medium mb-1">
+          <Label htmlFor="estimatedDays" className="block text-sm font-medium mb-1">
             Días estimados
-          </label>
-          <input
+          </Label>
+          <Input
             id="estimatedDays"
             type="number"
             {...register("estimatedDays", { valueAsNumber: true })}
             min={1}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
           {errors.estimatedDays && (
             <p className="text-sm text-destructive mt-1">
@@ -127,15 +128,20 @@ export function ShipmentForm({ initialData, onSuccess }: ShipmentFormProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="active"
-          {...register("active")}
-          className="rounded border-input"
+        <Controller
+          control={control}
+          name="active"
+          render={({ field }) => (
+            <Checkbox
+              id="active"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
         />
-        <label htmlFor="active" className="text-sm font-medium">
+        <Label htmlFor="active" className="text-sm font-medium">
           Activo
-        </label>
+        </Label>
       </div>
 
       <div className="flex gap-3 pt-4">

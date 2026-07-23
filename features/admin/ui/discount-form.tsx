@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { discountSchema, type DiscountInput } from "../lib/schemas";
 import {
@@ -9,6 +9,16 @@ import {
   updateDiscount,
 } from "../lib/discount-actions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -34,6 +44,7 @@ export function DiscountForm({ initialData, onSuccess }: DiscountFormProps) {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(discountSchema),
@@ -76,15 +87,14 @@ export function DiscountForm({ initialData, onSuccess }: DiscountFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium mb-1">
+        <Label htmlFor="name" className="block text-sm font-medium mb-1">
           Nombre
-        </label>
-        <input
+        </Label>
+        <Input
           id="name"
           type="text"
           {...register("name")}
           placeholder="Ej: Descuento de verano"
-          className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
         {errors.name && (
           <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
@@ -93,28 +103,34 @@ export function DiscountForm({ initialData, onSuccess }: DiscountFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="type" className="block text-sm font-medium mb-1">
+          <Label htmlFor="type" className="block text-sm font-medium mb-1">
             Tipo
-          </label>
-          <select
-            id="type"
-            {...register("type")}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="percentage">Porcentaje</option>
-            <option value="fixed">Monto fijo</option>
-          </select>
+          </Label>
+          <Controller
+            control={control}
+            name="type"
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="percentage">Porcentaje</SelectItem>
+                  <SelectItem value="fixed">Monto fijo</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
         <div>
-          <label htmlFor="value" className="block text-sm font-medium mb-1">
+          <Label htmlFor="value" className="block text-sm font-medium mb-1">
             Valor
-          </label>
-          <input
+          </Label>
+          <Input
             id="value"
             type="number"
             {...register("value", { valueAsNumber: true })}
             min={0}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
           {errors.value && (
             <p className="text-sm text-destructive mt-1">{errors.value.message}</p>
@@ -124,80 +140,80 @@ export function DiscountForm({ initialData, onSuccess }: DiscountFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="productId" className="block text-sm font-medium mb-1">
+          <Label htmlFor="productId" className="block text-sm font-medium mb-1">
             Producto (opcional)
-          </label>
-          <input
+          </Label>
+          <Input
             id="productId"
             type="text"
             {...register("productId")}
             placeholder="ID del producto"
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <div>
-          <label htmlFor="categoryId" className="block text-sm font-medium mb-1">
+          <Label htmlFor="categoryId" className="block text-sm font-medium mb-1">
             Categoria (opcional)
-          </label>
-          <input
+          </Label>
+          <Input
             id="categoryId"
             type="text"
             {...register("categoryId")}
             placeholder="ID de la categoria"
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="minPurchase" className="block text-sm font-medium mb-1">
+        <Label htmlFor="minPurchase" className="block text-sm font-medium mb-1">
           Compra minima (ARS, opcional)
-        </label>
-        <input
+        </Label>
+        <Input
           id="minPurchase"
           type="number"
           {...register("minPurchase", { valueAsNumber: true })}
           min={0}
           placeholder="0"
-          className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="startsAt" className="block text-sm font-medium mb-1">
+          <Label htmlFor="startsAt" className="block text-sm font-medium mb-1">
             Fecha de inicio (opcional)
-          </label>
-          <input
+          </Label>
+          <Input
             id="startsAt"
             type="date"
             {...register("startsAt", { valueAsDate: true })}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <div>
-          <label htmlFor="endsAt" className="block text-sm font-medium mb-1">
+          <Label htmlFor="endsAt" className="block text-sm font-medium mb-1">
             Fecha de fin (opcional)
-          </label>
-          <input
+          </Label>
+          <Input
             id="endsAt"
             type="date"
             {...register("endsAt", { valueAsDate: true })}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
       </div>
 
       <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="active"
-          {...register("active")}
-          className="rounded border-input"
+        <Controller
+          control={control}
+          name="active"
+          render={({ field }) => (
+            <Checkbox
+              id="active"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
         />
-        <label htmlFor="active" className="text-sm font-medium">
+        <Label htmlFor="active" className="text-sm font-medium">
           Activo
-        </label>
+        </Label>
       </div>
 
       <div className="flex gap-3 pt-4">

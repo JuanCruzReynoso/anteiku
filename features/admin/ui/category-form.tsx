@@ -1,11 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { categorySchema, type CategoryInput } from "../lib/schemas";
 import { createCategory, updateCategory } from "../lib/category-actions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -83,15 +87,14 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-lg">
       <div>
-        <label htmlFor="name" className="block text-sm font-medium mb-1">
+        <Label htmlFor="name" className="block text-sm font-medium mb-1">
           Nombre
-        </label>
-        <input
+        </Label>
+        <Input
           id="name"
           type="text"
           {...register("name")}
           onChange={handleNameChange}
-          className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
         {errors.name && (
           <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
@@ -99,14 +102,13 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
       </div>
 
       <div>
-        <label htmlFor="slug" className="block text-sm font-medium mb-1">
+        <Label htmlFor="slug" className="block text-sm font-medium mb-1">
           Slug
-        </label>
-        <input
+        </Label>
+        <Input
           id="slug"
           type="text"
           {...register("slug")}
-          className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
         {errors.slug && (
           <p className="text-sm text-destructive mt-1">{errors.slug.message}</p>
@@ -114,50 +116,52 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium mb-1">
+        <Label htmlFor="description" className="block text-sm font-medium mb-1">
           Descripción
-        </label>
-        <textarea
+        </Label>
+        <Textarea
           id="description"
           {...register("description")}
           rows={3}
-          className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring resize-y"
         />
       </div>
 
       <div>
-        <label htmlFor="image" className="block text-sm font-medium mb-1">
+        <Label htmlFor="image" className="block text-sm font-medium mb-1">
           URL de imagen
-        </label>
-        <input
+        </Label>
+        <Input
           id="image"
           type="text"
           {...register("image")}
           placeholder="https://..."
-          className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex items-end pb-1">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              {...register("active")}
-              className="rounded border-input"
+          <Label className="flex items-center gap-2 cursor-pointer">
+            <Controller
+              control={control}
+              name="active"
+              render={({ field }) => (
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              )}
             />
             <span className="text-sm font-medium">Activa</span>
-          </label>
+          </Label>
         </div>
         <div>
-          <label htmlFor="sortOrder" className="block text-sm font-medium mb-1">
+          <Label htmlFor="sortOrder" className="block text-sm font-medium mb-1">
             Orden
-          </label>
-          <input
+          </Label>
+          <Input
             id="sortOrder"
             type="number"
             {...register("sortOrder", { valueAsNumber: true })}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
       </div>

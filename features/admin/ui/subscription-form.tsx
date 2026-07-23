@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { subscriptionPlanSchema, type SubscriptionPlanInput } from "../lib/schemas";
 import {
@@ -9,6 +9,17 @@ import {
   updateSubscriptionPlan,
 } from "../lib/subscription-actions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Plus, X } from "lucide-react";
 
@@ -34,6 +45,7 @@ export function SubscriptionPlanForm({ initialData, onSuccess }: SubscriptionPla
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(subscriptionPlanSchema),
@@ -81,30 +93,28 @@ export function SubscriptionPlanForm({ initialData, onSuccess }: SubscriptionPla
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium mb-1">
+          <Label htmlFor="name" className="block text-sm font-medium mb-1">
             Nombre
-          </label>
-          <input
+          </Label>
+          <Input
             id="name"
             type="text"
             {...register("name")}
             placeholder="Ej: Cafe Mensual"
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
           {errors.name && (
             <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
           )}
         </div>
         <div>
-          <label htmlFor="slug" className="block text-sm font-medium mb-1">
+          <Label htmlFor="slug" className="block text-sm font-medium mb-1">
             Slug
-          </label>
-          <input
+          </Label>
+          <Input
             id="slug"
             type="text"
             {...register("slug")}
             placeholder="cafe-mensual"
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
           {errors.slug && (
             <p className="text-sm text-destructive mt-1">{errors.slug.message}</p>
@@ -113,53 +123,58 @@ export function SubscriptionPlanForm({ initialData, onSuccess }: SubscriptionPla
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium mb-1">
+        <Label htmlFor="description" className="block text-sm font-medium mb-1">
           Descripcion
-        </label>
-        <textarea
+        </Label>
+        <Textarea
           id="description"
           {...register("description")}
           rows={2}
           placeholder="Descripcion del plan"
-          className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring resize-y"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="price" className="block text-sm font-medium mb-1">
+          <Label htmlFor="price" className="block text-sm font-medium mb-1">
             Precio mensual (ARS)
-          </label>
-          <input
+          </Label>
+          <Input
             id="price"
             type="number"
             {...register("price", { valueAsNumber: true })}
             min={0}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
           />
           {errors.price && (
             <p className="text-sm text-destructive mt-1">{errors.price.message}</p>
           )}
         </div>
         <div>
-          <label htmlFor="interval" className="block text-sm font-medium mb-1">
+          <Label htmlFor="interval" className="block text-sm font-medium mb-1">
             Intervalo
-          </label>
-          <select
-            id="interval"
-            {...register("interval")}
-            className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="monthly">Mensual</option>
-            <option value="quarterly">Trimestral</option>
-            <option value="yearly">Anual</option>
-          </select>
+          </Label>
+          <Controller
+            control={control}
+            name="interval"
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Mensual</SelectItem>
+                  <SelectItem value="quarterly">Trimestral</SelectItem>
+                  <SelectItem value="yearly">Anual</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
       </div>
 
       {/* Features */}
       <div>
-        <label className="block text-sm font-medium mb-2">Features</label>
+        <Label className="block text-sm font-medium mb-2">Features</Label>
         <div className="space-y-2">
           {features.map((feature, index) => (
             <div key={index} className="flex items-center gap-2">
@@ -176,7 +191,7 @@ export function SubscriptionPlanForm({ initialData, onSuccess }: SubscriptionPla
             </div>
           ))}
           <div className="flex gap-2">
-            <input
+            <Input
               type="text"
               value={newFeature}
               onChange={(e) => setNewFeature(e.target.value)}
@@ -187,7 +202,7 @@ export function SubscriptionPlanForm({ initialData, onSuccess }: SubscriptionPla
                 }
               }}
               placeholder="Agregar feature"
-              className="flex-1 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+              className="flex-1"
             />
             <Button type="button" variant="outline" size="sm" onClick={addFeature}>
               <Plus className="size-4" />
@@ -197,15 +212,20 @@ export function SubscriptionPlanForm({ initialData, onSuccess }: SubscriptionPla
       </div>
 
       <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="active"
-          {...register("active")}
-          className="rounded border-input"
+        <Controller
+          control={control}
+          name="active"
+          render={({ field }) => (
+            <Checkbox
+              id="active"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
         />
-        <label htmlFor="active" className="text-sm font-medium">
+        <Label htmlFor="active" className="text-sm font-medium">
           Activo
-        </label>
+        </Label>
       </div>
 
       <div className="flex gap-3 pt-4">

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { enrollInSubscription } from "@/features/account/lib/subscription-actions";
 
 interface SubscribeButtonProps {
@@ -49,7 +50,8 @@ export function SubscribeButton({ planId }: SubscribeButtonProps) {
       disabled={isLoading}
       className="w-full"
     >
-      {isLoading ? "Procesando..." : "Suscribirme"}
+      {isLoading && <Loader2 className="size-4 animate-spin mr-2" />}
+      Suscribirme
     </Button>
   );
 }

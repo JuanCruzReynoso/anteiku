@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface SearchInputProps {
   placeholder?: string;
@@ -45,13 +46,13 @@ export function SearchInput({ placeholder = "Buscar productos..." }: SearchInput
 
   return (
     <div className="relative">
-      <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-      <input
+      <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+      <Input
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-12 bg-muted pl-11 pr-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+        className="h-12 bg-muted pl-11 pr-4"
       />
     </div>
   );

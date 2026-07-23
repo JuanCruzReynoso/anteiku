@@ -9,6 +9,11 @@ import { shippingSchema, type ShippingFormData } from "../lib/schema";
 import { getActiveShippingMethods, type ShippingMethod } from "../lib/shipping-actions";
 import { getSavedAddresses } from "@/features/account/lib/actions";
 import { formatPrice } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 interface SavedAddress {
   id: string;
@@ -157,29 +162,26 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
       {/* Saved Address Selector */}
       {session?.user?.id && savedAddresses.length > 0 && (
         <div className="space-y-3">
-          <label className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+          <Label className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             Dirección guardada
-          </label>
-          <div className="space-y-2">
-            <label
+          </Label>
+          <RadioGroup
+            value={selectedAddressId}
+            onValueChange={handleAddressSelect}
+            className="space-y-2"
+          >
+            <Label
               className={`flex items-center gap-3 p-3 cursor-pointer transition-colors ${
                 selectedAddressId === "new"
                   ? "bg-muted ring-1 ring-foreground"
                   : "bg-muted/50 hover:bg-muted"
               }`}
             >
-              <input
-                type="radio"
-                name="savedAddress"
-                value="new"
-                checked={selectedAddressId === "new"}
-                onChange={() => handleAddressSelect("new")}
-                className="mt-0.5"
-              />
+              <RadioGroupItem value="new" />
               <span className="text-sm">Usar nueva dirección</span>
-            </label>
+            </Label>
             {savedAddresses.map((addr) => (
-              <label
+              <Label
                 key={addr.id}
                 className={`flex items-start gap-3 p-3 cursor-pointer transition-colors ${
                   selectedAddressId === addr.id
@@ -187,14 +189,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
                     : "bg-muted/50 hover:bg-muted"
                 }`}
               >
-                <input
-                  type="radio"
-                  name="savedAddress"
-                  value={addr.id}
-                  checked={selectedAddressId === addr.id}
-                  onChange={() => handleAddressSelect(addr.id)}
-                  className="mt-0.5"
-                />
+                <RadioGroupItem value={addr.id} className="mt-0.5" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{addr.name}</span>
@@ -208,25 +203,25 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
                     {addr.line1}{addr.line2 && `, ${addr.line2}`} — {addr.city}, {addr.state} {addr.postalCode}
                   </p>
                 </div>
-              </label>
+              </Label>
             ))}
-          </div>
+          </RadioGroup>
         </div>
       )}
 
       {/* Email */}
       <div className="space-y-2">
-        <label htmlFor="email" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+        <Label htmlFor="email" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Email
-        </label>
-        <input
+        </Label>
+        <Input
           id="email"
           type="email"
           {...register("email")}
           required
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? "email-error" : undefined}
-          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+          className="h-12 bg-muted px-4"
           placeholder="tu@email.com"
         />
         {errors.email && (
@@ -236,17 +231,17 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
 
       {/* Name */}
       <div className="space-y-2">
-        <label htmlFor="name" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+        <Label htmlFor="name" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Nombre completo
-        </label>
-        <input
+        </Label>
+        <Input
           id="name"
           type="text"
           {...register("name")}
           required
           aria-invalid={!!errors.name}
           aria-describedby={errors.name ? "name-error" : undefined}
-          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+          className="h-12 bg-muted px-4"
           placeholder="Juan Pérez"
         />
         {errors.name && (
@@ -256,17 +251,17 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
 
       {/* Phone */}
       <div className="space-y-2">
-        <label htmlFor="phone" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+        <Label htmlFor="phone" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Teléfono
-        </label>
-        <input
+        </Label>
+        <Input
           id="phone"
           type="tel"
           {...register("phone")}
           required
           aria-invalid={!!errors.phone}
           aria-describedby={errors.phone ? "phone-error" : undefined}
-          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+          className="h-12 bg-muted px-4"
           placeholder="+54 11 1234-5678"
         />
         {errors.phone && (
@@ -276,17 +271,17 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
 
       {/* Address */}
       <div className="space-y-2">
-        <label htmlFor="line1" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+        <Label htmlFor="line1" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Dirección
-        </label>
-        <input
+        </Label>
+        <Input
           id="line1"
           type="text"
           {...register("line1")}
           required
           aria-invalid={!!errors.line1}
           aria-describedby={errors.line1 ? "line1-error" : undefined}
-          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+          className="h-12 bg-muted px-4"
           placeholder="Av. Corrientes 1234"
         />
         {errors.line1 && (
@@ -296,14 +291,14 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
 
       {/* Address line 2 */}
       <div className="space-y-2">
-        <label htmlFor="line2" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+        <Label htmlFor="line2" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
           Piso, departamento, etc. <span className="normal-case tracking-normal">(opcional)</span>
-        </label>
-        <input
+        </Label>
+        <Input
           id="line2"
           type="text"
           {...register("line2")}
-          className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+          className="h-12 bg-muted px-4"
           placeholder="Piso 4, Depto B"
         />
       </div>
@@ -311,17 +306,17 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
       {/* City + State */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="city" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+          <Label htmlFor="city" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             Ciudad
-          </label>
-          <input
+          </Label>
+          <Input
             id="city"
             type="text"
             {...register("city")}
             required
             aria-invalid={!!errors.city}
             aria-describedby={errors.city ? "city-error" : undefined}
-            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+            className="h-12 bg-muted px-4"
             placeholder="Buenos Aires"
           />
           {errors.city && (
@@ -329,17 +324,17 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           )}
         </div>
         <div className="space-y-2">
-          <label htmlFor="state" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+          <Label htmlFor="state" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             Provincia
-          </label>
-          <input
+          </Label>
+          <Input
             id="state"
             type="text"
             {...register("state")}
             required
             aria-invalid={!!errors.state}
             aria-describedby={errors.state ? "state-error" : undefined}
-            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+            className="h-12 bg-muted px-4"
             placeholder="CABA"
           />
           {errors.state && (
@@ -351,17 +346,17 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
       {/* Postal Code + Country */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <label htmlFor="postalCode" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+          <Label htmlFor="postalCode" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             Código postal
-          </label>
-          <input
+          </Label>
+          <Input
             id="postalCode"
             type="text"
             {...register("postalCode")}
             required
             aria-invalid={!!errors.postalCode}
             aria-describedby={errors.postalCode ? "postalCode-error" : undefined}
-            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+            className="h-12 bg-muted px-4"
             placeholder="C1000"
           />
           {errors.postalCode && (
@@ -371,17 +366,17 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
           )}
         </div>
         <div className="space-y-2">
-          <label htmlFor="country" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
+          <Label htmlFor="country" className="text-xs uppercase tracking-[0.2em] font-medium text-muted-foreground">
             País
-          </label>
-          <input
+          </Label>
+          <Input
             id="country"
             type="text"
             {...register("country")}
             required
             aria-invalid={!!errors.country}
             aria-describedby={errors.country ? "country-error" : undefined}
-            className="w-full h-12 bg-muted px-4 text-sm outline-none focus:ring-1 focus:ring-primary transition-shadow"
+            className="h-12 bg-muted px-4"
           />
           {errors.country && (
             <p id="country-error" className="text-xs text-destructive">
@@ -399,13 +394,17 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
         {isLoadingMethods ? (
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 bg-muted animate-pulse" />
+              <Skeleton key={i} className="h-20 w-full" />
             ))}
           </div>
         ) : (
-          <div className="space-y-3">
+          <RadioGroup
+            value={selectedMethod}
+            onValueChange={setSelectedMethod}
+            className="space-y-3"
+          >
             {shippingMethods.map((method) => (
-              <label
+              <Label
                 key={method.id}
                 className={`flex items-start gap-4 p-4 cursor-pointer transition-colors ${
                   selectedMethod === method.id
@@ -413,14 +412,7 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
                     : "bg-muted/50 hover:bg-muted"
                 }`}
               >
-                <input
-                  type="radio"
-                  name="shippingMethod"
-                  value={method.id}
-                  checked={selectedMethod === method.id}
-                  onChange={() => setSelectedMethod(method.id)}
-                  className="mt-1"
-                />
+                <RadioGroupItem value={method.id} className="mt-1" />
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <p className="font-medium">{method.name}</p>
@@ -435,19 +427,19 @@ export function ShippingForm({ onSubmit, defaultValues }: ShippingFormProps) {
                     </p>
                   )}
                 </div>
-              </label>
+              </Label>
             ))}
-          </div>
+          </RadioGroup>
         )}
       </div>
 
       {/* Submit — pill button */}
-      <button
+      <Button
         type="submit"
-        className="w-full h-12 rounded-full bg-foreground text-background font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
+        className="w-full h-12 rounded-full"
       >
         Continuar al pago
-      </button>
+      </Button>
     </form>
   );
 }
