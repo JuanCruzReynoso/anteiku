@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { discountSchema, type DiscountInput } from "../lib/schemas";
 import {
   createDiscount,
   updateDiscount,
+  getProductsForPicker,
+  getCategoriesForPicker,
 } from "../lib/discount-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronDown, X } from "lucide-react";
 
 interface DiscountFormProps {
   initialData?: {
@@ -38,13 +40,119 @@ interface DiscountFormProps {
   onSuccess?: () => void;
 }
 
+interface PickerItem {
+  id: string;
+  name: string;
+}
+
+function SearchablePicker({
+  label,
+  items,
+  value,
+  onChange,
+  disabled,
+  placeholder,
+}: {
+  label: string;
+  items: PickerItem[];
+  value: string;
+  onChange: (val: string) => void;
+  disabled?: boolean;
+  placeholder?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+
+  const selectedItem = items.find((i) => i.id === value);
+  const filtered = items.filter((i) =>
+    i.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <Label className="block text-sm font-medium mb-1">{label}</Label>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && setOpen(!open)}
+        className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <span className={selectedItem ? "" : "text-muted-foreground"}>
+          {selectedItem?.name ?? placeholder ?? "Seleccionar..."}
+        </span>
+        {selectedItem && !disabled ? (
+          <X
+            className="size-4 shrink-0 opacity-50 hover:opacity-100 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange("");
+              setSearch("");
+            }}
+          />
+        ) : (
+          <ChevronDown className="size-4 shrink-0 opacity-50" />
+        )}
+      </button>
+      {open && !disabled && (
+        <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md">
+          <div className="p-1">
+            <Input
+              placeholder="Buscar..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="h-8 text-sm"
+              autoFocus
+            />
+          </div>
+          <div className="max-h-48 overflow-y-auto p-1">
+            {filtered.length === 0 && (
+              <p className="px-2 py-1.5 text-sm text-muted-foreground">
+                Sin resultados
+              </p>
+            )}
+            {filtered.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  onChange(item.id);
+                  setOpen(false);
+                  setSearch("");
+                }}
+                className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+              >
+                {item.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function DiscountForm({ initialData, onSuccess }: DiscountFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [products, setProducts] = useState<PickerItem[]>([]);
+  const [categories, setCategories] = useState<PickerItem[]>([]);
 
   const {
     register,
     handleSubmit,
     control,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(discountSchema),
@@ -60,6 +168,14 @@ export function DiscountForm({ initialData, onSuccess }: DiscountFormProps) {
       active: initialData?.active ?? true,
     },
   });
+
+  const productId = watch("productId");
+  const categoryId = watch("categoryId");
+
+  useEffect(() => {
+    getProductsForPicker().then(setProducts);
+    getCategoriesForPicker().then(setCategories);
+  }, []);
 
   const onSubmit = async (data: DiscountInput) => {
     setIsSubmitting(true);
@@ -139,29 +255,47 @@ export function DiscountForm({ initialData, onSuccess }: DiscountFormProps) {
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="productId" className="block text-sm font-medium mb-1">
-            Producto (opcional)
-          </Label>
-          <Input
-            id="productId"
-            type="text"
-            {...register("productId")}
-            placeholder="ID del producto"
-          />
-        </div>
-        <div>
-          <Label htmlFor="categoryId" className="block text-sm font-medium mb-1">
-            Categoria (opcional)
-          </Label>
-          <Input
-            id="categoryId"
-            type="text"
-            {...register("categoryId")}
-            placeholder="ID de la categoria"
-          />
-        </div>
+        <Controller
+          control={control}
+          name="productId"
+          render={({ field }) => (
+            <SearchablePicker
+              label="Producto (opcional)"
+              items={products}
+              value={field.value ?? ""}
+              onChange={(val) => {
+                field.onChange(val);
+                if (val) setValue("categoryId", "");
+              }}
+              disabled={!!categoryId}
+              placeholder="Seleccionar producto..."
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="categoryId"
+          render={({ field }) => (
+            <SearchablePicker
+              label="Categoría (opcional)"
+              items={categories}
+              value={field.value ?? ""}
+              onChange={(val) => {
+                field.onChange(val);
+                if (val) setValue("productId", "");
+              }}
+              disabled={!!productId}
+              placeholder="Seleccionar categoría..."
+            />
+          )}
+        />
       </div>
+      {errors.productId && (
+        <p className="text-sm text-destructive">{errors.productId.message}</p>
+      )}
+      {errors.categoryId && (
+        <p className="text-sm text-destructive">{errors.categoryId.message}</p>
+      )}
 
       <div>
         <Label htmlFor="minPurchase" className="block text-sm font-medium mb-1">

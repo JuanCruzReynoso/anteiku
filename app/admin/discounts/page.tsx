@@ -15,6 +15,7 @@ export type Discount = {
   minPurchase: number | null;
   startsAt: Date | null;
   endsAt: Date | null;
+  usedCount: number;
   active: boolean | null;
   createdAt: Date;
   updatedAt: Date;

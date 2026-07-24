@@ -15,6 +15,7 @@ export type Discount = {
   minPurchase: number | null;
   startsAt: Date | null;
   endsAt: Date | null;
+  usedCount: number;
   active: boolean | null;
   createdAt: Date;
   updatedAt: Date;
@@ -59,6 +60,15 @@ const columns: Column<DiscountRow>[] = [
       <span className="text-muted-foreground">
         {row.productName ?? row.categoryName ?? "—"}
       </span>
+    ),
+  },
+  {
+    key: "usedCount",
+    header: "Usos",
+    type: "conditional",
+    align: "right",
+    render: (row) => (
+      <span className="tabular-nums">{row.usedCount}</span>
     ),
   },
   {

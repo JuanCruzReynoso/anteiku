@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { formatPrice } from "@/lib/utils";
-import { deleteDiscount } from "@/features/admin/lib/discount-actions";
+import { deleteDiscount, toggleDiscountActive } from "@/features/admin/lib/discount-actions";
 import { DiscountForm } from "@/features/admin/ui/discount-form";
 import type { Discount } from "./discounts-list";
 
@@ -15,6 +14,7 @@ interface DiscountActionsProps {
 export function DiscountActions({ discount }: DiscountActionsProps) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
+  const [toggling, setToggling] = useState(false);
 
   if (isEditing) {
     return (
@@ -39,6 +39,23 @@ export function DiscountActions({ discount }: DiscountActionsProps) {
     );
   }
 
+  const handleToggle = async () => {
+    setToggling(true);
+    try {
+      const result = await toggleDiscountActive(discount.id);
+      if ("error" in result) {
+        toast.error(result.error);
+      } else {
+        toast.success(result.active ? "Descuento activado" : "Descuento desactivado");
+        router.refresh();
+      }
+    } catch {
+      toast.error("Error al cambiar estado del descuento");
+    } finally {
+      setToggling(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!confirm("Estas seguro que queres eliminar este descuento?")) {
       return;
@@ -54,6 +71,13 @@ export function DiscountActions({ discount }: DiscountActionsProps) {
 
   return (
     <div className="flex gap-2 justify-end">
+      <button
+        onClick={handleToggle}
+        disabled={toggling}
+        className="text-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
+      >
+        {discount.active ? "Desactivar" : "Activar"}
+      </button>
       <button
         onClick={() => setIsEditing(true)}
         className="text-sm text-muted-foreground hover:text-foreground"
