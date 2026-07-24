@@ -96,6 +96,7 @@ export async function createOrder(input: OrderInput): Promise<CreateOrderResult>
       // Build discount lookup: productId → discount, categoryId → discount
       const productDiscountMap = new Map<string, typeof itemDiscounts[0]>();
       const categoryDiscountMap = new Map<string, typeof itemDiscounts[0]>();
+      const appliedDiscountIds: string[] = [];
       for (const d of itemDiscounts) {
         if (d.productId && !productDiscountMap.has(d.productId)) {
           productDiscountMap.set(d.productId, d);
@@ -137,6 +138,45 @@ export async function createOrder(input: OrderInput): Promise<CreateOrderResult>
         }
 
         subtotal += itemPrice * item.quantity;
+      }
+
+      // 8b. Fetch and apply global discounts (no product/category — apply to entire subtotal)
+      const globalDiscounts = await tx
+        .select()
+        .from(discounts)
+        .where(
+          and(
+            eq(discounts.active, true),
+            sql`${discounts.productId} IS NULL`,
+            sql`${discounts.categoryId} IS NULL`,
+            sql`(${discounts.startsAt} IS NULL OR ${discounts.startsAt} <= ${now})`,
+            sql`(${discounts.endsAt} IS NULL OR ${discounts.endsAt} >= ${now})`
+          )
+        );
+
+      if (globalDiscounts.length > 0) {
+        // Pick the best global discount: highest percentage, or first fixed
+        const pctDiscounts = globalDiscounts.filter((d) => d.type === "percentage");
+        const bestGlobal = pctDiscounts.length > 0
+          ? pctDiscounts.reduce((best, d) => (d.value > best.value ? d : best))
+          : globalDiscounts.find((d) => d.type === "fixed") ?? globalDiscounts[0];
+
+        // Respect minPurchase
+        if (!bestGlobal.minPurchase || subtotal >= bestGlobal.minPurchase) {
+          if (bestGlobal.type === "percentage") {
+            subtotal = Math.round(subtotal * (1 - bestGlobal.value / 100));
+          } else {
+            subtotal = Math.max(0, subtotal - bestGlobal.value);
+          }
+          appliedDiscountIds.push(bestGlobal.id);
+        }
+      }
+
+      // Track product/category discount IDs for usage counting
+      for (const d of itemDiscounts) {
+        if (!appliedDiscountIds.includes(d.id)) {
+          appliedDiscountIds.push(d.id);
+        }
       }
 
       // 9. Fetch coupon ONCE with SELECT FOR UPDATE (Task 2.2 + 2.3)
@@ -237,6 +277,14 @@ export async function createOrder(input: OrderInput): Promise<CreateOrderResult>
           },
         })
         .returning({ id: orders.id });
+
+      // 12b. Increment usedCount for all applied discounts (once per order, not per item)
+      if (appliedDiscountIds.length > 0) {
+        await tx
+          .update(discounts)
+          .set({ usedCount: sql`${discounts.usedCount} + 1` })
+          .where(sql`${discounts.id} IN (${sql.join(appliedDiscountIds.map((id) => sql`${id}`), sql`, `)})`);
+      }
 
       // 11. Insert order items + decrement stock + record inventory movement
       for (const item of items) {
