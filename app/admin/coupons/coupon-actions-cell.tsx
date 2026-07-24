@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { deleteCoupon } from "@/features/admin/lib/coupon-actions";
+import { deleteCoupon, toggleCouponActive } from "@/features/admin/lib/coupon-actions";
 import { CouponForm } from "@/features/admin/ui/coupon-form";
 import type { Coupon } from "./coupons-list";
 
@@ -14,6 +14,7 @@ interface CouponActionsProps {
 export function CouponActions({ coupon }: CouponActionsProps) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
+  const [toggling, setToggling] = useState(false);
 
   if (isEditing) {
     return (
@@ -38,6 +39,23 @@ export function CouponActions({ coupon }: CouponActionsProps) {
     );
   }
 
+  const handleToggle = async () => {
+    setToggling(true);
+    try {
+      const result = await toggleCouponActive(coupon.id);
+      if ("error" in result) {
+        toast.error(result.error);
+      } else {
+        toast.success(result.active ? "Cupón activado" : "Cupón desactivado");
+        router.refresh();
+      }
+    } catch {
+      toast.error("Error al cambiar estado del cupón");
+    } finally {
+      setToggling(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!confirm("Estas seguro que queres eliminar este cupon?")) {
       return;
@@ -53,6 +71,13 @@ export function CouponActions({ coupon }: CouponActionsProps) {
 
   return (
     <div className="flex gap-2 justify-end">
+      <button
+        onClick={handleToggle}
+        disabled={toggling}
+        className="text-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
+      >
+        {coupon.active ? "Desactivar" : "Activar"}
+      </button>
       <button
         onClick={() => setIsEditing(true)}
         className="text-sm text-muted-foreground hover:text-foreground"

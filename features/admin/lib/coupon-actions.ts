@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { coupons, orders } from "@/db/schema";
-import { eq, and, count } from "drizzle-orm";
+import { eq, and, count, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "./actions";
 import { couponSchema } from "./schemas";
@@ -66,6 +66,7 @@ export async function createCoupon(data: {
   value: number;
   minPurchase?: number;
   maxUses?: number;
+  maxUsesPerUser?: number;
   startsAt?: Date;
   endsAt?: Date;
 }) {
@@ -74,12 +75,23 @@ export async function createCoupon(data: {
     return { error: validated.error.issues[0].message };
   }
   await requireAdmin();
-  const [coupon] = await db
-    .insert(coupons)
-    .values({ ...validated.data, code: validated.data.code.toUpperCase() })
-    .returning();
-  revalidatePath("/admin/coupons");
-  return coupon;
+  try {
+    const [coupon] = await db
+      .insert(coupons)
+      .values({ ...validated.data, code: validated.data.code.toUpperCase() })
+      .returning();
+    revalidatePath("/admin/coupons");
+    return coupon;
+  } catch (err: unknown) {
+    if (
+      err instanceof Error &&
+      err.message.includes("unique") ||
+      (typeof err === "object" && err !== null && "code" in err && (err as { code: string }).code === "23505")
+    ) {
+      return { error: "Ya existe un cupón con ese código" };
+    }
+    throw err;
+  }
 }
 
 export async function updateCoupon(
@@ -116,4 +128,108 @@ export async function deleteCoupon(id: string) {
   await requireAdmin();
   await db.delete(coupons).where(eq(coupons.id, id));
   revalidatePath("/admin/coupons");
+}
+
+export async function toggleCouponActive(
+  id: string
+): Promise<{ active: boolean } | { error: string }> {
+  await requireAdmin();
+  const [coupon] = await db
+    .select()
+    .from(coupons)
+    .where(eq(coupons.id, id))
+    .limit(1);
+  if (!coupon) return { error: "Cupón no encontrado" };
+
+  const [updated] = await db
+    .update(coupons)
+    .set({ active: !coupon.active, updatedAt: new Date() })
+    .where(eq(coupons.id, id))
+    .returning({ active: coupons.active });
+  revalidatePath("/admin/coupons");
+  return { active: updated.active ?? true };
+}
+
+function generateRandomCode(length: number): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
+  for (let i = 0; i < length; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
+export async function generateCouponCode(): Promise<{ code: string }> {
+  await requireAdmin();
+  let code: string;
+  let attempts = 0;
+  do {
+    code = generateRandomCode(8);
+    const existing = await db.query.coupons.findFirst({
+      where: eq(coupons.code, code),
+    });
+    if (!existing) break;
+    attempts++;
+  } while (attempts < 10);
+  return { code };
+}
+
+export async function bulkCreateCoupons(input: {
+  prefix?: string;
+  quantity: number;
+  type: string;
+  value: number;
+  minPurchase?: number;
+  maxUses?: number;
+  maxUsesPerUser?: number;
+  startsAt?: Date;
+  endsAt?: Date;
+}): Promise<{ coupons: typeof coupons.$inferSelect[] } | { error: string }> {
+  if (input.quantity > 100) {
+    return { error: "No se pueden generar más de 100 cupones a la vez" };
+  }
+  await requireAdmin();
+
+  const generatedCodes = new Set<string>();
+  const couponsToInsert: (typeof coupons.$inferInsert)[] = [];
+
+  for (let i = 0; i < input.quantity; i++) {
+    let code: string;
+    let attempts = 0;
+    do {
+      const randomPart = generateRandomCode(8);
+      code = input.prefix ? `${input.prefix}-${randomPart}` : randomPart;
+      attempts++;
+    } while (generatedCodes.has(code) && attempts < 10);
+    generatedCodes.add(code);
+
+    couponsToInsert.push({
+      code,
+      name: input.prefix ? `${input.prefix} #${i + 1}` : `Cupón #${i + 1}`,
+      type: input.type,
+      value: input.value,
+      minPurchase: input.minPurchase,
+      maxUses: input.maxUses,
+      maxUsesPerUser: input.maxUsesPerUser ?? 1,
+      startsAt: input.startsAt,
+      endsAt: input.endsAt,
+      active: true,
+    });
+  }
+
+  try {
+    const inserted = await db
+      .insert(coupons)
+      .values(couponsToInsert)
+      .returning();
+    revalidatePath("/admin/coupons");
+    return { coupons: inserted };
+  } catch (err: unknown) {
+    if (
+      typeof err === "object" && err !== null && "code" in err && (err as { code: string }).code === "23505"
+    ) {
+      return { error: "Ya existe un cupón con ese código" };
+    }
+    throw err;
+  }
 }
