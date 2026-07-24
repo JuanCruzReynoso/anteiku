@@ -59,29 +59,44 @@ export type VariantInput = z.infer<typeof variantSchema>;
 export type OrderStatusInput = z.infer<typeof orderStatusSchema>;
 export type ShipmentMethodInput = z.infer<typeof shipmentMethodSchema>;
 
-export const discountSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido"),
-  type: z.enum(["percentage", "fixed"]),
-  value: z.number().min(0, "El valor debe ser positivo"),
-  productId: z.string().optional(),
-  categoryId: z.string().optional(),
-  minPurchase: z.number().optional(),
-  startsAt: z.date().optional(),
-  endsAt: z.date().optional(),
-  active: z.boolean().default(true),
-});
+export const discountSchema = z
+  .object({
+    name: z.string().min(1, "El nombre es requerido"),
+    type: z.enum(["percentage", "fixed"]),
+    value: z.number().min(0, "El valor debe ser positivo"),
+    productId: z.string().optional(),
+    categoryId: z.string().optional(),
+    minPurchase: z.number().optional(),
+    startsAt: z.date().optional(),
+    endsAt: z.date().optional(),
+    active: z.boolean().default(true),
+  })
+  .refine(
+    (data) => !(data.productId && data.categoryId),
+    { message: "Seleccioná producto O categoría, no ambos", path: ["categoryId"] }
+  )
+  .refine(
+    (data) => data.type !== "percentage" || data.value <= 100,
+    { message: "El porcentaje no puede exceder 100%", path: ["value"] }
+  );
 
-export const couponSchema = z.object({
-  code: z.string().min(1, "El codigo es requerido").max(20),
-  name: z.string().min(1, "El nombre es requerido"),
-  type: z.enum(["percentage", "fixed", "free_shipping"]),
-  value: z.number().min(0, "El valor debe ser positivo"),
-  minPurchase: z.number().optional(),
-  maxUses: z.number().optional(),
-  startsAt: z.date().optional(),
-  endsAt: z.date().optional(),
-  active: z.boolean().default(true),
-});
+export const couponSchema = z
+  .object({
+    code: z.string().min(1, "El codigo es requerido").max(20),
+    name: z.string().min(1, "El nombre es requerido"),
+    type: z.enum(["percentage", "fixed", "free_shipping"]),
+    value: z.number().min(0, "El valor debe ser positivo"),
+    minPurchase: z.number().optional(),
+    maxUses: z.number().optional(),
+    maxUsesPerUser: z.number().min(1).default(1).optional(),
+    startsAt: z.date().optional(),
+    endsAt: z.date().optional(),
+    active: z.boolean().default(true),
+  })
+  .refine(
+    (data) => data.type !== "percentage" || data.value <= 100,
+    { message: "El porcentaje no puede exceder 100%", path: ["value"] }
+  );
 
 export const subscriptionPlanSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),

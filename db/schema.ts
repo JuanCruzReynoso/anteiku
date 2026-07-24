@@ -245,6 +245,7 @@ export const discounts = pgTable("discounts", {
   minPurchase: integer("min_purchase"), // minimum purchase amount in ARS
   startsAt: timestamp("starts_at", { mode: "date" }),
   endsAt: timestamp("ends_at", { mode: "date" }),
+  usedCount: integer("used_count").default(0).notNull(),
   active: boolean("active").default(true),
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
