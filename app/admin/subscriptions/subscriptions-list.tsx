@@ -282,11 +282,63 @@ const subActions: ActionConfig<ActiveSubRow> = {
 
 export function SubscriptionsList({
   plans,
+  plansTotal,
+  planPage,
   subscriptions,
+  subsTotal,
+  subPage,
+  pageSize,
 }: {
   plans: PlanRow[];
+  plansTotal: number;
+  planPage: number;
   subscriptions: ActiveSubRow[];
+  subsTotal: number;
+  subPage: number;
+  pageSize: number;
 }) {
+  const router = useRouter();
+  const [isPendingPlans, setIsPendingPlans] = useState(false);
+  const [isPendingSubs, setIsPendingSubs] = useState(false);
+  const [planSearchInput, setPlanSearchInput] = useState("");
+  const [subSearchInput, setSubSearchInput] = useState("");
+
+  function updateParams(key: string, value: string) {
+    const params = new URLSearchParams(window.location.search);
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    // Reset the relevant page param when filters change
+    if (key === "planSearch" || key === "planStatus") {
+      params.delete("planPage");
+    }
+    if (key === "subSearch" || key === "subStatus") {
+      params.delete("subPage");
+    }
+    router.push(`/admin/subscriptions?${params.toString()}`);
+  }
+
+  function updatePlanParams(key: string, value: string) {
+    updateParams(key, value);
+  }
+
+  function updateSubParams(key: string, value: string) {
+    updateParams(key, value);
+  }
+
+  const planTotalPages = Math.ceil(plansTotal / pageSize);
+  const subTotalPages = Math.ceil(subsTotal / pageSize);
+
+  // Get URL search params for initial values
+  const planStatus = typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search).get("planStatus") ?? ""
+    : "";
+  const subStatus = typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search).get("subStatus") ?? ""
+    : "";
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -294,35 +346,137 @@ export function SubscriptionsList({
         <CreatePlanButton />
       </div>
 
-      {/* Plans */}
-      <DataTable
-        data={plans}
-        columns={planColumns}
-        actions={planActions}
-        header={{ title: "Planes" }}
-        empty={{
-          title: "Sin planes",
-          description:
-            "Agragate tu primer plan de suscripcion para ofrecer cafecito recurrente.",
-        }}
-        keyExtractor={(row) => row.id}
-      />
+      {/* Plans Section */}
+      <div className="flex flex-col gap-4 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <input
+              placeholder="Buscar por nombre de plan..."
+              value={planSearchInput}
+              onChange={(e) => setPlanSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") updatePlanParams("planSearch", planSearchInput);
+              }}
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring pl-9"
+            />
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+          </div>
+          <select
+            value={planStatus}
+            onChange={(e) => updatePlanParams("planStatus", e.target.value)}
+            className="flex h-9 w-[160px] items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="">Todos</option>
+            <option value="active">Activos</option>
+            <option value="inactive">Inactivos</option>
+          </select>
+        </div>
+
+        <DataTable
+          data={plans}
+          columns={planColumns}
+          actions={planActions}
+          header={{ title: `Planes (${plansTotal})` }}
+          empty={{
+            title: "Sin planes",
+            description:
+              "Agragate tu primer plan de suscripcion para ofrecer cafecito recurrente.",
+          }}
+          keyExtractor={(row) => row.id}
+        />
+
+        {planTotalPages > 1 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Página {planPage} de {planTotalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                disabled={planPage <= 1}
+                onClick={() => updatePlanParams("planPage", String(planPage - 1))}
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 disabled:pointer-events-none disabled:opacity-50"
+              >
+                ← Anterior
+              </button>
+              <button
+                disabled={planPage >= planTotalPages}
+                onClick={() => updatePlanParams("planPage", String(planPage + 1))}
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 disabled:pointer-events-none disabled:opacity-50"
+              >
+                Siguiente →
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="mt-8" />
 
-      {/* Active Subscriptions */}
-      <DataTable
-        data={subscriptions}
-        columns={subColumns}
-        actions={subActions}
-        header={{ title: "Suscripciones activas" }}
-        empty={{
-          title: "Sin suscripciones activas",
-          description:
-            "Cuando los clientes se suscriban, apareceran aca.",
-        }}
-        keyExtractor={(row) => row.id}
-      />
+      {/* Active Subscriptions Section */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1 max-w-sm">
+            <input
+              placeholder="Buscar por nombre de cliente..."
+              value={subSearchInput}
+              onChange={(e) => setSubSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") updateSubParams("subSearch", subSearchInput);
+              }}
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring pl-9"
+            />
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" /></svg>
+          </div>
+          <select
+            value={subStatus}
+            onChange={(e) => updateSubParams("subStatus", e.target.value)}
+            className="flex h-9 w-[160px] items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="">Todos</option>
+            <option value="active">Activas</option>
+            <option value="cancelled">Canceladas</option>
+            <option value="past_due">Vencidas</option>
+            <option value="paused">Pausadas</option>
+          </select>
+        </div>
+
+        <DataTable
+          data={subscriptions}
+          columns={subColumns}
+          actions={subActions}
+          header={{ title: `Suscripciones activas (${subsTotal})` }}
+          empty={{
+            title: "Sin suscripciones activas",
+            description:
+              "Cuando los clientes se suscriban, apareceran aca.",
+          }}
+          keyExtractor={(row) => row.id}
+        />
+
+        {subTotalPages > 1 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Página {subPage} de {subTotalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                disabled={subPage <= 1}
+                onClick={() => updateSubParams("subPage", String(subPage - 1))}
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 disabled:pointer-events-none disabled:opacity-50"
+              >
+                ← Anterior
+              </button>
+              <button
+                disabled={subPage >= subTotalPages}
+                onClick={() => updateSubParams("subPage", String(subPage + 1))}
+                className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 disabled:pointer-events-none disabled:opacity-50"
+              >
+                Siguiente →
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

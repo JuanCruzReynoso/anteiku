@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { coupons, orders } from "@/db/schema";
-import { eq, and, count, sql } from "drizzle-orm";
+import { eq, and, count, sql, ilike, or, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "./actions";
 import { couponSchema } from "./schemas";
@@ -12,6 +12,60 @@ export async function getCoupons() {
   return db.query.coupons.findMany({
     orderBy: (coupons, { desc }) => [desc(coupons.createdAt)],
   });
+}
+
+/**
+ * Fetches coupons with search, status filter, and offset-based pagination.
+ */
+export async function getCouponsPaginated(params: {
+  search?: string;
+  status?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  await requireAdmin();
+  const { search, status, page = 1, pageSize = 20 } = params;
+  const offset = (page - 1) * pageSize;
+
+  const conditions = [];
+  if (search) {
+    conditions.push(or(ilike(coupons.code, `%${search}%`), ilike(coupons.name, `%${search}%`)));
+  }
+  if (status) {
+    conditions.push(eq(coupons.active, status === "active"));
+  }
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [data, countResult] = await Promise.all([
+    db.query.coupons.findMany({
+      where,
+      orderBy: [desc(coupons.createdAt)],
+      limit: pageSize,
+      offset,
+    }),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(coupons)
+      .where(where),
+  ]);
+
+  const total = countResult[0]?.count ?? 0;
+
+  return {
+    data: data.map((c) => {
+      let dateRange = "Sin limite";
+      if (c.startsAt && c.endsAt) {
+        dateRange = `${c.startsAt.toLocaleDateString("es-AR")} - ${c.endsAt.toLocaleDateString("es-AR")}`;
+      } else if (c.startsAt) {
+        dateRange = `Desde ${c.startsAt.toLocaleDateString("es-AR")}`;
+      }
+      return { ...c, dateRange };
+    }),
+    total,
+    page,
+    pageSize,
+  };
 }
 
 export async function validateCoupon(code: string, purchaseAmount: number, userId?: string) {

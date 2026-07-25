@@ -1,67 +1,48 @@
-import { db } from "@/db";
-import { subscriptionPlans, userSubscriptions } from "@/db/schema";
-import { asc, desc, eq, and, count } from "drizzle-orm";
+import { getSubscriptionPlansPaginated, getUserSubscriptionsPaginated } from "@/features/admin/lib/subscription-actions";
 import { SubscriptionsList } from "./subscriptions-list";
 
 export const dynamic = "force-dynamic";
 
-export type SubscriptionPlan = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  price: number;
-  interval: string;
-  features: string[];
-  active: boolean | null;
-  createdAt: Date;
-  updatedAt: Date;
-};
+interface SearchParams {
+  planSearch?: string;
+  planStatus?: string;
+  planPage?: string;
+  subSearch?: string;
+  subStatus?: string;
+  subPage?: string;
+}
 
-export default async function AdminSubscriptions() {
-  const plans = await db.query.subscriptionPlans.findMany({
-    orderBy: [asc(subscriptionPlans.price)],
-  });
+export default async function AdminSubscriptions({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const params = await searchParams;
 
-  const activeSubscriptions = await db.query.userSubscriptions.findMany({
-    orderBy: [desc(userSubscriptions.createdAt)],
-    with: { user: true, plan: true },
-  });
+  const [plansResult, subsResult] = await Promise.all([
+    getSubscriptionPlansPaginated({
+      search: params.planSearch,
+      status: params.planStatus,
+      page: params.planPage ? Number(params.planPage) : 1,
+      pageSize: 20,
+    }),
+    getUserSubscriptionsPaginated({
+      search: params.subSearch,
+      status: params.subStatus,
+      page: params.subPage ? Number(params.subPage) : 1,
+      pageSize: 20,
+    }),
+  ]);
 
-  // Fetch subscriber counts per plan
-  const subscriberCounts = await db
-    .select({
-      planId: userSubscriptions.planId,
-      count: count(),
-    })
-    .from(userSubscriptions)
-    .where(eq(userSubscriptions.status, "active"))
-    .groupBy(userSubscriptions.planId);
-
-  const countMap = new Map(
-    subscriberCounts.map((r) => [r.planId, r.count])
+  return (
+    <SubscriptionsList
+      plans={plansResult.data}
+      plansTotal={plansResult.total}
+      planPage={plansResult.page}
+      subscriptions={subsResult.data}
+      subsTotal={subsResult.total}
+      subPage={subsResult.page}
+      pageSize={plansResult.pageSize}
+    />
   );
-
-  const planData = plans.map((p) => ({
-    ...p,
-    featureCount: p.features?.length ?? 0,
-    intervalLabel:
-      p.interval === "monthly"
-        ? "Mensual"
-        : p.interval === "quarterly"
-          ? "Trimestral"
-          : "Anual",
-    subscriberCount: countMap.get(p.id) ?? 0,
-  }));
-
-  const subData = activeSubscriptions.map((s) => ({
-    id: s.id,
-    userName: s.user?.name ?? s.user?.email ?? "—",
-    planName: s.plan?.name ?? "—",
-    status: s.status,
-    currentPeriodStart: s.currentPeriodStart,
-    currentPeriodEnd: s.currentPeriodEnd,
-  }));
-
-  return <SubscriptionsList plans={planData} subscriptions={subData} />;
 }

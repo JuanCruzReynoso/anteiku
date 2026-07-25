@@ -1,8 +1,8 @@
 "use server";
 
 import { db } from "@/db";
-import { subscriptionPlans, userSubscriptions } from "@/db/schema";
-import { eq, and, count } from "drizzle-orm";
+import { subscriptionPlans, userSubscriptions, users } from "@/db/schema";
+import { eq, and, count, ilike, sql, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "./actions";
 import { subscriptionPlanSchema } from "./schemas";
@@ -12,6 +12,136 @@ export async function getSubscriptionPlans() {
   return db.query.subscriptionPlans.findMany({
     orderBy: (plans, { asc }) => [asc(plans.price)],
   });
+}
+
+/**
+ * Fetches subscription plans with search, status filter, and offset-based pagination.
+ */
+export async function getSubscriptionPlansPaginated(params: {
+  search?: string;
+  status?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  await requireAdmin();
+  const { search, status, page = 1, pageSize = 20 } = params;
+  const offset = (page - 1) * pageSize;
+
+  const conditions = [];
+  if (search) {
+    conditions.push(ilike(subscriptionPlans.name, `%${search}%`));
+  }
+  if (status) {
+    conditions.push(eq(subscriptionPlans.active, status === "active"));
+  }
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [data, countResult] = await Promise.all([
+    db.query.subscriptionPlans.findMany({
+      where,
+      orderBy: [desc(subscriptionPlans.createdAt)],
+      limit: pageSize,
+      offset,
+    }),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(subscriptionPlans)
+      .where(where),
+  ]);
+
+  const total = countResult[0]?.count ?? 0;
+
+  // Fetch subscriber counts per plan
+  const subscriberCounts = await db
+    .select({
+      planId: userSubscriptions.planId,
+      count: count(),
+    })
+    .from(userSubscriptions)
+    .where(eq(userSubscriptions.status, "active"))
+    .groupBy(userSubscriptions.planId);
+
+  const countMap = new Map(
+    subscriberCounts.map((r) => [r.planId, r.count])
+  );
+
+  return {
+    data: data.map((p) => ({
+      ...p,
+      featureCount: p.features?.length ?? 0,
+      intervalLabel:
+        p.interval === "monthly"
+          ? "Mensual"
+          : p.interval === "quarterly"
+            ? "Trimestral"
+            : "Anual",
+      subscriberCount: countMap.get(p.id) ?? 0,
+    })),
+    total,
+    page,
+    pageSize,
+  };
+}
+
+/**
+ * Fetches user subscriptions with search, status filter, and offset-based pagination.
+ */
+export async function getUserSubscriptionsPaginated(params: {
+  search?: string;
+  status?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  await requireAdmin();
+  const { search, status, page = 1, pageSize = 20 } = params;
+  const offset = (page - 1) * pageSize;
+
+  const conditions = [];
+  if (search) {
+    // Join userSubscriptions → users to search by user name
+    const matchingUserIds = db
+      .select({ id: users.id })
+      .from(users)
+      .where(ilike(users.name, `%${search}%`));
+
+    conditions.push(sql`${userSubscriptions.userId} IN (SELECT id FROM (${matchingUserIds}))`);
+  }
+  if (status) {
+    conditions.push(eq(userSubscriptions.status, status));
+  }
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [data, countResult] = await Promise.all([
+    db.query.userSubscriptions.findMany({
+      where,
+      orderBy: [desc(userSubscriptions.createdAt)],
+      limit: pageSize,
+      offset,
+      with: { user: true, plan: true },
+    }),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(userSubscriptions)
+      .where(where),
+  ]);
+
+  const total = countResult[0]?.count ?? 0;
+
+  return {
+    data: data.map((s) => ({
+      id: s.id,
+      userName: s.user?.name ?? s.user?.email ?? "—",
+      planName: s.plan?.name ?? "—",
+      status: s.status,
+      currentPeriodStart: s.currentPeriodStart,
+      currentPeriodEnd: s.currentPeriodEnd,
+    })),
+    total,
+    page,
+    pageSize,
+  };
 }
 
 export async function createSubscriptionPlan(data: {

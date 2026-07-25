@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { categories } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, ilike, or, and, sql, asc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "./actions";
 import { categorySchema } from "./schemas";
@@ -12,6 +12,60 @@ export async function getCategories() {
   return db.query.categories.findMany({
     orderBy: (categories, { asc }) => [asc(categories.sortOrder)],
   });
+}
+
+/**
+ * Fetches categories with search, status filter, and offset-based pagination.
+ */
+export async function getCategoriesPaginated(params: {
+  search?: string;
+  status?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  await requireAdmin();
+  const { search, status, page = 1, pageSize = 20 } = params;
+  const offset = (page - 1) * pageSize;
+
+  const conditions = [];
+  if (search) {
+    conditions.push(or(ilike(categories.name, `%${search}%`), ilike(categories.slug, `%${search}%`)));
+  }
+  if (status) {
+    conditions.push(eq(categories.active, status === "active"));
+  }
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [data, countResult] = await Promise.all([
+    db.query.categories.findMany({
+      where,
+      orderBy: [asc(categories.sortOrder)],
+      limit: pageSize,
+      offset,
+      with: { products: true },
+    }),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(categories)
+      .where(where),
+  ]);
+
+  const total = countResult[0]?.count ?? 0;
+
+  return {
+    data: data.map((cat) => ({
+      id: cat.id,
+      sortOrder: cat.sortOrder,
+      name: cat.name,
+      slug: cat.slug,
+      productCount: cat.products.length,
+      active: cat.active,
+    })),
+    total,
+    page,
+    pageSize,
+  };
 }
 
 export async function getCategoryById(id: string) {

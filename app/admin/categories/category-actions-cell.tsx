@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { deleteCategory } from "@/features/admin/lib/category-actions";
-import { Loader2, Trash2 } from "lucide-react";
+import { CategoryForm } from "@/features/admin/ui/category-form";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,15 +18,41 @@ import {
 } from "@/components/ui/alert-dialog";
 
 interface CategoryActionsProps {
-  categoryId: string;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+    description?: string;
+    image?: string;
+    active?: boolean;
+    sortOrder?: number;
+  };
 }
 
-export function CategoryActions({ categoryId }: CategoryActionsProps) {
+export function CategoryActions({ category }: CategoryActionsProps) {
   const router = useRouter();
+  const [isEditing, setIsEditing] = useState(false);
+
+  if (isEditing) {
+    return (
+      <div className="fixed inset-0 z-[70] bg-black/50 flex items-center justify-center p-4">
+        <div className="bg-background rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <h2 className="text-lg font-bold mb-4">Editar categoría</h2>
+          <CategoryForm initialData={category} />
+          <button
+            onClick={() => setIsEditing(false)}
+            className="mt-4 text-sm text-muted-foreground hover:text-foreground"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleDelete = async () => {
     try {
-      await deleteCategory(categoryId);
+      await deleteCategory(category.id);
       toast.success("Categoría eliminada");
       router.refresh();
     } catch (error) {
@@ -38,16 +64,16 @@ export function CategoryActions({ categoryId }: CategoryActionsProps) {
 
   return (
     <div className="flex items-center justify-end gap-2">
-      <Link
-        href={`/admin/categories/${categoryId}`}
-        className="px-2 py-1 text-xs rounded bg-muted hover:bg-muted/80 transition-colors"
+      <button
+        onClick={() => setIsEditing(true)}
+        className="text-sm text-muted-foreground hover:text-foreground"
       >
         Editar
-      </Link>
+      </button>
       <AlertDialog>
         <AlertDialogTrigger
           render={
-            <button className="px-2 py-1 text-xs rounded bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors" />
+            <button className="text-sm text-destructive hover:text-destructive/80" />
           }
         >
           Eliminar

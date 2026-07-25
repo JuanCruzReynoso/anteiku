@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { discounts, products, categories } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, ilike, and, sql, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "./actions";
 import { discountSchema } from "./schemas";
@@ -87,6 +87,67 @@ export async function toggleDiscountActive(
     .returning({ active: discounts.active });
   revalidatePath("/admin/discounts");
   return { active: updated.active ?? true };
+}
+
+/**
+ * Fetches discounts with search, status filter, and offset-based pagination.
+ */
+export async function getDiscountsPaginated(params: {
+  search?: string;
+  status?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  await requireAdmin();
+  const { search, status, page = 1, pageSize = 20 } = params;
+  const offset = (page - 1) * pageSize;
+
+  const conditions = [];
+  if (search) {
+    conditions.push(ilike(discounts.name, `%${search}%`));
+  }
+  if (status) {
+    conditions.push(eq(discounts.active, status === "active"));
+  }
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const [data, countResult] = await Promise.all([
+    db.query.discounts.findMany({
+      where,
+      orderBy: [desc(discounts.createdAt)],
+      limit: pageSize,
+      offset,
+      with: { product: true, category: true },
+    }),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(discounts)
+      .where(where),
+  ]);
+
+  const total = countResult[0]?.count ?? 0;
+
+  return {
+    data: data.map((d) => {
+      let dateRange = "Sin limite";
+      if (d.startsAt && d.endsAt) {
+        dateRange = `${d.startsAt.toLocaleDateString("es-AR")} - ${d.endsAt.toLocaleDateString("es-AR")}`;
+      } else if (d.startsAt) {
+        dateRange = `Desde ${d.startsAt.toLocaleDateString("es-AR")}`;
+      }
+
+      return {
+        ...d,
+        productName: d.product?.name ?? null,
+        categoryName: d.category?.name ?? null,
+        dateRange,
+      };
+    }),
+    total,
+    page,
+    pageSize,
+  };
 }
 
 export async function getProductsForPicker(): Promise<

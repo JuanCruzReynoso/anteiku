@@ -22,10 +22,7 @@ export function AdminLayoutShell({
     <SidebarProvider defaultOpen>
       {sidebar}
       <SidebarInset className="min-h-screen">
-        <header className="flex h-12 items-center border-b border-border/50 px-4 md:hidden">
-          <SidebarTrigger />
-        </header>
-        <header className="hidden md:flex h-12 items-center border-b border-border/50 px-4">
+        <header className="flex h-12 items-center border-b border-border/50 px-4">
           <SidebarTrigger />
         </header>
         <div className="flex-1 p-4 lg:p-6">{children}</div>

@@ -1,24 +1,33 @@
-import { db } from "@/db";
-import { categories } from "@/db/schema";
-import { asc } from "drizzle-orm";
+import { getCategoriesPaginated } from "@/features/admin/lib/category-actions";
 import { CategoriesList } from "./categories-list";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminCategories() {
-  const allCategories = await db.query.categories.findMany({
-    orderBy: [asc(categories.sortOrder)],
-    with: { products: true },
+interface SearchParams {
+  search?: string;
+  status?: string;
+  page?: string;
+}
+
+export default async function AdminCategories({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const params = await searchParams;
+  const result = await getCategoriesPaginated({
+    search: params.search,
+    status: params.status,
+    page: params.page ? Number(params.page) : 1,
+    pageSize: 20,
   });
 
-  const data = allCategories.map((cat) => ({
-    id: cat.id,
-    sortOrder: cat.sortOrder,
-    name: cat.name,
-    slug: cat.slug,
-    productCount: cat.products.length,
-    active: cat.active,
-  }));
-
-  return <CategoriesList data={data} />;
+  return (
+    <CategoriesList
+      data={result.data}
+      total={result.total}
+      page={result.page}
+      pageSize={result.pageSize}
+    />
+  );
 }
