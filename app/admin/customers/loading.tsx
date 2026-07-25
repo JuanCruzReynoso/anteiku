@@ -15,7 +15,23 @@ export default function AdminCustomersLoading() {
         ))}
       </div>
 
-      <DataTableSkeleton columns={5} rows={5} hasActions />
+      {/* Search skeleton */}
+      <div className="flex items-center gap-2 mb-4">
+        <div className="h-10 w-80 rounded bg-muted animate-pulse" />
+        <div className="h-10 w-20 rounded bg-muted animate-pulse" />
+      </div>
+
+      <DataTableSkeleton columns={6} rows={5} hasActions />
+
+      {/* Pagination skeleton */}
+      <div className="flex items-center justify-between mt-4">
+        <div className="h-4 w-48 rounded bg-muted animate-pulse" />
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded bg-muted animate-pulse" />
+          <div className="h-4 w-24 rounded bg-muted animate-pulse" />
+          <div className="h-8 w-8 rounded bg-muted animate-pulse" />
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { subscriptionPlans, userSubscriptions } from "@/db/schema";
-import { asc, desc } from "drizzle-orm";
+import { asc, desc, eq, and, count } from "drizzle-orm";
 import { SubscriptionsList } from "./subscriptions-list";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +28,20 @@ export default async function AdminSubscriptions() {
     with: { user: true, plan: true },
   });
 
+  // Fetch subscriber counts per plan
+  const subscriberCounts = await db
+    .select({
+      planId: userSubscriptions.planId,
+      count: count(),
+    })
+    .from(userSubscriptions)
+    .where(eq(userSubscriptions.status, "active"))
+    .groupBy(userSubscriptions.planId);
+
+  const countMap = new Map(
+    subscriberCounts.map((r) => [r.planId, r.count])
+  );
+
   const planData = plans.map((p) => ({
     ...p,
     featureCount: p.features?.length ?? 0,
@@ -37,6 +51,7 @@ export default async function AdminSubscriptions() {
         : p.interval === "quarterly"
           ? "Trimestral"
           : "Anual",
+    subscriberCount: countMap.get(p.id) ?? 0,
   }));
 
   const subData = activeSubscriptions.map((s) => ({

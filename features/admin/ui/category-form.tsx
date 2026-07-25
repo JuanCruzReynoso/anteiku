@@ -78,7 +78,9 @@ export function CategoryForm({ initialData }: CategoryFormProps) {
       router.push("/admin/categories");
       router.refresh();
     } catch (error) {
-      toast.error("Error al guardar la categoría");
+      toast.error(
+        error instanceof Error ? error.message : "Error al guardar la categoría"
+      );
     } finally {
       setIsSubmitting(false);
     }

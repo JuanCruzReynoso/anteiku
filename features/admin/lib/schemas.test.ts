@@ -7,6 +7,7 @@ import {
   discountSchema,
   subscriptionPlanSchema,
   orderStatusSchema,
+  orderTransitionSchema,
   shipmentMethodSchema,
 } from "./schemas";
 
@@ -238,6 +239,30 @@ describe("orderStatusSchema", () => {
   it("rejects invalid status", () => {
     const result = orderStatusSchema.safeParse({ status: "unknown" });
     expect(result.success).toBe(false);
+  });
+});
+
+// ─── orderTransitionSchema ──────────────────────────────
+
+describe("orderTransitionSchema", () => {
+  it("accepts valid transition pair", () => {
+    const result = orderTransitionSchema.safeParse({ fromStatus: "pending", toStatus: "paid" });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects invalid fromStatus", () => {
+    const result = orderTransitionSchema.safeParse({ fromStatus: "unknown", toStatus: "paid" });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects invalid toStatus", () => {
+    const result = orderTransitionSchema.safeParse({ fromStatus: "pending", toStatus: "unknown" });
+    expect(result.success).toBe(false);
+  });
+
+  it("accepts same status (notes-only)", () => {
+    const result = orderTransitionSchema.safeParse({ fromStatus: "pending", toStatus: "pending" });
+    expect(result.success).toBe(true);
   });
 });
 

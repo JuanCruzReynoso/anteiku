@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { productSchema, type ProductInput } from "../lib/schemas";
-import { createProduct, updateProduct } from "../lib/product-actions";
+import {
+  createProduct,
+  updateProduct,
+  checkSlugUnique,
+} from "../lib/product-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, Plus, X } from "lucide-react";
+import { Loader2, Plus, X, Image as ImageIcon } from "lucide-react";
 import { ImageUpload } from "./image-upload";
 
 interface ProductFormProps {
@@ -41,6 +45,10 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
+  const [slugStatus, setSlugStatus] = useState<
+    "idle" | "checking" | "unique" | "taken"
+  >("idle");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
     register,
@@ -63,6 +71,31 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
   });
 
   const images = useWatch({ control, name: "images" });
+  const slug = useWatch({ control, name: "slug" });
+
+  // Debounced slug uniqueness check
+  const checkSlug = useCallback(
+    (value: string) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (!value || value === initialData?.slug) {
+        setSlugStatus("idle");
+        return;
+      }
+      setSlugStatus("checking");
+      debounceRef.current = setTimeout(async () => {
+        const result = await checkSlugUnique(value, initialData?.id);
+        setSlugStatus(result.unique ? "unique" : "taken");
+      }, 500);
+    },
+    [initialData?.slug, initialData?.id]
+  );
+
+  useEffect(() => {
+    checkSlug(slug);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [slug, checkSlug]);
 
   // Auto-generate slug from name
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,6 +127,10 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
   };
 
   const onSubmit = async (data: ProductInput) => {
+    if (slugStatus === "taken") {
+      toast.error("El slug ya está en uso. Elegí otro.");
+      return;
+    }
     setIsSubmitting(true);
     try {
       if (initialData) {
@@ -105,7 +142,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
       }
       router.push("/admin/products");
       router.refresh();
-    } catch (error) {
+    } catch {
       toast.error("Error al guardar el producto");
     } finally {
       setIsSubmitting(false);
@@ -140,6 +177,19 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
           type="text"
           {...register("slug")}
         />
+        {slugStatus === "checking" && (
+          <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+            <Loader2 className="size-3 animate-spin" /> Verificando slug...
+          </p>
+        )}
+        {slugStatus === "taken" && (
+          <p className="text-xs text-destructive mt-1">
+            Este slug ya está en uso.
+          </p>
+        )}
+        {slugStatus === "unique" && (
+          <p className="text-xs text-green-600 mt-1">Slug disponible.</p>
+        )}
         {errors.slug && (
           <p className="text-sm text-destructive mt-1">{errors.slug.message}</p>
         )}
@@ -279,18 +329,29 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
           </Button>
         </div>
         {images.length > 0 && (
-          <div className="space-y-1">
+          <div className="flex flex-wrap gap-2">
             {images.map((img, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm">
-                <span className="truncate flex-1 text-muted-foreground">
-                  {img}
-                </span>
+              <div
+                key={i}
+                className="relative group size-20 rounded-md overflow-hidden border"
+              >
+                <img
+                  src={img}
+                  alt={`Imagen ${i + 1}`}
+                  className="size-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-muted/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ImageIcon className="size-4 text-muted-foreground" />
+                </div>
                 <button
                   type="button"
                   onClick={() => removeImage(i)}
-                  className="text-destructive hover:text-destructive/80"
+                  className="absolute top-1 right-1 size-5 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 >
-                  <X className="size-4" />
+                  <X className="size-3" />
                 </button>
               </div>
             ))}
@@ -305,7 +366,7 @@ export function ProductForm({ categories, initialData }: ProductFormProps) {
 
       {/* Actions */}
       <div className="flex gap-3 pt-4">
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting || slugStatus === "taken"}>
           {isSubmitting && <Loader2 className="size-4 animate-spin mr-2" />}
           {initialData ? "Guardar cambios" : "Crear producto"}
         </Button>

@@ -2,11 +2,23 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   createVariant,
   updateVariant,
   deleteVariant,
 } from "@/features/admin/lib/product-actions";
+import { variantSchema, type VariantInput } from "@/features/admin/lib/schemas";
 import { toast } from "sonner";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 
@@ -24,6 +36,8 @@ interface VariantManagerProps {
   initialVariants: Variant[];
 }
 
+const emptyAddForm = { name: "", sku: "", price: 0, stock: 0, optionsJson: "" };
+
 export function VariantManager({
   productId,
   initialVariants,
@@ -31,29 +45,97 @@ export function VariantManager({
   const [variants, setVariants] = useState<Variant[]>(initialVariants);
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState({
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+
+  // Separate form state for add and edit
+  const [addForm, setAddForm] = useState(emptyAddForm);
+  const [editForm, setEditForm] = useState({
     name: "",
     sku: "",
     price: 0,
     stock: 0,
+    optionsJson: "",
   });
 
+  const [addErrors, setAddErrors] = useState<Record<string, string>>({});
+  const [editErrors, setEditErrors] = useState<Record<string, string>>({});
+
+  function parseOptions(json: string): Record<string, string> | undefined {
+    if (!json.trim()) return undefined;
+    try {
+      return JSON.parse(json);
+    } catch {
+      return undefined;
+    }
+  }
+
+  function validateAddForm(): boolean {
+    const parsed = variantSchema.safeParse({
+      name: addForm.name,
+      sku: addForm.sku,
+      price: addForm.price,
+      stock: addForm.stock,
+      options: parseOptions(addForm.optionsJson),
+    });
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0] as string;
+        if (field && !fieldErrors[field]) {
+          fieldErrors[field] = issue.message;
+        }
+      }
+      setAddErrors(fieldErrors);
+      return false;
+    }
+    setAddErrors({});
+    return true;
+  }
+
+  function validateEditForm(): boolean {
+    const parsed = variantSchema.safeParse({
+      name: editForm.name,
+      sku: editForm.sku,
+      price: editForm.price,
+      stock: editForm.stock,
+      options: parseOptions(editForm.optionsJson),
+    });
+    if (!parsed.success) {
+      const fieldErrors: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0] as string;
+        if (field && !fieldErrors[field]) {
+          fieldErrors[field] = issue.message;
+        }
+      }
+      setEditErrors(fieldErrors);
+      return false;
+    }
+    setEditErrors({});
+    return true;
+  }
+
   const handleAdd = async () => {
+    if (!validateAddForm()) return;
     setIsAdding(true);
     try {
       const result = await createVariant({
         productId,
-        name: form.name,
-        sku: form.sku,
-        price: form.price,
-        stock: form.stock,
+        name: addForm.name,
+        sku: addForm.sku,
+        price: addForm.price,
+        stock: addForm.stock,
+        options: parseOptions(addForm.optionsJson),
       });
       if ("error" in result) {
         toast.error(result.error);
         return;
       }
-      setVariants([...variants, { ...result, options: {} }]);
-      setForm({ name: "", sku: "", price: 0, stock: 0 });
+      setVariants([
+        ...variants,
+        { ...result, options: parseOptions(addForm.optionsJson) ?? {} },
+      ]);
+      setAddForm(emptyAddForm);
       toast.success("Variante creada");
     } catch {
       toast.error("Error al crear la variante");
@@ -63,12 +145,14 @@ export function VariantManager({
   };
 
   const handleUpdate = async (id: string) => {
+    if (!validateEditForm()) return;
     try {
       const result = await updateVariant(id, {
-        name: form.name,
-        sku: form.sku,
-        price: form.price,
-        stock: form.stock,
+        name: editForm.name,
+        sku: editForm.sku,
+        price: editForm.price,
+        stock: editForm.stock,
+        options: parseOptions(editForm.optionsJson),
       });
       if ("error" in result) {
         toast.error(result.error);
@@ -76,31 +160,46 @@ export function VariantManager({
       }
       setVariants(
         variants.map((v) =>
-          v.id === id ? { ...result, options: v.options } : v
+          v.id === id
+            ? { ...result, options: parseOptions(editForm.optionsJson) ?? v.options }
+            : v
         )
       );
       setEditingId(null);
-      setForm({ name: "", sku: "", price: 0, stock: 0 });
       toast.success("Variante actualizada");
     } catch {
       toast.error("Error al actualizar la variante");
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Eliminar esta variante?")) return;
+  const handleDelete = async () => {
+    if (!deleteTargetId) return;
     try {
-      await deleteVariant(id);
-      setVariants(variants.filter((v) => v.id !== id));
+      await deleteVariant(deleteTargetId);
+      setVariants(variants.filter((v) => v.id !== deleteTargetId));
       toast.success("Variante eliminada");
     } catch {
       toast.error("Error al eliminar la variante");
+    } finally {
+      setDeleteTargetId(null);
     }
   };
 
   const startEdit = (v: Variant) => {
     setEditingId(v.id);
-    setForm({ name: v.name, sku: v.sku, price: v.price, stock: v.stock });
+    setEditErrors({});
+    setEditForm({
+      name: v.name,
+      sku: v.sku,
+      price: v.price,
+      stock: v.stock,
+      optionsJson: Object.keys(v.options).length > 0 ? JSON.stringify(v.options, null, 2) : "",
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditErrors({});
   };
 
   return (
@@ -121,42 +220,54 @@ export function VariantManager({
               editingId === v.id ? (
                 <tr key={v.id} className="bg-muted/20">
                   <td className="px-4 py-2">
-                    <input
-                      value={form.name}
+                    <Input
+                      value={editForm.name}
                       onChange={(e) =>
-                        setForm({ ...form, name: e.target.value })
+                        setEditForm({ ...editForm, name: e.target.value })
                       }
-                      className="w-full rounded border bg-background px-2 py-1 text-sm"
+                      aria-invalid={!!editErrors.name}
                     />
+                    {editErrors.name && (
+                      <p className="text-xs text-destructive mt-1">{editErrors.name}</p>
+                    )}
                   </td>
                   <td className="px-4 py-2">
-                    <input
-                      value={form.sku}
+                    <Input
+                      value={editForm.sku}
                       onChange={(e) =>
-                        setForm({ ...form, sku: e.target.value })
+                        setEditForm({ ...editForm, sku: e.target.value })
                       }
-                      className="w-full rounded border bg-background px-2 py-1 text-sm"
+                      aria-invalid={!!editErrors.sku}
                     />
+                    {editErrors.sku && (
+                      <p className="text-xs text-destructive mt-1">{editErrors.sku}</p>
+                    )}
                   </td>
                   <td className="px-4 py-2">
-                    <input
+                    <Input
                       type="number"
-                      value={form.price}
+                      value={editForm.price}
                       onChange={(e) =>
-                        setForm({ ...form, price: Number(e.target.value) })
+                        setEditForm({ ...editForm, price: Number(e.target.value) })
                       }
-                      className="w-full rounded border bg-background px-2 py-1 text-sm"
+                      aria-invalid={!!editErrors.price}
                     />
+                    {editErrors.price && (
+                      <p className="text-xs text-destructive mt-1">{editErrors.price}</p>
+                    )}
                   </td>
                   <td className="px-4 py-2">
-                    <input
+                    <Input
                       type="number"
-                      value={form.stock}
+                      value={editForm.stock}
                       onChange={(e) =>
-                        setForm({ ...form, stock: Number(e.target.value) })
+                        setEditForm({ ...editForm, stock: Number(e.target.value) })
                       }
-                      className="w-full rounded border bg-background px-2 py-1 text-sm"
+                      aria-invalid={!!editErrors.stock}
                     />
+                    {editErrors.stock && (
+                      <p className="text-xs text-destructive mt-1">{editErrors.stock}</p>
+                    )}
                   </td>
                   <td className="px-4 py-2 text-right">
                     <div className="flex items-center justify-end gap-1">
@@ -169,7 +280,7 @@ export function VariantManager({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setEditingId(null)}
+                        onClick={cancelEdit}
                       >
                         Cancelar
                       </Button>
@@ -193,7 +304,7 @@ export function VariantManager({
                         Editar
                       </button>
                       <button
-                        onClick={() => handleDelete(v.id)}
+                        onClick={() => setDeleteTargetId(v.id)}
                         className="p-1 rounded hover:bg-destructive/10 text-destructive"
                       >
                         <Trash2 className="size-3.5" />
@@ -215,37 +326,64 @@ export function VariantManager({
       <div className="border-t p-4">
         <p className="text-sm font-medium mb-2">Agregar variante</p>
         <div className="grid grid-cols-4 gap-2 mb-2">
-          <input
-            placeholder="Nombre (ej: Negro / L)"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="rounded border bg-background px-2 py-1 text-sm"
-          />
-          <input
-            placeholder="SKU"
-            value={form.sku}
-            onChange={(e) => setForm({ ...form, sku: e.target.value })}
-            className="rounded border bg-background px-2 py-1 text-sm"
-          />
-          <input
-            type="number"
-            placeholder="Precio (0 = base)"
-            value={form.price || ""}
-            onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
-            className="rounded border bg-background px-2 py-1 text-sm"
-          />
-          <input
-            type="number"
-            placeholder="Stock"
-            value={form.stock || ""}
-            onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })}
-            className="rounded border bg-background px-2 py-1 text-sm"
+          <div>
+            <Input
+              placeholder="Nombre (ej: Negro / L)"
+              value={addForm.name}
+              onChange={(e) => setAddForm({ ...addForm, name: e.target.value })}
+              aria-invalid={!!addErrors.name}
+            />
+            {addErrors.name && (
+              <p className="text-xs text-destructive mt-1">{addErrors.name}</p>
+            )}
+          </div>
+          <div>
+            <Input
+              placeholder="SKU"
+              value={addForm.sku}
+              onChange={(e) => setAddForm({ ...addForm, sku: e.target.value })}
+              aria-invalid={!!addErrors.sku}
+            />
+            {addErrors.sku && (
+              <p className="text-xs text-destructive mt-1">{addErrors.sku}</p>
+            )}
+          </div>
+          <div>
+            <Input
+              type="number"
+              placeholder="Precio (0 = base)"
+              value={addForm.price || ""}
+              onChange={(e) => setAddForm({ ...addForm, price: Number(e.target.value) })}
+              aria-invalid={!!addErrors.price}
+            />
+            {addErrors.price && (
+              <p className="text-xs text-destructive mt-1">{addErrors.price}</p>
+            )}
+          </div>
+          <div>
+            <Input
+              type="number"
+              placeholder="Stock"
+              value={addForm.stock || ""}
+              onChange={(e) => setAddForm({ ...addForm, stock: Number(e.target.value) })}
+              aria-invalid={!!addErrors.stock}
+            />
+            {addErrors.stock && (
+              <p className="text-xs text-destructive mt-1">{addErrors.stock}</p>
+            )}
+          </div>
+        </div>
+        <div className="mb-2">
+          <Input
+            placeholder='Opciones JSON (ej: {"color":"Negro","size":"L"})'
+            value={addForm.optionsJson}
+            onChange={(e) => setAddForm({ ...addForm, optionsJson: e.target.value })}
           />
         </div>
         <Button
           size="sm"
           onClick={handleAdd}
-          disabled={isAdding || !form.name || !form.sku}
+          disabled={isAdding}
         >
           {isAdding ? (
             <Loader2 className="size-4 animate-spin mr-1" />
@@ -255,6 +393,27 @@ export function VariantManager({
           Agregar
         </Button>
       </div>
+      <AlertDialog open={deleteTargetId !== null} onOpenChange={(open) => !open && setDeleteTargetId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar variante</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que querés eliminar esta variante? Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteTargetId(null)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

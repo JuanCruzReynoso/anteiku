@@ -5,6 +5,17 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { deleteDiscount, toggleDiscountActive } from "@/features/admin/lib/discount-actions";
 import { DiscountForm } from "@/features/admin/ui/discount-form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import type { Discount } from "./discounts-list";
 
 interface DiscountActionsProps {
@@ -57,9 +68,6 @@ export function DiscountActions({ discount }: DiscountActionsProps) {
   };
 
   const handleDelete = async () => {
-    if (!confirm("Estas seguro que queres eliminar este descuento?")) {
-      return;
-    }
     try {
       await deleteDiscount(discount.id);
       toast.success("Descuento eliminado");
@@ -84,12 +92,32 @@ export function DiscountActions({ discount }: DiscountActionsProps) {
       >
         Editar
       </button>
-      <button
-        onClick={handleDelete}
-        className="text-sm text-destructive hover:text-destructive/80"
-      >
-        Eliminar
-      </button>
+      <AlertDialog>
+        <AlertDialogTrigger
+          render={
+            <button className="text-sm text-destructive hover:text-destructive/80" />
+          }
+        >
+          Eliminar
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar descuento</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que querés eliminar este descuento? Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

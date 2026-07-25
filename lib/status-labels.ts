@@ -13,8 +13,9 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
 
 export const PAYMENT_STATUS_LABELS: Record<string, string> = {
   pending: "Pendiente",
-  approved: "Aprobado",
-  rejected: "Rechazado",
+  completed: "Completado",
+  failed: "Fallido",
+  refunded: "Reembolsado",
 };
 
 export const SUBSCRIPTION_STATUS_LABELS: Record<string, string> = {
@@ -22,4 +23,19 @@ export const SUBSCRIPTION_STATUS_LABELS: Record<string, string> = {
   paused: "Pausada",
   cancelled: "Cancelada",
   past_due: "Vencida",
+};
+
+export const ROLE_LABELS: Record<string, { label: string; className: string }> = {
+  customer: {
+    label: "Cliente",
+    className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  },
+  admin: {
+    label: "Administrador",
+    className: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+  },
+  owner: {
+    label: "Propietario",
+    className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  },
 };

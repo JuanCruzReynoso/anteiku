@@ -45,6 +45,11 @@ export const orderStatusSchema = z.object({
   notes: z.string().optional(),
 });
 
+export const orderTransitionSchema = z.object({
+  fromStatus: z.enum(["pending", "paid", "shipped", "delivered", "cancelled"]),
+  toStatus: z.enum(["pending", "paid", "shipped", "delivered", "cancelled"]),
+});
+
 export const shipmentMethodSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
   description: z.string().optional(),

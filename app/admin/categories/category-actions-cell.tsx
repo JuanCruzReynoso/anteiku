@@ -4,6 +4,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { deleteCategory } from "@/features/admin/lib/category-actions";
+import { Loader2, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface CategoryActionsProps {
   categoryId: string;
@@ -13,7 +25,6 @@ export function CategoryActions({ categoryId }: CategoryActionsProps) {
   const router = useRouter();
 
   const handleDelete = async () => {
-    if (!confirm("¿Estás seguro que querés eliminar esta categoría?")) return;
     try {
       await deleteCategory(categoryId);
       toast.success("Categoría eliminada");
@@ -33,12 +44,32 @@ export function CategoryActions({ categoryId }: CategoryActionsProps) {
       >
         Editar
       </Link>
-      <button
-        onClick={handleDelete}
-        className="px-2 py-1 text-xs rounded bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
-      >
-        Eliminar
-      </button>
+      <AlertDialog>
+        <AlertDialogTrigger
+          render={
+            <button className="px-2 py-1 text-xs rounded bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors" />
+          }
+        >
+          Eliminar
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar categoría</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que querés eliminar esta categoría? Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

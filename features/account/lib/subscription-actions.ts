@@ -70,7 +70,7 @@ export async function cancelSubscription(subscriptionId: string) {
 
   await db
     .update(userSubscriptions)
-    .set({ status: "cancelled", updatedAt: new Date() })
+    .set({ status: "cancelled", cancelAt: new Date(), updatedAt: new Date() })
     .where(eq(userSubscriptions.id, subscriptionId));
 
   return { success: true };

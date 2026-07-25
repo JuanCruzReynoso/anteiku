@@ -6,6 +6,17 @@ import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils";
 import { deleteShipmentMethod } from "@/features/admin/lib/shipment-actions";
 import { ShipmentForm } from "@/features/admin/ui/shipment-form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import type { ShipmentMethod } from "./shipping-list";
 
 interface ShipmentActionsProps {
@@ -40,9 +51,6 @@ export function ShipmentActions({ method }: ShipmentActionsProps) {
   }
 
   const handleDelete = async () => {
-    if (!confirm("¿Estás seguro de que querés eliminar este método de envío?")) {
-      return;
-    }
     try {
       await deleteShipmentMethod(method.id);
       toast.success("Método de envío eliminado");
@@ -60,12 +68,32 @@ export function ShipmentActions({ method }: ShipmentActionsProps) {
       >
         Editar
       </button>
-      <button
-        onClick={handleDelete}
-        className="text-sm text-destructive hover:text-destructive/80"
-      >
-        Eliminar
-      </button>
+      <AlertDialog>
+        <AlertDialogTrigger
+          render={
+            <button className="text-sm text-destructive hover:text-destructive/80" />
+          }
+        >
+          Eliminar
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar método de envío</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que querés eliminar este método de envío? Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

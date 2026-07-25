@@ -4,7 +4,7 @@ import { db } from "@/db";
 import { orders } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { formatPrice } from "@/lib/utils";
-import { ORDER_STATUS_LABELS } from "@/lib/status-labels";
+import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/status-labels";
 import { OrderStatusForm } from "./order-status-form";
 
 export const dynamic = "force-dynamic";
@@ -29,6 +29,7 @@ export default async function OrderDetailPage({ params }: Props) {
       },
       payments: true,
       shipmentMethod: true,
+      statusHistory: true,
     },
   });
 
@@ -38,12 +39,7 @@ export default async function OrderDetailPage({ params }: Props) {
 
   const statusLabel = ORDER_STATUS_LABELS;
 
-  const paymentStatusLabel: Record<string, string> = {
-    pending: "Pendiente",
-    completed: "Completado",
-    failed: "Fallido",
-    refunded: "Reembolsado",
-  };
+
 
   return (
     <div className="max-w-3xl">
@@ -51,7 +47,7 @@ export default async function OrderDetailPage({ params }: Props) {
         Orden #{order.id.slice(0, 8)}
       </h1>
 
-      <div className="grid grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Order info */}
         <div className="border rounded-lg p-4">
           <h2 className="text-sm font-medium text-muted-foreground mb-3">
@@ -103,7 +99,7 @@ export default async function OrderDetailPage({ params }: Props) {
 
       {/* Payment info */}
       {order.payments.length > 0 && (
-        <div className="border rounded-lg mb-6">
+        <div className="border rounded-lg mb-6 overflow-x-auto">
           <div className="p-4 border-b">
             <h2 className="text-sm font-medium text-muted-foreground">
               Pagos ({order.payments.length})
@@ -139,7 +135,7 @@ export default async function OrderDetailPage({ params }: Props) {
                             : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
                       }`}
                     >
-                      {paymentStatusLabel[payment.status] ?? payment.status}
+                      {PAYMENT_STATUS_LABELS[payment.status] ?? payment.status}
                     </span>
                   </td>
                   <td className="px-4 py-2 text-muted-foreground">
@@ -153,7 +149,7 @@ export default async function OrderDetailPage({ params }: Props) {
       )}
 
       {/* Order items */}
-      <div className="border rounded-lg mb-6">
+      <div className="border rounded-lg mb-6 overflow-x-auto">
         <div className="p-4 border-b">
           <h2 className="text-sm font-medium text-muted-foreground">
             Items ({order.items.length})
@@ -201,6 +197,43 @@ export default async function OrderDetailPage({ params }: Props) {
         currentStatus={order.status}
         currentNotes={order.notes ?? ""}
       />
+
+      {/* Status history timeline */}
+      {order.statusHistory && order.statusHistory.length > 0 && (
+        <div className="border rounded-lg p-4 mt-6">
+          <h2 className="text-sm font-medium text-muted-foreground mb-3">
+            Historial de estados
+          </h2>
+          <div className="space-y-4">
+            {order.statusHistory
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+              .map((entry) => (
+                <div key={entry.id} className="flex items-start gap-3">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="size-2 rounded-full bg-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm">
+                      <span className="font-medium">
+                        {ORDER_STATUS_LABELS[entry.fromStatus] ?? entry.fromStatus}
+                      </span>
+                      {" → "}
+                      <span className="font-medium">
+                        {ORDER_STATUS_LABELS[entry.toStatus] ?? entry.toStatus}
+                      </span>
+                    </p>
+                    {entry.note && (
+                      <p className="text-sm text-muted-foreground mt-0.5">{entry.note}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {new Date(entry.createdAt).toLocaleString("es-AR")} · {entry.changedBy}
+                    </p>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

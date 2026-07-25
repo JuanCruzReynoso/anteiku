@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Upload, X, Loader2 } from "lucide-react";
+import { uploadProductImage } from "../lib/upload-actions";
 
 interface ImageUploadProps {
   onUpload: (url: string) => void;
@@ -41,15 +42,13 @@ export function ImageUpload({ onUpload, disabled }: ImageUploadProps) {
       const buffer = await file.arrayBuffer();
       const base64 = Buffer.from(buffer).toString("base64");
 
-      // TODO: Import and call uploadProductImage when Supabase is configured
-      // const result = await uploadProductImage(base64, file.name);
-      // if (result.url) {
-      //   onUpload(result.url);
-      // } else {
-      //   setError(result.error || "Error al subir la imagen.");
-      // }
-
-      setError("Upload no disponible — configurá SUPABASE_SERVICE_ROLE_KEY.");
+      const result = await uploadProductImage(base64, file.name);
+      if (result.url) {
+        onUpload(result.url);
+        setError(null);
+      } else {
+        setError(result.error || "Error al subir la imagen.");
+      }
     } catch {
       setError("Error al procesar el archivo.");
     } finally {
@@ -74,7 +73,7 @@ export function ImageUpload({ onUpload, disabled }: ImageUploadProps) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-2">
       <div
         onDrop={handleDrop}
         onDragOver={handleDragOver}

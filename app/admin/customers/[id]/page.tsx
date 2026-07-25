@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { requireAdmin } from "@/features/admin/lib/actions";
 import { db } from "@/db";
 import { users, orders, addresses } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { formatPrice } from "@/lib/utils";
-import { ORDER_STATUS_LABELS } from "@/lib/status-labels";
+import { ORDER_STATUS_LABELS, ROLE_LABELS } from "@/lib/status-labels";
+import { Badge } from "@/components/ui/badge";
 
 export const dynamic = "force-dynamic";
 
@@ -35,8 +37,8 @@ export default async function CustomerDetailPage({ params }: Props) {
   });
 
   const totalSpent = userOrders.reduce((acc, o) => acc + o.total, 0);
-
-
+  const lastOrderDate =
+    userOrders.length > 0 ? userOrders[0].createdAt : null;
 
   return (
     <div className="max-w-3xl">
@@ -62,25 +64,20 @@ export default async function CustomerDetailPage({ params }: Props) {
           </div>
           <div>
             <dt className="text-muted-foreground">Rol</dt>
-            <dd className="capitalize">{user.role}</dd>
+            <dd>
+              <Badge
+                variant="secondary"
+                className={ROLE_LABELS[user.role]?.className}
+              >
+                {ROLE_LABELS[user.role]?.label ?? user.role}
+              </Badge>
+            </dd>
           </div>
-          {user.address && (
-            <>
-              <div className="col-span-2">
-                <dt className="text-muted-foreground">Direccion</dt>
-                <dd>
-                  {user.address.street}, {user.address.city},{" "}
-                  {user.address.state} {user.address.zip},{" "}
-                  {user.address.country}
-                </dd>
-              </div>
-            </>
-          )}
         </dl>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="border rounded-lg p-4">
           <p className="text-sm text-muted-foreground">Total ordenes</p>
           <p className="text-2xl font-bold">{userOrders.length}</p>
@@ -92,8 +89,14 @@ export default async function CustomerDetailPage({ params }: Props) {
         <div className="border rounded-lg p-4">
           <p className="text-sm text-muted-foreground">Miembro desde</p>
           <p className="text-lg font-medium">
-            {user.emailVerified
-              ? new Date(user.emailVerified).toLocaleDateString("es-AR")
+            {new Date(user.createdAt).toLocaleDateString("es-AR")}
+          </p>
+        </div>
+        <div className="border rounded-lg p-4">
+          <p className="text-sm text-muted-foreground">Ultima orden</p>
+          <p className="text-lg font-medium">
+            {lastOrderDate
+              ? new Date(lastOrderDate).toLocaleDateString("es-AR")
               : "—"}
           </p>
         </div>
@@ -157,9 +160,17 @@ export default async function CustomerDetailPage({ params }: Props) {
             </thead>
             <tbody className="divide-y">
               {userOrders.map((order) => (
-                <tr key={order.id} className="hover:bg-muted/30">
-                  <td className="px-4 py-2 font-mono text-xs">
-                    {order.id.slice(0, 8)}
+                <tr
+                  key={order.id}
+                  className="hover:bg-muted/30 cursor-pointer"
+                >
+                  <td className="px-4 py-2">
+                    <Link
+                      href={`/admin/orders/${order.id}`}
+                      className="font-mono text-xs text-primary hover:underline"
+                    >
+                      {order.id.slice(0, 8)}
+                    </Link>
                   </td>
                   <td className="px-4 py-2">
                     <span className="text-xs">

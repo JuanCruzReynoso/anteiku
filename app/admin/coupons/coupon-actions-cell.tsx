@@ -5,6 +5,17 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { deleteCoupon, toggleCouponActive } from "@/features/admin/lib/coupon-actions";
 import { CouponForm } from "@/features/admin/ui/coupon-form";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import type { Coupon } from "./coupons-list";
 
 interface CouponActionsProps {
@@ -57,9 +68,6 @@ export function CouponActions({ coupon }: CouponActionsProps) {
   };
 
   const handleDelete = async () => {
-    if (!confirm("Estas seguro que queres eliminar este cupon?")) {
-      return;
-    }
     try {
       await deleteCoupon(coupon.id);
       toast.success("Cupon eliminado");
@@ -84,12 +92,32 @@ export function CouponActions({ coupon }: CouponActionsProps) {
       >
         Editar
       </button>
-      <button
-        onClick={handleDelete}
-        className="text-sm text-destructive hover:text-destructive/80"
-      >
-        Eliminar
-      </button>
+      <AlertDialog>
+        <AlertDialogTrigger
+          render={
+            <button className="text-sm text-destructive hover:text-destructive/80" />
+          }
+        >
+          Eliminar
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar cupón</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que querés eliminar este cupón? Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

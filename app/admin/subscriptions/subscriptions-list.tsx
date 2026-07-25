@@ -1,9 +1,27 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { formatPrice } from "@/lib/utils";
 import { PlanActions } from "./plan-actions-cell";
 import { CreatePlanButton } from "./create-plan-button";
 import { DataTable, type Column, type ActionConfig } from "@/components/admin/data-table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  adminPauseSubscription,
+  adminCancelSubscription,
+  adminResumeSubscription,
+} from "@/features/admin/lib/subscription-actions";
 
 export type SubscriptionPlan = {
   id: string;
@@ -21,6 +39,7 @@ export type SubscriptionPlan = {
 type PlanRow = SubscriptionPlan & {
   featureCount: number;
   intervalLabel: string;
+  subscriberCount: number;
 };
 
 type ActiveSubRow = {
@@ -44,7 +63,16 @@ const planColumns: Column<PlanRow>[] = [
     header: "Precio",
     type: "currency",
     align: "right",
-    render: (row) => <span>{formatPrice(row.price)}/mes</span>,
+    render: (row) => (
+      <span>
+        {formatPrice(row.price)}/
+        {row.interval === "monthly"
+          ? "mes"
+          : row.interval === "quarterly"
+            ? "trimestre"
+            : "año"}
+      </span>
+    ),
   },
   {
     key: "intervalLabel",
@@ -64,6 +92,12 @@ const planColumns: Column<PlanRow>[] = [
       </span>
     ),
     hideOnMobile: true,
+  },
+  {
+    key: "subscriberCount",
+    header: "Suscriptores",
+    type: "count",
+    align: "right",
   },
   {
     key: "active",
@@ -136,8 +170,114 @@ const planActions: ActionConfig<PlanRow> = {
   component: ({ row }) => <PlanActions plan={row} />,
 };
 
+function SubscriptionActions({ subscription }: { subscription: ActiveSubRow }) {
+  const router = useRouter();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingAction, setPendingAction] = useState<{
+    fn: () => Promise<{ success: boolean; error?: string }>;
+    label: string;
+  } | null>(null);
+
+  const handleAction = async (
+    fn: () => Promise<{ success: boolean; error?: string }>,
+    label: string
+  ) => {
+    setPendingAction({ fn, label });
+    setShowConfirm(true);
+  };
+
+  const confirmAction = async () => {
+    if (!pendingAction) return;
+    const result = await pendingAction.fn();
+    if (result.success) {
+      toast.success(
+        pendingAction.label === "Pausar"
+          ? "Suscripción pausada"
+          : pendingAction.label === "Cancelar"
+            ? "Suscripción cancelada"
+            : "Suscripción reanudada"
+      );
+      router.refresh();
+    } else {
+      toast.error(result.error ?? "Error al ejecutar la acción");
+    }
+    setShowConfirm(false);
+    setPendingAction(null);
+  };
+
+  const status = subscription.status;
+
+  if (status === "cancelled") return null;
+
+  return (
+    <div className="flex gap-2 justify-end">
+      {status === "active" && (
+        <button
+          onClick={() =>
+            handleAction(
+              () => adminPauseSubscription(subscription.id),
+              "Pausar"
+            )
+          }
+          className="text-sm text-muted-foreground hover:text-foreground"
+        >
+          Pausar
+        </button>
+      )}
+      {status === "paused" && (
+        <button
+          onClick={() =>
+            handleAction(
+              () => adminResumeSubscription(subscription.id),
+              "Reanudar"
+            )
+          }
+          className="text-sm text-muted-foreground hover:text-foreground"
+        >
+          Reanudar
+        </button>
+      )}
+      <button
+        onClick={() =>
+          handleAction(
+            () => adminCancelSubscription(subscription.id),
+            "Cancelar"
+          )
+        }
+        className="text-sm text-destructive hover:text-destructive/80"
+      >
+        Cancelar
+      </button>
+
+      <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingAction?.label ?? "Confirmar acción"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingAction?.label === "Cancelar"
+                ? "Esta acción cancelará la suscripción permanentemente. ¿Estás seguro?"
+                : `¿Estás seguro que querés ${pendingAction?.label?.toLowerCase()} esta suscripción?`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingAction(null)}>
+              No, mantener
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmAction}>
+              {pendingAction?.label ?? "Confirmar"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}
+
 const subActions: ActionConfig<ActiveSubRow> = {
-  type: "none",
+  type: "text-buttons",
+  component: ({ row }) => <SubscriptionActions subscription={row} />,
 };
 
 export function SubscriptionsList({

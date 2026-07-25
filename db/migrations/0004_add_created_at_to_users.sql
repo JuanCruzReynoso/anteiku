@@ -1,0 +1,2 @@
+ALTER TABLE "users" ADD COLUMN "created_at" timestamp with time zone DEFAULT now() NOT NULL;--> statement-breakpoint
+UPDATE "users" SET "created_at" = COALESCE("email_verified", now()) WHERE "created_at" IS NULL;

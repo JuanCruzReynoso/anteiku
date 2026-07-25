@@ -3,9 +3,31 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { deleteProduct, toggleProductVisibility } from "@/features/admin/lib/product-actions";
+import {
+  deleteProductWithCheck,
+  toggleProductVisibility,
+  cloneProduct,
+} from "@/features/admin/lib/product-actions";
 import { toast } from "sonner";
-import { Eye, EyeOff, Loader2, Pencil, Trash2 } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Pencil,
+  Trash2,
+  Copy,
+} from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ProductActionsProps {
   productId: string;
@@ -16,6 +38,7 @@ export function ProductActions({ productId, status }: ProductActionsProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
+  const [isCloning, setIsCloning] = useState(false);
 
   const isVisible = status === "active";
 
@@ -37,16 +60,36 @@ export function ProductActions({ productId, status }: ProductActionsProps) {
   };
 
   const handleDelete = async () => {
-    if (!confirm("Estas seguro de que queres eliminar este producto? Esta accion no se puede deshacer.")) return;
     setIsDeleting(true);
     try {
-      await deleteProduct(productId);
-      toast.success("Producto eliminado");
-      router.refresh();
+      const result = await deleteProductWithCheck(productId);
+      if ("error" in result) {
+        toast.error(result.error);
+      } else {
+        toast.success("Producto eliminado");
+        router.refresh();
+      }
     } catch {
       toast.error("Error al eliminar el producto");
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleClone = async () => {
+    setIsCloning(true);
+    try {
+      const result = await cloneProduct(productId);
+      if ("error" in result) {
+        toast.error(result.error);
+      } else {
+        toast.success("Producto clonado");
+        router.push(`/admin/products/${result.id}`);
+      }
+    } catch {
+      toast.error("Error al clonar el producto");
+    } finally {
+      setIsCloning(false);
     }
   };
 
@@ -78,17 +121,49 @@ export function ProductActions({ productId, status }: ProductActionsProps) {
         )}
       </button>
       <button
-        onClick={handleDelete}
-        disabled={isDeleting}
-        className="p-1.5 rounded hover:bg-destructive/10 text-destructive transition-colors disabled:opacity-50"
-        title="Eliminar permanentemente"
+        onClick={handleClone}
+        disabled={isCloning}
+        className="p-1.5 rounded hover:bg-muted transition-colors disabled:opacity-50"
+        title="Clonar producto"
       >
-        {isDeleting ? (
+        {isCloning ? (
           <Loader2 className="size-4 animate-spin" />
         ) : (
-          <Trash2 className="size-4" />
+          <Copy className="size-4" />
         )}
       </button>
+      <AlertDialog>
+        <AlertDialogTrigger
+          render={
+            <button
+              className="p-1.5 rounded hover:bg-destructive/10 text-destructive transition-colors"
+              title="Eliminar permanentemente"
+            />
+          }
+        >
+          <Trash2 className="size-4" />
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar producto</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que querés eliminar este producto? Esta acción no
+              se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting && <Loader2 className="size-4 animate-spin mr-2" />}
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

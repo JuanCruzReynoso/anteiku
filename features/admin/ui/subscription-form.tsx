@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { subscriptionPlanSchema, type SubscriptionPlanInput } from "../lib/schemas";
 import {
   createSubscriptionPlan,
   updateSubscriptionPlan,
+  checkSlugUnique,
 } from "../lib/subscription-actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,8 @@ export function SubscriptionPlanForm({ initialData, onSuccess }: SubscriptionPla
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [features, setFeatures] = useState<string[]>(initialData?.features ?? []);
   const [newFeature, setNewFeature] = useState("");
+  const [slugStatus, setSlugStatus] = useState<"idle" | "checking" | "unique" | "taken">("idle");
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const {
     register,
@@ -59,6 +62,32 @@ export function SubscriptionPlanForm({ initialData, onSuccess }: SubscriptionPla
     },
   });
 
+  const slug = useWatch({ control, name: "slug" });
+
+  // Debounced slug uniqueness check
+  const checkSlug = useCallback(
+    (value: string) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (!value || value === initialData?.slug) {
+        setSlugStatus("idle");
+        return;
+      }
+      setSlugStatus("checking");
+      debounceRef.current = setTimeout(async () => {
+        const result = await checkSlugUnique(value, initialData?.id);
+        setSlugStatus(result.unique ? "unique" : "taken");
+      }, 500);
+    },
+    [initialData?.slug, initialData?.id]
+  );
+
+  useEffect(() => {
+    checkSlug(slug);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [slug, checkSlug]);
+
   const addFeature = () => {
     if (newFeature.trim()) {
       setFeatures([...features, newFeature.trim()]);
@@ -71,6 +100,10 @@ export function SubscriptionPlanForm({ initialData, onSuccess }: SubscriptionPla
   };
 
   const onSubmit = async (data: SubscriptionPlanInput) => {
+    if (slugStatus === "taken") {
+      toast.error("El slug ya está en uso. Elegí otro.");
+      return;
+    }
     setIsSubmitting(true);
     try {
       const payload = { ...data, features };
@@ -116,6 +149,19 @@ export function SubscriptionPlanForm({ initialData, onSuccess }: SubscriptionPla
             {...register("slug")}
             placeholder="cafe-mensual"
           />
+          {slugStatus === "checking" && (
+            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+              <Loader2 className="size-3 animate-spin" /> Verificando slug...
+            </p>
+          )}
+          {slugStatus === "taken" && (
+            <p className="text-xs text-destructive mt-1">
+              Este slug ya está en uso.
+            </p>
+          )}
+          {slugStatus === "unique" && (
+            <p className="text-xs text-green-600 mt-1">Slug disponible.</p>
+          )}
           {errors.slug && (
             <p className="text-sm text-destructive mt-1">{errors.slug.message}</p>
           )}
@@ -229,7 +275,7 @@ export function SubscriptionPlanForm({ initialData, onSuccess }: SubscriptionPla
       </div>
 
       <div className="flex gap-3 pt-4">
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting || slugStatus === "taken"}>
           {isSubmitting && <Loader2 className="size-4 animate-spin mr-2" />}
           {initialData ? "Guardar cambios" : "Crear plan"}
         </Button>

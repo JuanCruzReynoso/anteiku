@@ -43,6 +43,9 @@ export const users = pgTable("users", {
     zip: string;
     country: string;
   }>(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 });
 
 export const accounts = pgTable("accounts", {
@@ -174,6 +177,20 @@ export const orderItems = pgTable("order_items", {
     .references(() => variants.id),
   quantity: integer("quantity").notNull(),
   unitPrice: integer("unit_price").notNull(), // price at time of purchase in ARS
+});
+
+// ─── Order Status History ───────────────────────────────
+
+export const orderStatusHistory = pgTable("order_status_history", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  orderId: uuid("order_id")
+    .notNull()
+    .references(() => orders.id, { onDelete: "cascade" }),
+  fromStatus: orderStatusEnum("from_status").notNull(),
+  toStatus: orderStatusEnum("to_status").notNull(),
+  note: text("note"),
+  changedBy: text("changed_by").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // ─── Shipment Methods ────────────────────────────────────
@@ -339,6 +356,7 @@ export const ordersRelations = relations(orders, ({ one, many }) => ({
     fields: [orders.shipmentMethodId],
     references: [shipmentMethods.id],
   }),
+  statusHistory: many(orderStatusHistory),
 }));
 
 export const orderItemsRelations = relations(orderItems, ({ one }) => ({
@@ -349,6 +367,13 @@ export const orderItemsRelations = relations(orderItems, ({ one }) => ({
   variant: one(variants, {
     fields: [orderItems.variantId],
     references: [variants.id],
+  }),
+}));
+
+export const orderStatusHistoryRelations = relations(orderStatusHistory, ({ one }) => ({
+  order: one(orders, {
+    fields: [orderStatusHistory.orderId],
+    references: [orders.id],
   }),
 }));
 
