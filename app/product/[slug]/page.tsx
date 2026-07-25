@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProductBySlug, getAllProducts } from "@/features/product/lib/queries";
+import { getProductBySlug } from "@/features/product/lib/queries";
 import { getProductDisplayData } from "@/features/product/lib/display";
 import { getLowestDiscountedPrice } from "@/features/product/lib/discount";
 import { formatPrice } from "@/lib/utils";
@@ -12,13 +12,10 @@ import { BackButton } from "@/components/ui/back-button";
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
+export const dynamic = "force-dynamic";
+
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const products = await getAllProducts();
-  return products.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({
