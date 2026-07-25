@@ -38,17 +38,14 @@ export const dynamic = "force-dynamic";
 
 const LOW_STOCK_THRESHOLD = Number(process.env.LOW_STOCK_THRESHOLD ?? 5);
 
-// ─── Date Boundaries ──────────────────────────────────
+// ─── Date Boundaries (ISO strings for SQL params) ─────
 const now = new Date();
-const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-const startOfYesterday = new Date(startOfDay);
-startOfYesterday.setDate(startOfDay.getDate() - 1);
-const startOfWeek = new Date(startOfDay);
-startOfWeek.setDate(startOfDay.getDate() - startOfDay.getDay() + 1); // Monday
-const startOfLastWeek = new Date(startOfWeek);
-startOfLastWeek.setDate(startOfWeek.getDate() - 7);
-const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+const startOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).toISOString();
+const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay() + 1).toISOString();
+const startOfLastWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay() - 6).toISOString();
+const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString();
 
 // ─── Helpers ──────────────────────────────────────────
 function trendPct(current: number, previous: number): number | null {
@@ -192,7 +189,7 @@ export default async function AdminDashboard() {
         .where(
           and(
             ne(orders.status, "cancelled"),
-            gte(orders.createdAt, startOfMonth)
+            gte(orders.createdAt, new Date(startOfMonth))
           )
         )
         .groupBy(products.id, products.name)
