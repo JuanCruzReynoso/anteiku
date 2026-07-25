@@ -15,3 +15,8 @@ export function formatPrice(amount: number): string {
   // Prices are stored as ARS integers (no cents)
   return priceFormatter.format(amount);
 }
+
+export function formatPercent(value: number): string {
+  const sign = value >= 0 ? "+" : "";
+  return `${sign}${Math.round(value)}%`;
+}

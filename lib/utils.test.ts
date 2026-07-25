@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { cn, formatPrice } from "./utils";
+import { cn, formatPrice, formatPercent } from "./utils";
 
 // ─── cn() ──────────────────────────────────────────────
 
@@ -48,5 +48,30 @@ describe("formatPrice", () => {
   it("formats price with decimals as-is", () => {
     // Intl.NumberFormat respects minimumFractionDigits: 0
     expect(formatPrice(1500.7)).toBe("$\u00a01.500,7");
+  });
+});
+
+// ─── formatPercent() ───────────────────────────────────
+
+describe("formatPercent", () => {
+  it("formats positive value with plus sign", () => {
+    expect(formatPercent(12)).toBe("+12%");
+  });
+
+  it("formats negative value with minus sign", () => {
+    expect(formatPercent(-3)).toBe("-3%");
+  });
+
+  it("formats zero with plus sign", () => {
+    expect(formatPercent(0)).toBe("+0%");
+  });
+
+  it("rounds decimal values", () => {
+    expect(formatPercent(12.7)).toBe("+13%");
+    expect(formatPercent(-3.2)).toBe("-3%");
+  });
+
+  it("formats large values", () => {
+    expect(formatPercent(150)).toBe("+150%");
   });
 });
